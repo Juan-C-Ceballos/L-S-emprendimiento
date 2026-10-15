@@ -135,11 +135,10 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - Vitest sin `globals`: las pruebas importan `describe`/`it`/`expect` de `vitest` y `src/test/setup.ts` llama a `cleanup()` en `afterEach`.
 - `HeaderCliente`: el carrito es un `Link` a `/carrito` (navega, no ejecuta una acción), con `aria-label="Carrito vacío"`.
 
-### D-29 · Scripts de npm sin los atajos de `node_modules/.bin`
-- La carpeta del proyecto se llama `L&S`. En Windows, los atajos `.cmd` de `node_modules/.bin` se rompen con el `&` en la ruta (`"S\node_modules\.bin\" no se reconoce como un comando…`), así que `npm run lint` y compañía fallaban.
-- Los scripts de `package.json` llaman a cada herramienta con `node node_modules/<paquete>/<bin>` (por ejemplo `node node_modules/vite/bin/vite.js`). Funciona igual en Windows, macOS, Linux y CI.
-- Mismo problema con `npx <herramienta local>` en esa carpeta: usar `node node_modules/<paquete>/<bin>` (ej. `node node_modules/shadcn/dist/index.js add <componente>`). Los scripts `db:*` de la etapa 1 siguen el mismo criterio.
-- Alternativa: renombrar la carpeta (por ejemplo `L-S`). Si se renombra, los scripts siguen funcionando igual.
+### D-29 · Carpeta del proyecto sin `&` en la ruta (actualizada 2026-10-15)
+- Al principio la carpeta se llamaba `L&S`. En Windows, los atajos `.cmd` de `node_modules/.bin` se rompen con el `&` en la ruta (`"S\node_modules\.bin\" no se reconoce como un comando…`), así que `npm run lint`, `npx <herramienta local>` y compañía fallaban. Como parche, los scripts llamaban a `node node_modules/<paquete>/<bin>`.
+- **Resolución:** la carpeta se renombró a `L-S`. Los scripts de `package.json` volvieron a la forma estándar (`vite`, `tsc -b`, `eslint .`, `vitest run`) y `npx <herramienta>` funciona (verificado con `vite` y `eslint`). Los scripts `db:*` de la etapa 1 usan la forma estándar (`supabase …`).
+- Regla: no usar `&` (ni otros caracteres especiales de `cmd`) en la ruta del proyecto. Si alguien lo clona en una carpeta así, renombrarla.
 
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.

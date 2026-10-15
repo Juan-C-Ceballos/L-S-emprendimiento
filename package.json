@@ -7,13 +7,13 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "node node_modules/vite/bin/vite.js",
-    "build": "node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build",
-    "preview": "node node_modules/vite/bin/vite.js preview",
-    "lint": "node node_modules/eslint/bin/eslint.js .",
-    "typecheck": "node node_modules/typescript/bin/tsc -b --noEmit",
-    "test": "node node_modules/vitest/vitest.mjs run",
-    "test:watch": "node node_modules/vitest/vitest.mjs"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

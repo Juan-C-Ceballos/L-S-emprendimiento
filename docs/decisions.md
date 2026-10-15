@@ -125,6 +125,21 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 ### D-27 · Imágenes de las semillas
 - Las semillas de desarrollo usan SVG estáticos en `public/seed/` (generados una vez a partir del componente `Ph` del prototipo), con `path` relativo al sitio en lugar de Storage. `src/services/imagenes.ts` resuelve: si `path` empieza con `/seed/`, se usa tal cual; si no, se arma la URL pública de Storage. En producción no hay semillas.
 
+### D-28 · Versiones del scaffold (etapa 0)
+- La plantilla `react-ts` de `create-vite` vigente trae Vite 8, TypeScript 6.0 y **oxlint** en lugar de ESLint, y ya no genera `src/vite-env.d.ts` (usa `"types": ["vite/client"]` en `tsconfig.app.json`). Se mantiene **ESLint** como pide el plan (`typescript-eslint` `strictTypeChecked` + `no-restricted-imports`), con flat config escrita a mano; no se agrega oxlint. No se usa `stylisticTypeChecked` (el plan pide solo `strictTypeChecked`).
+- `shadcn init` (v4) pide elegir base y preset: se eligió **Radix** + **Nova** (el preset por defecto). Diferencias con lo descripto en el plan:
+  - `src/lib/utils.ts` reexporta `cn` del paquete `cn` (de shadcn, reemplazo de `clsx` + `tailwind-merge`) y los componentes de `ui/` lo importan directo. Se acepta: viene con shadcn.
+  - El preset agregaba la fuente Geist con `@fontsource-variable/geist`: **se quitó** (D-09: fuentes por `<link>` a Google Fonts).
+  - `shadcn` y `tw-animate-css` quedan como `devDependencies`: solo se usan al compilar el CSS (`@import "shadcn/tailwind.css"`).
+  - Se borró el bloque `.dark` (no hay modo oscuro) y se dejó `@custom-variant dark (&:is(.dark *))` para que las clases `dark:` de shadcn nunca se activen por la preferencia del sistema.
+- Vitest sin `globals`: las pruebas importan `describe`/`it`/`expect` de `vitest` y `src/test/setup.ts` llama a `cleanup()` en `afterEach`.
+- `HeaderCliente`: el carrito es un `Link` a `/carrito` (navega, no ejecuta una acción), con `aria-label="Carrito vacío"`.
+
+### D-29 · Carpeta del proyecto sin `&` en la ruta (actualizada 2026-10-15)
+- Al principio la carpeta se llamaba `L&S`. En Windows, los atajos `.cmd` de `node_modules/.bin` se rompen con el `&` en la ruta (`"S\node_modules\.bin\" no se reconoce como un comando…`), así que `npm run lint`, `npx <herramienta local>` y compañía fallaban. Como parche, los scripts llamaban a `node node_modules/<paquete>/<bin>`.
+- **Resolución:** la carpeta se renombró a `L-S`. Los scripts de `package.json` volvieron a la forma estándar (`vite`, `tsc -b`, `eslint .`, `vitest run`) y `npx <herramienta>` funciona (verificado con `vite` y `eslint`). Los scripts `db:*` de la etapa 1 usan la forma estándar (`supabase …`).
+- Regla: no usar `&` (ni otros caracteres especiales de `cmd`) en la ruta del proyecto. Si alguien lo clona en una carpeta así, renombrarla.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

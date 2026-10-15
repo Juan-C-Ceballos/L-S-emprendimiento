@@ -1,0 +1,1710 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>L&amp;S — Prototipo de pedidos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#9A4E5E}a:hover{color:#7A3747}
+.app{position:relative;width:390px;height:844px;overflow:hidden;background:#FBF4F1;color:#3A2C2C;font-family:'Hanken Grotesk',system-ui,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.app *{box-sizing:border-box}
+.app p{margin:0}
+:where(.app) button{font:inherit;color:inherit;cursor:pointer}
+.app input,.app textarea{font:inherit;color:inherit}
+.app button:focus-visible,.app a:focus-visible,.app input:focus-visible,.app textarea:focus-visible{outline:2px solid #9A4E5E;outline-offset:2px}
+.proto{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 6px 0 14px;background:#3A2C2C;color:#A8A299;font-size:10px;letter-spacing:.14em;text-transform:uppercase;z-index:20}
+.proto-sw{display:flex;background:#4D3B3A;border-radius:999px;padding:3px}
+.proto-sw button{border:0;background:transparent;color:#C9C3BA;font-size:12px;font-weight:600;padding:0 11px;border-radius:999px;min-height:32px}
+.proto-sw button.on{background:#FBF4F1;color:#3A2C2C}
+.view{position:absolute;top:44px;left:0;right:0;bottom:0}
+.hd{position:absolute;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;background:#FBF4F1;border-bottom:1px solid #EFDFD9;z-index:4}
+.hd-s{width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.ib{width:44px;height:44px;border:0;background:transparent;border-radius:999px;display:flex;align-items:center;justify-content:center;position:relative;padding:0}
+.ib:hover{background:#F4E4DF}
+.count{position:absolute;top:3px;right:1px;min-width:18px;height:18px;border-radius:9px;background:#9A4E5E;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.mark-btn{border:0;background:transparent;padding:4px 10px;min-height:44px}
+.mark{font-family:'Bricolage Grotesque',Georgia,serif;font-size:27px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.mark .amp{color:#9A4E5E;font-weight:400;margin:0 1px}
+.atitle{font-family:'Bricolage Grotesque',Georgia,serif;font-size:19px;font-weight:600;margin:0;flex:1;text-align:center;letter-spacing:-.01em}
+.scroll{position:absolute;top:60px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden}
+.scroll.bar-b{bottom:80px}
+.scroll.tabs-b{bottom:68px}
+.eb{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7D6762;font-weight:600}
+.h1{font-family:'Bricolage Grotesque',Georgia,serif;font-size:34px;line-height:1.02;font-weight:600;letter-spacing:-.025em;margin:10px 0 0}
+.h2{font-family:'Bricolage Grotesque',Georgia,serif;font-size:28px;line-height:1.08;font-weight:600;letter-spacing:-.02em;margin:0}
+.hero{padding:30px 20px 26px;background:#F6E3DD}
+.hero .eb{color:#9A4E5E}
+.fl{padding:22px 20px 0}
+.lb{font-size:13px;font-weight:700;color:#3A2C2C}
+.seg{display:flex;background:#F3E2DC;border-radius:999px;padding:3px;margin-top:10px}
+.seg button{flex:1;border:0;background:transparent;border-radius:999px;min-height:40px;font-size:13px;font-weight:600;color:#5F5B54}
+.seg button.on{background:#fff;color:#3A2C2C;box-shadow:0 1px 3px rgba(58,44,44,.14)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 15px;border-radius:999px;border:1px solid #E6CEC7;background:transparent;font-size:14px;font-weight:500;transition:opacity .15s,background .15s}
+.chip:hover{border-color:#3A2C2C}
+.chip .n{font-size:12px;color:#7D6762;font-variant-numeric:tabular-nums}
+.chip.on{background:#3A2C2C;border-color:#3A2C2C;color:#fff}
+.chip.on .n{color:#BDB7AE}
+.chip.dim{opacity:.36}
+.chip.new{border-style:dashed;border-color:#9A4E5E;color:#9A4E5E}
+.rr{display:flex;justify-content:space-between;align-items:center;margin-top:10px;min-height:44px;font-size:13px;color:#7D6762}
+.link{border:0;background:none;color:#9A4E5E;font-weight:600;font-size:14px;min-height:44px;padding:0 4px;text-decoration:underline;text-underline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 12px;padding:6px 16px 36px}
+.card{border:0;background:transparent;padding:0;text-align:left;display:flex;flex-direction:column;gap:4px}
+.ci{position:relative;display:block;aspect-ratio:4/5;border-radius:3px;overflow:hidden;background:#E4E1DB;margin-bottom:8px}
+.phw{position:absolute;inset:0;display:block}
+.card.out .phw{filter:grayscale(.7);opacity:.55}
+.card:hover .ci{box-shadow:0 0 0 1px #3A2C2C}
+.cn{display:block;font-size:14px;line-height:1.3}
+.cp{display:block;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.card.out .cp{color:#7D6762;font-weight:500}
+.badge{position:absolute;left:8px;top:8px;background:#fff;color:#3A2C2C;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 8px;border-radius:2px;z-index:1}
+.empty{margin:16px 20px 28px;padding:28px 20px;border:1px dashed #E0C8C1;border-radius:10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.et{font-family:'Bricolage Grotesque',Georgia,serif;font-size:19px;font-weight:600;letter-spacing:-.01em}
+.ed{font-size:14px;color:#7D6762;max-width:290px}
+.erow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:999px;border:0;background:#3A2C2C;color:#fff;font-weight:700;font-size:15px;text-decoration:none;width:100%;flex:1}
+.btn:hover{background:#56403F;color:#fff}
+.btn[disabled]{background:#D9D5CE;color:#7D6762;cursor:not-allowed}
+.btn.ghost{background:transparent;color:#3A2C2C;border:1px solid #E0C8C1}
+.btn.ghost:hover{background:#F4E4DF}
+.btn.wa{background:#1E6343}
+.btn.wa:hover{background:#174F35}
+.btn.danger{background:transparent;color:#9E2A1F;border:1px solid #E3B9B3}
+.btn.danger:hover{background:#FBEDEA}
+.btn.danger-solid{background:#9E2A1F}
+.btn.danger-solid:hover{background:#7F2017}
+.btn.sm{min-height:44px;font-size:14px;width:auto;padding:0 18px;flex:0 0 auto}
+.btn.split{justify-content:space-between}
+.bar{position:absolute;left:0;right:0;bottom:0;height:80px;padding:12px 16px 14px;background:#FBF4F1;border-top:1px solid #EFDFD9;display:flex;gap:10px;align-items:center;z-index:5}
+.galw{position:relative}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:#E4E1DB}
+.gal::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;position:relative;aspect-ratio:1/1.1}
+.gc{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.88);font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;font-variant-numeric:tabular-nums}
+.dots{display:flex;justify-content:center;gap:0;padding:2px 0 0}
+.dot{width:36px;height:32px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.dot span{display:block;width:7px;height:7px;border-radius:4px;background:#E0C8C1;transition:width .2s}
+.dot.on span{width:20px;background:#3A2C2C}
+.db{padding:12px 20px 28px}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tg{border:1px solid #E6CEC7;background:transparent;border-radius:999px;min-height:34px;padding:0 12px;font-size:13px;color:#4A4741}
+.tg:hover{border-color:#3A2C2C}
+.pr{font-size:21px;font-weight:700;margin-top:8px;font-variant-numeric:tabular-nums}
+.desc{font-size:15px;color:#4F4B45;margin-top:12px;line-height:1.55}
+.note{font-size:13px;color:#7D6762;margin-top:14px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.note.low{color:#7A4F0A;font-weight:600}
+.note.out{color:#9E2A1F;font-weight:600}
+.step{display:flex;align-items:center;border:1px solid #E0C8C1;border-radius:999px;height:52px;flex:0 0 auto;background:#fff}
+.step button{width:46px;height:50px;border:0;background:transparent;font-size:20px;display:flex;align-items:center;justify-content:center;border-radius:999px;padding:0}
+.step button[disabled]{color:#E0C8C1;cursor:not-allowed}
+.step .q{min-width:26px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.step.sm{height:44px}
+.step.sm button{width:42px;height:42px;font-size:18px}
+.pad{padding:24px 20px 32px}
+.line{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid #EFDFD9}
+.th{position:relative;width:76px;height:94px;border-radius:3px;overflow:hidden;flex:0 0 auto;display:block}
+.th.sm{width:48px;height:58px}
+.li{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.li-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.ln{font-size:15px;font-weight:600;line-height:1.3}
+.ls{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lu{font-size:13px;color:#7D6762}
+.li-bot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.warn{font-size:13px;color:#9E2A1F;margin-top:8px;font-weight:600}
+.tot{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0 8px;font-weight:600}
+.tv{font-family:'Bricolage Grotesque',Georgia,serif;font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.hint{font-size:13px;color:#7D6762;line-height:1.45}
+.center{text-align:center}
+.fld{display:flex;flex-direction:column;gap:6px;margin-top:18px}
+.in{width:100%;min-height:50px;border:1px solid #E0C8C1;border-radius:10px;background:#fff;padding:0 14px;font-size:16px;outline:none}
+.in:focus{border-color:#3A2C2C;box-shadow:0 0 0 3px rgba(92,34,50,.14)}
+.in.err{border-color:#9E2A1F;background:#FFFBFA}
+.in.ta{min-height:96px;padding:12px 14px;resize:vertical;line-height:1.45}
+.em{font-size:13px;color:#9E2A1F;font-weight:600}
+.alert{background:#FBEDEA;border:1px solid #F0C9C2;border-radius:12px;padding:16px;color:#6E1A12;font-size:14px;margin-top:18px}
+.alert ul{margin:8px 0 0;padding-left:18px}
+.alert li{margin-top:4px}
+.at{font-weight:700;font-size:15px}
+.okbox{background:#E8F2EB;border:1px solid #C3DCCB;border-radius:12px;padding:14px 16px;color:#1F4A33;font-size:14px;margin-top:16px}
+.okbox .dl{display:flex;justify-content:space-between;margin-top:6px;gap:12px}
+.okbox .dl b{font-variant-numeric:tabular-nums}
+.ok-ic{width:56px;height:56px;border-radius:50%;background:#3A2C2C;color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.bubble{background:#fff;border:1px solid #EFDFD9;border-radius:16px 16px 16px 4px;padding:14px 16px;white-space:pre-line;font-size:14px;line-height:1.55;margin:8px 0 18px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.login{padding:56px 24px 32px;display:flex;flex-direction:column}
+.login .mark{font-size:52px}
+.tabs{position:absolute;left:0;right:0;bottom:0;height:68px;display:flex;background:#fff;border-top:1px solid #EFDFD9;z-index:5}
+.tab{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:#7A766F;position:relative}
+.tab.on{color:#3A2C2C}
+.tab.on::before{content:'';position:absolute;top:0;left:30%;right:30%;height:2px;background:#9A4E5E}
+.tb{position:absolute;top:8px;left:calc(50% + 8px);min-width:17px;height:17px;border-radius:9px;background:#9A4E5E;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.hello{padding:22px 16px 4px}
+.hello .h2{font-size:26px;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:16px}
+.stat{background:#fff;border:1px solid #EFDFD9;border-radius:14px;padding:14px;text-align:left;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.stat:hover{border-color:#3A2C2C}
+.stat.wide{grid-column:span 2;background:#3A2C2C;color:#fff;border-color:#3A2C2C}
+.stat.wide .sl,.stat.wide .ss{color:#C9C3BA}
+.sl{font-size:12px;font-weight:700;color:#7D6762;letter-spacing:.04em}
+.sv{font-family:'Bricolage Grotesque',Georgia,serif;font-size:32px;font-weight:600;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.ss{font-size:12px;color:#7D6762}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:18px 16px 8px}
+.sh h2{font-family:'Bricolage Grotesque',Georgia,serif;font-size:18px;font-weight:600;margin:0}
+.list{margin:0 16px 8px;border:1px solid #EFDFD9;border-radius:14px;overflow:hidden;background:#fff}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:#fff;border:0;border-bottom:1px solid #F6E9E5;text-align:left;min-height:68px}
+.row:hover{background:#FAF9F7}
+.row.off .rmain,.row.off .th{opacity:.5}
+.rmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.rname{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rsub{font-size:12.5px;color:#7D6762;font-variant-numeric:tabular-nums}
+.rend{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:0 0 auto}
+.rtot{font-weight:700;font-variant-numeric:tabular-nums}
+.pill{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap;line-height:1.1}
+.pill.pendiente,.pill.low{background:#F6EBD3;color:#6A4C0A}
+.pill.vendido{background:#E1EEE5;color:#245038}
+.pill.cancelado,.pill.inactivo{background:#ECEAE6;color:#57534D}
+.pill.out{background:#FBEDEA;color:#8A2219}
+.pill.ok{background:#F0EFEC;color:#4A4741}
+.pfx{padding:14px 16px 6px}
+.pfx .chips{margin-top:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.pfx .chip{flex:0 0 auto}
+.fs{padding:6px 0 22px;border-bottom:1px solid #EFDFD9;margin-bottom:18px}
+.fh{font-family:'Bricolage Grotesque',Georgia,serif;font-size:18px;font-weight:600;margin:0 0 4px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mi{position:relative;display:block}
+.mi .cur{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#7D6762;pointer-events:none}
+.mi .in{padding-left:28px}
+.mg{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#EFEDE9;border-radius:12px;padding:12px 14px;margin-top:14px}
+.mg .mv{font-family:'Bricolage Grotesque',Georgia,serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.mg.pos{background:#E8F2EB;color:#1F4A33}
+.mg.neg{background:#FBEDEA;color:#7A1E15}
+.mgs{font-size:12px;display:block;margin-top:2px}
+.imgs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.imt{display:flex;flex-direction:column;gap:4px}
+.im{position:relative;display:block;width:100%;aspect-ratio:4/5;border-radius:6px;overflow:hidden;border:1px solid #EFDFD9;padding:0;background:#E4E1DB}
+.im.cover{box-shadow:0 0 0 2px #3A2C2C}
+.im.add{border:1px dashed #A9A39A;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#4A4741}
+.im.add:hover{border-color:#3A2C2C;background:#F4E4DF}
+.imc{display:flex;justify-content:space-between}
+.mini{width:36px;height:36px;border:0;background:transparent;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0;color:#4A4741}
+.mini:hover{background:#F4E4DF}
+.mini[disabled]{color:#D0CBC3;cursor:not-allowed;background:transparent}
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;border:0;background:transparent;padding:6px 0;text-align:left;min-height:56px}
+.swt{display:flex;flex-direction:column;gap:2px}
+.sw{width:52px;height:32px;border-radius:999px;background:#E0C8C1;position:relative;flex:0 0 auto;transition:background .15s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:#1E6343}
+.sw.on::after{left:23px}
+.kv{display:flex;justify-content:space-between;align-items:center;min-height:48px;border-bottom:1px solid #F6E9E5;gap:12px;font-size:14px}
+.kv span{color:#7D6762}
+.cardb{background:#fff;border:1px solid #EFDFD9;border-radius:14px;padding:2px 16px;margin:12px 0 18px}
+.oi{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #F6E9E5;align-items:flex-start}
+.odh{display:flex;align-items:center;gap:10px}
+.odn{font-family:'Bricolage Grotesque',Georgia,serif;font-size:30px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.confirm{background:#fff;border:1px solid #E3B9B3;border-radius:12px;padding:16px}
+.only-desk{display:none}
+.app.desk{width:1280px;height:800px}
+.desk .only-desk{display:flex}
+.desk .hd{height:72px;padding:0 32px}
+.desk .scroll{top:72px}
+.desk .mark{font-size:32px}
+.desk .hero{padding:56px 40px 44px}
+.desk .h1{font-size:58px;max-width:760px}
+.desk .catb{display:grid;grid-template-columns:288px minmax(0,1fr);gap:44px;padding:32px 40px 56px;align-items:start}
+.desk .catr{min-width:0}
+.desk .fl{padding:0;position:sticky;top:24px}
+.desk .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:40px 20px;padding:12px 0 0}
+.desk .catr .empty{margin:12px 0 0}
+.desk .cview .bar{display:none}
+.desk .cview .scroll.bar-b{bottom:0}
+.desk .detw{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:56px;padding:36px 40px 56px;max-width:1180px;margin:0 auto;align-items:start}
+.desk .slide{aspect-ratio:1/1}
+.desk .gal{border-radius:4px}
+.desk .db{padding:8px 0 0}
+.desk .db .h2{font-size:42px}
+.desk .pr{font-size:24px}
+.dadd{gap:10px;margin-top:28px;align-items:center;flex-wrap:wrap}
+.desk .dadd .btn{flex:0 0 auto;width:auto;min-width:240px}
+.desk .cview .pad{max-width:720px;margin:0 auto;padding:44px 40px 56px}
+.desk .aview .tabs{top:0;bottom:0;left:0;right:auto;width:220px;height:auto;flex-direction:column;justify-content:flex-start;gap:4px;border-top:0;border-right:1px solid #EFDFD9;padding:22px 12px}
+.desk .tab{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:0 14px;min-height:46px;font-size:14px;border-radius:10px;width:100%}
+.desk .tab:hover{background:#FBF4F1}
+.desk .tab.on{background:#F4E4DF}
+.desk .tab.on::before{display:none}
+.desk .tb{position:static;margin-left:auto}
+.side-mark{font-family:'Bricolage Grotesque',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-.03em;padding:0 14px 26px;align-items:baseline;gap:10px}
+.side-mark .eb{font-family:'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em}
+.desk .aview .hd{left:220px}
+.desk .aview .scroll{left:220px;bottom:0}
+.desk .aview .scroll.bar-b{bottom:80px}
+.desk .aview .bar{left:220px;justify-content:flex-end;padding:12px 32px}
+.desk .aview .bar .btn{flex:0 0 auto;width:auto;min-width:200px}
+.desk .aview .pad{max-width:760px;margin:0 auto;padding:32px 32px 48px}
+.desk .hello,.desk .sh,.desk .pfx{padding-left:32px;padding-right:32px}
+.desk .hello{padding-top:32px}
+.desk .rc{padding-left:32px}
+.desk .list{margin-left:32px;margin-right:32px}
+.desk .aview .empty{margin-left:32px !important;margin-right:32px !important}
+.desk .stats{grid-template-columns:repeat(3,minmax(0,1fr));padding:20px 32px}
+.desk .stat.wide{grid-column:auto}
+.desk .pfx .chips{flex-wrap:wrap}
+.desk .pfx .search{max-width:520px}
+.desk .login{max-width:440px;margin:0 auto;padding-top:80px}
+.desk .toast{left:auto;right:32px;bottom:32px;width:380px}
+.addrow{display:flex;gap:8px}
+.addrow .in{flex:1}
+.tlist{margin-top:16px;border:1px solid #EFDFD9;border-radius:14px;overflow:hidden;background:#fff}
+.trow{padding:4px 6px 4px 14px;border-bottom:1px solid #F6E9E5}
+.trow-n{display:flex;align-items:center;gap:2px;min-height:56px}
+.trow-x{padding:10px 8px 14px 0}
+.trow-x .fld{margin-top:4px}
+.mini.lg{width:44px;height:44px}
+.erow.left{justify-content:flex-start}
+.in.tpl{min-height:190px;font-size:14px}
+.tok{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.search{position:relative;display:block}
+.search .sic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#7D6762;pointer-events:none;display:flex}
+.search .in{padding-left:42px;padding-right:46px}
+.search .sclr{position:absolute;right:3px;top:3px}
+.search.sm .in{min-height:44px;font-size:15px}
+.search.sm .sclr{top:0}
+.frow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px}
+.selw{position:relative;display:inline-flex;align-items:center}
+.sel{appearance:none;-webkit-appearance:none;min-height:40px;border:1px solid #E6CEC7;border-radius:999px;background:#fff;padding:0 38px 0 15px;font:inherit;font-size:13px;font-weight:600;color:#3A2C2C;cursor:pointer}
+.sel:hover{border-color:#3A2C2C}
+.selw svg{position:absolute;right:13px;pointer-events:none}
+.chip .x{display:flex;margin-right:-4px}
+.pfx .search{margin-bottom:12px}
+.rc{font-size:13px;color:#7D6762;padding:2px 16px 10px}
+.mt8{margin-top:8px}
+.toast{position:absolute;left:16px;right:16px;bottom:92px;background:#3A2C2C;color:#fff;border-radius:12px;padding:14px 16px;font-size:14px;z-index:30;box-shadow:0 10px 30px rgba(58,44,44,.25)}
+</style>
+</helmet>
+<div class="{{appCls}}">
+
+<div class="proto">
+<span>Prototipo</span>
+<div class="proto-sw" role="group" aria-label="Cambiar de vista">
+<button type="button" class="{{swClient}}" aria-pressed="{{isClientStr}}" onClick="{{toClient}}">Vista cliente</button>
+<button type="button" class="{{swAdmin}}" aria-pressed="{{isAdminStr}}" onClick="{{toAdmin}}">Vista administradora</button>
+</div>
+</div>
+
+<sc-if value="{{isClient}}" hint-placeholder-val="{{true}}">
+<div class="view cview">
+<header class="hd">
+<div class="hd-s">
+<sc-if value="{{c.showBack}}" hint-placeholder-val="{{false}}">
+<button type="button" class="ib" aria-label="Volver" onClick="{{c.back}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+</sc-if>
+</div>
+<button type="button" class="mark-btn" aria-label="L&amp;S, ir al catálogo" onClick="{{c.home}}"><span class="mark">L<span class="amp">&amp;</span>S</span></button>
+<div class="hd-s">
+<button type="button" class="ib" aria-label="{{c.cartLabel}}" onClick="{{c.toCart}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8z"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8"></path></svg><sc-if value="{{c.hasCart}}" hint-placeholder-val="{{false}}"><span class="count">{{c.cartCount}}</span></sc-if></button>
+</div>
+</header>
+
+<div class="{{c.scrollCls}}" ref="{{setCS}}">
+
+<sc-if value="{{c.isCatalog}}" hint-placeholder-val="{{true}}">
+<section class="hero">
+<p class="eb">Vidriera</p>
+<h1 class="h1">Accesorios para usar todos los días.</h1>
+</section>
+<div class="catb">
+<section class="fl" aria-label="Buscar y filtrar">
+<div class="search">
+<span class="sic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg></span>
+<input type="text" class="in" value="{{cat.qIn}}" onChange="{{cat.onQ}}" placeholder="Buscar por nombre" aria-label="Buscar piezas por nombre">
+<sc-if value="{{cat.hasQ}}" hint-placeholder-val="{{false}}"><button type="button" class="ib sclr" aria-label="Borrar búsqueda" onClick="{{cat.clearQ}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button></sc-if>
+</div>
+<div class="frow">
+<span class="lb">Etiquetas</span>
+<span class="selw">
+<select class="sel" aria-label="Cómo combinar las etiquetas" value="{{cat.mode}}" onChange="{{cat.onMode}}">
+<option value="all">Que tenga todas</option>
+<option value="any">Que tenga alguna</option>
+</select>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</span>
+</div>
+<sc-if value="{{cat.hasSel}}" hint-placeholder-val="{{false}}">
+<div class="chips" style="margin-top: 12px">
+<sc-for list="{{cat.selected}}" as="st" hint-placeholder-count="1">
+<button type="button" class="chip on" aria-label="Quitar filtro {{st.label}}" onClick="{{st.remove}}">{{st.label}}<span class="x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></span></button>
+</sc-for>
+</div>
+</sc-if>
+<div class="search sm" style="margin-top: 12px">
+<span class="sic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg></span>
+<input type="text" class="in" value="{{cat.tagIn}}" onChange="{{cat.onTag}}" onKeyDown="{{cat.onTagKey}}" placeholder="Buscar etiqueta: dorado, aros…" aria-label="Buscar etiqueta para filtrar">
+<sc-if value="{{cat.hasTagIn}}" hint-placeholder-val="{{false}}"><button type="button" class="ib sclr" aria-label="Borrar etiqueta buscada" onClick="{{cat.clearTag}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button></sc-if>
+</div>
+<div class="chips">
+<sc-for list="{{cat.chips}}" as="t" hint-placeholder-count="10">
+<button type="button" class="{{t.cls}}" aria-pressed="{{t.pressed}}" onClick="{{t.toggle}}">{{t.label}}<span class="n">{{t.count}}</span></button>
+</sc-for>
+</div>
+<sc-if value="{{cat.noTagMatch}}" hint-placeholder-val="{{false}}"><p class="hint mt8">{{cat.noTagText}}</p></sc-if>
+<div class="rr">
+<span>{{cat.resultLabel}}</span>
+<sc-if value="{{cat.hasFilters}}" hint-placeholder-val="{{false}}">
+<button type="button" class="link" onClick="{{cat.clear}}">Limpiar filtros</button>
+</sc-if>
+</div>
+</section>
+<div class="catr">
+<sc-if value="{{cat.hasResults}}" hint-placeholder-val="{{true}}">
+<div class="grid">
+<sc-for list="{{cat.cards}}" as="p" hint-placeholder-count="6">
+<button type="button" class="{{p.cls}}" aria-label="{{p.label}}" onClick="{{p.open}}">
+<span class="ci"><span class="phw"><dc-import name="Ph" kind="{{p.ph.kind}}" tone="{{p.ph.tone}}" metal="{{p.ph.metal}}" v="{{p.ph.v}}" hint-size="100%,100%"></dc-import></span><sc-if value="{{p.out}}" hint-placeholder-val="{{false}}"><span class="badge">Agotado</span></sc-if></span>
+<span class="cn">{{p.name}}</span>
+<span class="cp">{{p.price}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{cat.noResults}}" hint-placeholder-val="{{false}}">
+<div class="empty">
+<p class="et">No encontramos piezas</p>
+<p class="ed">{{cat.emptyHint}}</p>
+<div class="erow">
+<sc-if value="{{cat.canAny}}" hint-placeholder-val="{{false}}"><button type="button" class="btn ghost sm" onClick="{{cat.setAny}}">Que tenga alguna</button></sc-if>
+<button type="button" class="btn sm" onClick="{{cat.clear}}">Limpiar filtros</button>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{c.isDetail}}" hint-placeholder-val="{{false}}">
+<div class="detw">
+<div class="detl">
+<div class="galw">
+<div class="gal" ref="{{setGal}}" onScroll="{{onGal}}" aria-label="Fotos del producto">
+<sc-for list="{{d.slides}}" as="sl" hint-placeholder-count="3">
+<div class="slide"><dc-import name="Ph" kind="{{sl.ph.kind}}" tone="{{sl.ph.tone}}" metal="{{sl.ph.metal}}" v="{{sl.ph.v}}" hint-size="100%,100%"></dc-import></div>
+</sc-for>
+</div>
+<sc-if value="{{d.multi}}" hint-placeholder-val="{{true}}"><span class="gc">{{d.counter}}</span></sc-if>
+<sc-if value="{{d.out}}" hint-placeholder-val="{{false}}"><span class="badge">Agotado</span></sc-if>
+</div>
+<sc-if value="{{d.multi}}" hint-placeholder-val="{{true}}">
+<div class="dots">
+<sc-for list="{{d.dots}}" as="dt" hint-placeholder-count="3">
+<button type="button" class="{{dt.cls}}" aria-label="{{dt.label}}" onClick="{{dt.go}}"><span></span></button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<div class="db">
+<div class="tagrow">
+<sc-for list="{{d.tags}}" as="tg" hint-placeholder-count="3">
+<button type="button" class="tg" aria-label="Ver más piezas con la etiqueta {{tg.label}}" onClick="{{tg.go}}">{{tg.label}}</button>
+</sc-for>
+</div>
+<h1 class="h2">{{d.name}}</h1>
+<p class="pr">{{d.price}}</p>
+<p class="desc">{{d.desc}}</p>
+<sc-if value="{{d.hasNote}}" hint-placeholder-val="{{false}}"><p class="{{d.noteCls}}">{{d.stockNote}}</p></sc-if>
+<sc-if value="{{d.hasInCart}}" hint-placeholder-val="{{false}}"><p class="note">{{d.inCartNote}}<button type="button" class="link" onClick="{{c.toCart}}">Ver carrito</button></p></sc-if>
+<div class="only-desk dadd">
+<sc-if value="{{d.canAdd}}" hint-placeholder-val="{{true}}">
+<div class="step">
+<button type="button" aria-label="Restar una unidad" disabled="{{d.minusOff}}" onClick="{{d.minus}}">−</button>
+<span class="q">{{d.qty}}</span>
+<button type="button" aria-label="Sumar una unidad" disabled="{{d.plusOff}}" onClick="{{d.plus}}">+</button>
+</div>
+<button type="button" class="btn" onClick="{{d.add}}">Agregar al carrito</button>
+</sc-if>
+<sc-if value="{{d.out}}" hint-placeholder-val="{{false}}"><button type="button" class="btn" disabled="{{yes}}">Agotado</button></sc-if>
+<sc-if value="{{d.noRoom}}" hint-placeholder-val="{{false}}"><button type="button" class="btn ghost" onClick="{{c.toCart}}">Ya tenés todo el stock · Ver carrito</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{c.isCart}}" hint-placeholder-val="{{false}}">
+<div class="pad">
+<h1 class="h2">Tu carrito</h1>
+<sc-if value="{{c.hasCart}}" hint-placeholder-val="{{true}}">
+<div>
+<sc-for list="{{c.lines}}" as="l" hint-placeholder-count="2">
+<div class="line">
+<span class="th"><span class="phw"><dc-import name="Ph" kind="{{l.ph.kind}}" tone="{{l.ph.tone}}" metal="{{l.ph.metal}}" v="{{l.ph.v}}" hint-size="100%,100%"></dc-import></span></span>
+<div class="li">
+<div class="li-top"><span class="ln">{{l.name}}</span><span class="ls">{{l.sub}}</span></div>
+<span class="lu">{{l.unit}}</span>
+<div class="li-bot">
+<div class="step sm">
+<button type="button" aria-label="Restar una unidad" disabled="{{l.minusOff}}" onClick="{{l.minus}}">−</button>
+<span class="q">{{l.qty}}</span>
+<button type="button" aria-label="Sumar una unidad" disabled="{{l.plusOff}}" onClick="{{l.plus}}">+</button>
+</div>
+<button type="button" class="link" aria-label="{{l.label}}" onClick="{{l.remove}}">Quitar</button>
+</div>
+<sc-if value="{{l.hasIssue}}" hint-placeholder-val="{{false}}"><p class="warn">{{l.issue}}</p></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+<div class="tot"><span>Total</span><span class="tv">{{c.total}}</span></div>
+<p class="hint">Después de confirmar vas a poder enviarnos el pedido por WhatsApp para coordinar.</p>
+<div class="only-desk" style="margin-top: 22px"><button type="button" class="btn split" onClick="{{c.toCheckout}}"><span>Continuar</span><span>{{c.total}}</span></button></div>
+</sc-if>
+<sc-if value="{{c.cartEmpty}}" hint-placeholder-val="{{false}}">
+<div class="empty" style="margin: 20px 0 0">
+<p class="et">Tu carrito está vacío</p>
+<p class="ed">Mirá la vidriera y tocá una pieza para agregarla.</p>
+<div class="erow"><button type="button" class="btn sm" onClick="{{c.home}}">Ver catálogo</button></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{c.isCheckout}}" hint-placeholder-val="{{false}}">
+<div class="pad">
+<h1 class="h2">Confirmar pedido</h1>
+<p class="desc" style="margin-top: 6px">{{co.summary}}</p>
+<sc-if value="{{co.hasIssues}}" hint-placeholder-val="{{false}}">
+<div class="alert" role="alert">
+<p class="at">Antes de confirmar, corregí tu carrito</p>
+<ul>
+<sc-for list="{{co.issues}}" as="is" hint-placeholder-count="1"><li>{{is.text}}</li></sc-for>
+</ul>
+<div class="erow" style="justify-content: flex-start">
+<button type="button" class="btn sm" onClick="{{co.fix}}">Ajustar al stock disponible</button>
+<button type="button" class="btn ghost sm" onClick="{{c.toCart}}">Ir al carrito</button>
+</div>
+</div>
+</sc-if>
+<div class="fld">
+<label class="lb" for="f-name">Nombre</label>
+<input id="f-name" type="text" class="{{co.nameCls}}" value="{{co.name}}" onChange="{{co.onName}}" placeholder="Cómo te llamás" aria-invalid="{{co.nameInv}}">
+<sc-if value="{{co.nameErr}}" hint-placeholder-val="{{false}}"><span class="em">{{co.nameErrText}}</span></sc-if>
+</div>
+<div class="fld">
+<label class="lb" for="f-phone">Teléfono</label>
+<input id="f-phone" type="tel" class="{{co.phoneCls}}" value="{{co.phone}}" onChange="{{co.onPhone}}" placeholder="Ej. 351 555-1234" aria-invalid="{{co.phoneInv}}">
+<sc-if value="{{co.phoneErr}}" hint-placeholder-val="{{false}}"><span class="em">{{co.phoneErrText}}</span></sc-if>
+<sc-if value="{{co.phoneOk}}" hint-placeholder-val="{{true}}"><span class="hint">Con código de área. Lo usamos solo para coordinar este pedido.</span></sc-if>
+</div>
+<div style="margin-top: 26px"><button type="button" class="btn" onClick="{{co.confirm}}">Confirmar pedido</button></div>
+<p class="hint center" style="margin-top: 12px">No se cobra nada ahora: el pedido queda pendiente hasta que lo coordinemos.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{c.isSuccess}}" hint-placeholder-val="{{false}}">
+<div class="pad">
+<div class="ok-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></div>
+<p class="eb">Pedido {{su.num}} · pendiente</p>
+<h1 class="h2" style="margin-top: 8px">¡Gracias, {{su.first}}!</h1>
+<p class="desc">Tu pedido quedó registrado. Para terminar, mandanos el resumen por WhatsApp y coordinamos el resto por ahí.</p>
+<p class="lb" style="margin-top: 22px">Vista previa del mensaje</p>
+<div class="bubble">{{su.text}}</div>
+<div class="stack">
+<a class="btn wa" href="{{su.href}}" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+<button type="button" class="btn ghost" onClick="{{c.home}}">Volver al catálogo</button>
+</div>
+<p class="hint center" style="margin-top: 12px">Se abre un chat con L&amp;S al {{su.phoneShown}}.</p>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{c.showCartBar}}" hint-placeholder-val="{{false}}">
+<div class="bar"><button type="button" class="btn split" onClick="{{c.toCart}}"><span>Ver carrito · {{c.countLabel}}</span><span>{{c.total}}</span></button></div>
+</sc-if>
+<sc-if value="{{c.showCartNext}}" hint-placeholder-val="{{false}}">
+<div class="bar"><button type="button" class="btn split" onClick="{{c.toCheckout}}"><span>Continuar</span><span>{{c.total}}</span></button></div>
+</sc-if>
+<sc-if value="{{c.isDetail}}" hint-placeholder-val="{{false}}">
+<div class="bar">
+<sc-if value="{{d.canAdd}}" hint-placeholder-val="{{true}}">
+<div class="step">
+<button type="button" aria-label="Restar una unidad" disabled="{{d.minusOff}}" onClick="{{d.minus}}">−</button>
+<span class="q" aria-live="polite">{{d.qty}}</span>
+<button type="button" aria-label="Sumar una unidad" disabled="{{d.plusOff}}" onClick="{{d.plus}}">+</button>
+</div>
+<button type="button" class="btn" onClick="{{d.add}}">Agregar al carrito</button>
+</sc-if>
+<sc-if value="{{d.out}}" hint-placeholder-val="{{false}}"><button type="button" class="btn" disabled="{{yes}}">Agotado</button></sc-if>
+<sc-if value="{{d.noRoom}}" hint-placeholder-val="{{false}}"><button type="button" class="btn ghost" onClick="{{c.toCart}}">Ya tenés todo el stock · Ver carrito</button></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{isAdmin}}" hint-placeholder-val="{{false}}">
+<div class="view aview">
+
+<sc-if value="{{a.notLogged}}" hint-placeholder-val="{{true}}">
+<div class="login">
+<span class="mark">L<span class="amp">&amp;</span>S</span>
+<p class="eb" style="margin-top: 14px">Panel de la tienda</p>
+<p class="desc" style="margin-top: 6px">Ingresá para ver pedidos y cargar productos.</p>
+<div class="fld" style="margin-top: 28px">
+<label class="lb" for="l-email">Email</label>
+<input id="l-email" type="email" class="in" value="{{a.email}}" onChange="{{a.onEmail}}" onKeyDown="{{a.onLoginKey}}" placeholder="tu@email.com">
+</div>
+<div class="fld">
+<label class="lb" for="l-pass">Contraseña</label>
+<input id="l-pass" type="password" class="in" value="{{a.pass}}" onChange="{{a.onPass}}" onKeyDown="{{a.onLoginKey}}" placeholder="Tu contraseña">
+</div>
+<sc-if value="{{a.loginErr}}" hint-placeholder-val="{{false}}"><p class="em" role="alert" style="margin-top: 12px">{{a.loginErrText}}</p></sc-if>
+<div style="margin-top: 24px"><button type="button" class="btn" onClick="{{a.login}}">Ingresar</button></div>
+<p class="hint center" style="margin-top: 14px">Prototipo: cualquier email y contraseña sirven.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{a.logged}}" hint-placeholder-val="{{false}}">
+<header class="hd">
+<div class="hd-s">
+<sc-if value="{{a.showBack}}" hint-placeholder-val="{{false}}">
+<button type="button" class="ib" aria-label="Volver" onClick="{{a.back}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+</sc-if>
+</div>
+<h1 class="atitle">{{a.title}}</h1>
+<div class="hd-s">
+<sc-if value="{{a.isHome}}" hint-placeholder-val="{{true}}">
+<button type="button" class="ib" aria-label="Salir del panel" onClick="{{a.logout}}"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg></button>
+</sc-if>
+<sc-if value="{{a.isProducts}}" hint-placeholder-val="{{false}}">
+<button type="button" class="ib" aria-label="Nuevo producto" onClick="{{a.newProduct}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button>
+</sc-if>
+</div>
+</header>
+
+<div class="{{a.scrollCls}}" ref="{{setAS}}">
+
+<sc-if value="{{a.isHome}}" hint-placeholder-val="{{true}}">
+<div class="hello">
+<p class="eb">{{a.today}}</p>
+<p class="h2">Hola. Esto es lo que hay hoy.</p>
+</div>
+<div class="stats">
+<button type="button" class="stat" onClick="{{a.goPending}}"><span class="sl">Pedidos pendientes</span><span class="sv">{{sum.pending}}</span><span class="ss">{{sum.pendingSub}}</span></button>
+<button type="button" class="stat" onClick="{{a.goLow}}"><span class="sl">Stock bajo</span><span class="sv">{{sum.low}}</span><span class="ss">{{sum.lowSub}}</span></button>
+<button type="button" class="stat wide" onClick="{{a.goSold}}"><span class="sl">Ventas de {{sum.month}}</span><span class="sv">{{sum.sales}}</span><span class="ss">{{sum.salesSub}}</span></button>
+</div>
+<div class="sh"><h2>Para atender</h2><button type="button" class="link" onClick="{{a.goPending}}">Ver pedidos</button></div>
+<sc-if value="{{sum.hasPend}}" hint-placeholder-val="{{true}}">
+<div class="list">
+<sc-for list="{{sum.pend}}" as="o" hint-placeholder-count="2">
+<button type="button" class="row" aria-label="{{o.label}}" onClick="{{o.open}}">
+<span class="rmain"><span class="rname">{{o.name}}</span><span class="rsub">{{o.num}} · {{o.date}}</span></span>
+<span class="rend"><span class="rtot">{{o.total}}</span><span class="{{o.pillCls}}">{{o.statusLabel}}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{sum.noPend}}" hint-placeholder-val="{{false}}">
+<div class="empty" style="margin: 0 16px 8px"><p class="et">Todo al día</p><p class="ed">No hay pedidos pendientes. Cuando un cliente confirme uno, aparece acá.</p></div>
+</sc-if>
+<div class="sh"><h2>Para reponer</h2><button type="button" class="link" onClick="{{a.goLow}}">Ver productos</button></div>
+<sc-if value="{{sum.hasLow}}" hint-placeholder-val="{{true}}">
+<div class="list" style="margin-bottom: 24px">
+<sc-for list="{{sum.lowList}}" as="pr" hint-placeholder-count="2">
+<button type="button" class="{{pr.cls}}" aria-label="{{pr.label}}" onClick="{{pr.edit}}">
+<span class="th sm"><span class="phw"><dc-import name="Ph" kind="{{pr.ph.kind}}" tone="{{pr.ph.tone}}" metal="{{pr.ph.metal}}" v="{{pr.ph.v}}" hint-size="100%,100%"></dc-import></span></span>
+<span class="rmain"><span class="rname">{{pr.name}}</span><span class="rsub">{{pr.price}}</span></span>
+<span class="rend"><span class="{{pr.stockCls}}">{{pr.stockLabel}}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{sum.noLow}}" hint-placeholder-val="{{false}}">
+<div class="empty" style="margin: 0 16px 24px"><p class="ed">Todos los productos activos tienen más de 3 unidades.</p></div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{a.isProducts}}" hint-placeholder-val="{{false}}">
+<div class="pfx">
+<div class="search">
+<span class="sic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg></span>
+<input type="text" class="in" value="{{pl.qIn}}" onChange="{{pl.onQ}}" placeholder="Nombre o etiqueta" aria-label="Buscar productos por nombre o etiqueta">
+<sc-if value="{{pl.hasQ}}" hint-placeholder-val="{{false}}"><button type="button" class="ib sclr" aria-label="Borrar búsqueda" onClick="{{pl.clearQ}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button></sc-if>
+</div>
+<div class="chips">
+<sc-for list="{{pl.filters}}" as="pf" hint-placeholder-count="4">
+<button type="button" class="{{pf.cls}}" aria-pressed="{{pf.pressed}}" onClick="{{pf.pick}}">{{pf.label}}<span class="n">{{pf.n}}</span></button>
+</sc-for>
+</div>
+</div>
+<p class="rc">{{pl.countLabel}}</p>
+<sc-if value="{{pl.has}}" hint-placeholder-val="{{true}}">
+<div class="list">
+<sc-for list="{{pl.rows}}" as="pr" hint-placeholder-count="6">
+<button type="button" class="{{pr.cls}}" aria-label="{{pr.label}}" onClick="{{pr.edit}}">
+<span class="th sm"><span class="phw"><dc-import name="Ph" kind="{{pr.ph.kind}}" tone="{{pr.ph.tone}}" metal="{{pr.ph.metal}}" v="{{pr.ph.v}}" hint-size="100%,100%"></dc-import></span></span>
+<span class="rmain"><span class="rname">{{pr.name}}</span><span class="rsub">{{pr.price}} · costo {{pr.cost}}</span><span class="rsub">{{pr.tagsLabel}}</span></span>
+<span class="rend"><span class="{{pr.stockCls}}">{{pr.stockLabel}}</span><sc-if value="{{pr.inactive}}" hint-placeholder-val="{{false}}"><span class="pill inactivo">Inactivo</span></sc-if></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{pl.empty}}" hint-placeholder-val="{{false}}">
+<div class="empty"><p class="ed">{{pl.emptyText}}</p></div>
+</sc-if>
+<div style="padding: 12px 16px 24px"><button type="button" class="btn ghost" onClick="{{a.newProduct}}">Nuevo producto</button></div>
+</sc-if>
+
+<sc-if value="{{a.isForm}}" hint-placeholder-val="{{false}}">
+<div class="pad" style="padding-top: 18px">
+<section class="fs">
+<div class="fld" style="margin-top: 0">
+<label class="lb" for="p-name">Nombre</label>
+<input id="p-name" type="text" class="{{f.nameCls}}" value="{{f.name}}" onChange="{{f.onName}}" placeholder="Ej. Argollas clásicas doradas">
+<sc-if value="{{f.eName}}" hint-placeholder-val="{{false}}"><span class="em">{{f.eNameText}}</span></sc-if>
+</div>
+<div class="fld">
+<label class="lb" for="p-desc">Descripción</label>
+<textarea id="p-desc" class="in ta" value="{{f.desc}}" onChange="{{f.onDesc}}" placeholder="Material, medidas, cómo se usa."></textarea>
+</div>
+</section>
+
+<section class="fs">
+<h2 class="fh">Precio y stock</h2>
+<div class="two">
+<div class="fld">
+<label class="lb" for="p-price">Precio</label>
+<span class="mi"><span class="cur">$</span><input id="p-price" type="text" inputmode="numeric" class="{{f.priceCls}}" value="{{f.price}}" onChange="{{f.onPrice}}" placeholder="0"></span>
+</div>
+<div class="fld">
+<label class="lb" for="p-cost">Costo</label>
+<span class="mi"><span class="cur">$</span><input id="p-cost" type="text" inputmode="numeric" class="{{f.costCls}}" value="{{f.cost}}" onChange="{{f.onCost}}" placeholder="0"></span>
+</div>
+</div>
+<sc-if value="{{f.ePrice}}" hint-placeholder-val="{{false}}"><p class="em" style="margin-top: 6px">{{f.ePriceText}}</p></sc-if>
+<sc-if value="{{f.eCost}}" hint-placeholder-val="{{false}}"><p class="em" style="margin-top: 6px">{{f.eCostText}}</p></sc-if>
+<p class="hint" style="margin-top: 6px">El costo solo se ve en el panel, nunca en el catálogo.</p>
+<div class="{{f.marginCls}}" aria-live="polite">
+<span><span class="lb" style="color: inherit">Ganancia por unidad</span><span class="mgs">{{f.marginSub}}</span></span>
+<span class="mv">{{f.margin}}</span>
+</div>
+<div class="fld">
+<label class="lb" for="p-stock">Stock (unidades)</label>
+<input id="p-stock" type="text" inputmode="numeric" class="{{f.stockCls}}" value="{{f.stock}}" onChange="{{f.onStock}}" placeholder="0" style="max-width: 160px">
+<sc-if value="{{f.eStock}}" hint-placeholder-val="{{false}}"><span class="em">{{f.eStockText}}</span></sc-if>
+</div>
+</section>
+
+<section class="fs">
+<h2 class="fh">Imágenes</h2>
+<p class="hint">La primera es la portada. Tocá una imagen para hacerla portada y usá las flechas para ordenar.</p>
+<div class="imgs">
+<sc-for list="{{f.imgs}}" as="im" hint-placeholder-count="2">
+<div class="imt">
+<button type="button" class="{{im.cls}}" aria-label="{{im.coverLabel}}" onClick="{{im.cover}}"><span class="phw"><dc-import name="Ph" kind="{{im.ph.kind}}" tone="{{im.ph.tone}}" metal="{{im.ph.metal}}" v="{{im.ph.v}}" hint-size="100%,100%"></dc-import></span><sc-if value="{{im.isCover}}" hint-placeholder-val="{{false}}"><span class="badge" style="left: 6px; top: 6px">Portada</span></sc-if></button>
+<div class="imc">
+<button type="button" class="mini" aria-label="Mover antes" disabled="{{im.leftOff}}" onClick="{{im.left}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<button type="button" class="mini" aria-label="Mover después" disabled="{{im.rightOff}}" onClick="{{im.right}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+<button type="button" class="mini" aria-label="Quitar imagen" onClick="{{im.remove}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+</div>
+</sc-for>
+<button type="button" class="im add" onClick="{{f.addImg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg><span>Agregar imagen</span></button>
+</div>
+<sc-if value="{{f.eImg}}" hint-placeholder-val="{{false}}"><p class="em" style="margin-top: 10px">{{f.eImgText}}</p></sc-if>
+</section>
+
+<section class="fs">
+<h2 class="fh">Etiquetas</h2>
+<sc-if value="{{f.hasTags}}" hint-placeholder-val="{{true}}">
+<div class="chips" style="margin-top: 8px">
+<sc-for list="{{f.tags}}" as="tt" hint-placeholder-count="2">
+<button type="button" class="chip on" aria-label="Quitar etiqueta {{tt.label}}" onClick="{{tt.remove}}">{{tt.label}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{f.noTags}}" hint-placeholder-val="{{false}}"><p class="hint" style="margin-top: 6px">Sin etiquetas todavía. Sumá tipo y material para que se pueda filtrar.</p></sc-if>
+<div class="fld">
+<label class="lb" for="p-tag">Agregar etiqueta</label>
+<input id="p-tag" type="text" class="in" value="{{f.tagQ}}" onChange="{{f.onTagQ}}" onKeyDown="{{f.onTagKey}}" placeholder="Escribí: dorado, aros, perlas…">
+</div>
+<p class="hint" style="margin-top: 10px">{{f.suggHint}}</p>
+<div class="chips" style="margin-top: 8px">
+<sc-if value="{{f.canCreate}}" hint-placeholder-val="{{false}}"><button type="button" class="chip new" onClick="{{f.create}}">Crear «{{f.tagQt}}»</button></sc-if>
+<sc-for list="{{f.sugg}}" as="sg" hint-placeholder-count="6">
+<button type="button" class="chip" onClick="{{sg.add}}">{{sg.label}}<span class="n">{{sg.count}}</span></button>
+</sc-for>
+</div>
+</section>
+
+<section class="fs" style="border-bottom: 0">
+<button type="button" class="swrow" aria-pressed="{{f.activeStr}}" onClick="{{f.toggleActive}}">
+<span class="swt"><span class="lb">Activo: visible en el catálogo</span><span class="hint">{{f.activeHint}}</span></span>
+<span class="{{f.swCls}}" aria-hidden="true"></span>
+</button>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{a.isSettings}}" hint-placeholder-val="{{false}}">
+<div class="pad" style="padding-top: 18px">
+<section class="fs">
+<h2 class="fh">WhatsApp de la tienda</h2>
+<p class="hint">A este número llegan los pedidos que envían los clientes.</p>
+<div class="fld">
+<label class="lb" for="s-phone">Número</label>
+<input id="s-phone" type="tel" class="{{st.phoneCls}}" value="{{st.phone}}" onChange="{{st.onPhone}}" placeholder="+54 9 11 0000-0000">
+<sc-if value="{{st.ePhone}}" hint-placeholder-val="{{false}}"><span class="em">{{st.ePhoneText}}</span></sc-if>
+<sc-if value="{{st.phoneOk}}" hint-placeholder-val="{{true}}"><span class="hint">Con código de país (54), el 9 y el código de área.</span></sc-if>
+</div>
+</section>
+<section class="fs">
+<h2 class="fh">Mensaje de WhatsApp</h2>
+<p class="hint">Es el texto que se arma cuando el cliente confirma. Las palabras entre llaves se reemplazan solas con los datos del pedido.</p>
+<div class="fld">
+<label class="lb" for="s-tpl">Mensaje</label>
+<textarea id="s-tpl" class="{{st.tplCls}}" value="{{st.tpl}}" onChange="{{st.onTpl}}"></textarea>
+<sc-if value="{{st.eTpl}}" hint-placeholder-val="{{false}}"><span class="em">{{st.eTplText}}</span></sc-if>
+</div>
+<p class="lb" style="margin-top: 14px">Insertar dato</p>
+<div class="chips" style="margin-top: 8px">
+<sc-for list="{{st.tokens}}" as="tk" hint-placeholder-count="4">
+<button type="button" class="chip" aria-label="Insertar {{tk.l}}" onClick="{{tk.add}}"><span class="tok">{{tk.k}}</span><span class="n">{{tk.l}}</span></button>
+</sc-for>
+</div>
+<sc-if value="{{st.notDefault}}" hint-placeholder-val="{{false}}"><button type="button" class="link" style="margin-top: 4px" onClick="{{st.reset}}">Volver al mensaje original</button></sc-if>
+<p class="lb" style="margin-top: 18px">Vista previa</p>
+<div class="bubble">{{st.preview}}</div>
+<p class="hint" style="margin-top: -10px">{{st.previewNote}}</p>
+<div class="erow left" style="margin-top: 16px">
+<sc-if value="{{st.dirty}}" hint-placeholder-val="{{false}}"><button type="button" class="btn ghost sm" onClick="{{st.discard}}">Descartar</button></sc-if>
+<button type="button" class="btn sm" onClick="{{st.save}}">Guardar número y mensaje</button>
+</div>
+</section>
+<section class="fs" style="border-bottom: 0">
+<h2 class="fh">Etiquetas</h2>
+<p class="hint">Renombrá o eliminá etiquetas: el cambio se aplica a todos los productos que la usan.</p>
+<div class="fld">
+<label class="lb" for="s-newtag">Nueva etiqueta</label>
+<div class="addrow">
+<input id="s-newtag" type="text" class="in" value="{{st.newTag}}" onChange="{{st.onNewTag}}" onKeyDown="{{st.onNewKey}}" placeholder="Ej. rosé">
+<button type="button" class="btn sm" onClick="{{st.addTag}}">Agregar</button>
+</div>
+<sc-if value="{{st.hasNewErr}}" hint-placeholder-val="{{false}}"><span class="em">{{st.newErr}}</span></sc-if>
+</div>
+<div class="tlist">
+<sc-for list="{{st.tags}}" as="tg" hint-placeholder-count="6">
+<div class="trow">
+<sc-if value="{{tg.isNormal}}" hint-placeholder-val="{{true}}">
+<div class="trow-n">
+<span class="rmain"><span class="rname">{{tg.label}}</span><span class="rsub">{{tg.countLabel}}</span></span>
+<button type="button" class="mini lg" aria-label="Renombrar etiqueta {{tg.label}}" onClick="{{tg.edit}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path><path d="M13.5 6.5l4 4"></path></svg></button>
+<button type="button" class="mini lg" aria-label="Eliminar etiqueta {{tg.label}}" onClick="{{tg.askDel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14"></path><path d="M10 7V5h4v2"></path><path d="M7 7l1 13h8l1-13"></path></svg></button>
+</div>
+</sc-if>
+<sc-if value="{{tg.isEditing}}" hint-placeholder-val="{{false}}">
+<div class="trow-x">
+<div class="fld">
+<label class="lb" for="s-tagedit">Renombrar «{{tg.label}}»</label>
+<input id="s-tagedit" type="text" class="in" value="{{tg.val}}" onChange="{{tg.onVal}}" onKeyDown="{{tg.onKey}}">
+<sc-if value="{{tg.hasHint}}" hint-placeholder-val="{{false}}"><span class="{{tg.hintCls}}">{{tg.hint}}</span></sc-if>
+</div>
+<div class="erow left">
+<button type="button" class="btn ghost sm" onClick="{{tg.cancel}}">Cancelar</button>
+<button type="button" class="btn sm" onClick="{{tg.save}}">Guardar</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{tg.isDeleting}}" hint-placeholder-val="{{false}}">
+<div class="trow-x">
+<p class="at">¿Eliminar «{{tg.label}}»?</p>
+<p class="hint" style="margin-top: 2px">{{tg.delText}}</p>
+<div class="erow left">
+<button type="button" class="btn ghost sm" onClick="{{tg.noDel}}">No</button>
+<button type="button" class="btn danger-solid sm" onClick="{{tg.doDel}}">Sí, eliminar</button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{a.isOrders}}" hint-placeholder-val="{{false}}">
+<div class="pfx">
+<div class="search">
+<span class="sic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg></span>
+<input type="text" class="in" value="{{ol.qIn}}" onChange="{{ol.onQ}}" placeholder="Cliente o nº de pedido" aria-label="Buscar pedidos por cliente o número">
+<sc-if value="{{ol.hasQ}}" hint-placeholder-val="{{false}}"><button type="button" class="ib sclr" aria-label="Borrar búsqueda" onClick="{{ol.clearQ}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button></sc-if>
+</div>
+<div class="chips">
+<sc-for list="{{ol.filters}}" as="of" hint-placeholder-count="4">
+<button type="button" class="{{of.cls}}" aria-pressed="{{of.pressed}}" onClick="{{of.pick}}">{{of.label}}<span class="n">{{of.n}}</span></button>
+</sc-for>
+</div>
+</div>
+<p class="rc">{{ol.countLabel}}</p>
+<sc-if value="{{ol.has}}" hint-placeholder-val="{{true}}">
+<div class="list" style="margin-bottom: 24px">
+<sc-for list="{{ol.rows}}" as="o" hint-placeholder-count="4">
+<button type="button" class="row" aria-label="{{o.label}}" onClick="{{o.open}}">
+<span class="rmain"><span class="rname">{{o.num}} · {{o.name}}</span><span class="rsub">{{o.phone}}</span><span class="rsub">{{o.date}}</span></span>
+<span class="rend"><span class="rtot">{{o.total}}</span><span class="{{o.pillCls}}">{{o.statusLabel}}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ol.empty}}" hint-placeholder-val="{{false}}">
+<div class="empty"><p class="et">{{ol.emptyTitle}}</p><p class="ed">{{ol.emptyText}}</p></div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{a.isOrder}}" hint-placeholder-val="{{false}}">
+<div class="pad" style="padding-top: 18px">
+<div class="odh"><span class="odn">{{od.num}}</span><span class="{{od.pillCls}}">{{od.statusLabel}}</span></div>
+<p class="rsub" style="margin-top: 4px">Recibido el {{od.date}}</p>
+<div class="cardb">
+<div class="kv"><span>Cliente</span><strong>{{od.name}}</strong></div>
+<div class="kv" style="border-bottom: 0"><span>Teléfono</span><strong>{{od.phone}}</strong></div>
+</div>
+<h2 class="fh">Ítems</h2>
+<div class="cardb">
+<sc-for list="{{od.items}}" as="it" hint-placeholder-count="2">
+<div class="oi">
+<span class="th sm"><span class="phw"><dc-import name="Ph" kind="{{it.ph.kind}}" tone="{{it.ph.tone}}" metal="{{it.ph.metal}}" v="{{it.ph.v}}" hint-size="100%,100%"></dc-import></span></span>
+<div class="li">
+<span class="ln">{{it.qty}} × {{it.name}}</span>
+<span class="lu">{{it.unit}} c/u al momento del pedido</span>
+<sc-if value="{{it.priceChanged}}" hint-placeholder-val="{{false}}"><span class="lu">Precio actual: {{it.nowPrice}}</span></sc-if>
+<span class="{{it.stockCls}}">{{it.stockNow}}</span>
+</div>
+<span class="ls">{{it.sub}}</span>
+</div>
+</sc-for>
+<div class="tot"><span>Total</span><span class="tv">{{od.total}}</span></div>
+<div class="kv" style="border-bottom: 0; min-height: 36px; padding-bottom: 8px"><span>Ganancia estimada</span><span style="color: #3A2C2C; font-weight: 600">{{od.profit}}</span></div>
+</div>
+
+<sc-if value="{{od.hasDelta}}" hint-placeholder-val="{{false}}">
+<div class="okbox" role="status" style="margin: 0 0 16px">
+<p class="at">{{od.deltaTitle}}</p>
+<sc-for list="{{od.delta}}" as="dl" hint-placeholder-count="2"><div class="dl"><span>{{dl.name}}</span><b>{{dl.from}} → {{dl.to}}</b></div></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{od.isPend}}" hint-placeholder-val="{{true}}">
+<sc-if value="{{od.short}}" hint-placeholder-val="{{false}}"><div class="alert" role="alert" style="margin: 0 0 14px"><p class="at">No alcanza el stock</p><p style="margin-top: 4px">{{od.shortText}}</p></div></sc-if>
+<button type="button" class="btn" disabled="{{od.sellOff}}" onClick="{{od.sell}}">Marcar como vendido</button>
+<p class="hint center" style="margin: 8px 0 14px">Descuenta {{od.unitsLabel}} del stock en una sola acción.</p>
+</sc-if>
+<sc-if value="{{od.isSold}}" hint-placeholder-val="{{false}}"><p class="hint" style="margin-bottom: 14px">{{od.soldDate}}. Si lo cancelás, el stock se repone.</p></sc-if>
+<sc-if value="{{od.canCancel}}" hint-placeholder-val="{{true}}"><button type="button" class="btn danger" onClick="{{od.askCancel}}">Cancelar pedido</button></sc-if>
+<sc-if value="{{od.confirming}}" hint-placeholder-val="{{false}}">
+<div class="confirm" role="alertdialog" aria-label="Confirmar cancelación">
+<p class="at">¿Cancelar el pedido {{od.num}}?</p>
+<p class="hint" style="margin-top: 4px">{{od.confirmText}}</p>
+<div class="erow" style="justify-content: flex-start">
+<button type="button" class="btn ghost sm" onClick="{{od.noCancel}}">No, volver</button>
+<button type="button" class="btn danger-solid sm" onClick="{{od.doCancel}}">Sí, cancelar</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{od.isCanc}}" hint-placeholder-val="{{false}}"><div class="cardb" style="padding: 14px 16px; margin-top: 0"><p class="hint">Este pedido está cancelado. Un pedido cancelado no se puede volver a vender.</p></div></sc-if>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{a.isForm}}" hint-placeholder-val="{{false}}">
+<div class="bar">
+<button type="button" class="btn ghost sm" onClick="{{a.back}}">Cancelar</button>
+<button type="button" class="btn" onClick="{{f.save}}">{{f.saveLabel}}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{a.showTabs}}" hint-placeholder-val="{{true}}">
+<nav class="tabs" aria-label="Secciones del panel">
+<span class="side-mark only-desk">L<span class="amp" style="color: #9A4E5E; font-weight: 400">&amp;</span>S <span class="eb">Panel</span></span>
+<button type="button" class="{{a.tHome}}" aria-current="{{a.cHome}}" onClick="{{a.goHome}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v9H4z"></path><path d="M13 4h7v5h-7z"></path><path d="M13 11h7v9h-7z"></path><path d="M4 15h7v5H4z"></path></svg>Resumen</button>
+<button type="button" class="{{a.tProducts}}" aria-current="{{a.cProducts}}" onClick="{{a.goProducts}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"></path><path d="M4 7.5l8 4.5 8-4.5"></path><path d="M12 12v9"></path></svg>Productos</button>
+<button type="button" class="{{a.tOrders}}" aria-current="{{a.cOrders}}" onClick="{{a.goOrders}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg>Pedidos<sc-if value="{{a.pendBadge}}" hint-placeholder-val="{{true}}"><span class="tb">{{sum.pending}}</span></sc-if></button>
+<button type="button" class="{{a.tSettings}}" aria-current="{{a.cSettings}}" onClick="{{a.goSettings}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10"></path><path d="M18 7h2"></path><path d="M4 17h4"></path><path d="M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>Ajustes</button>
+</nav>
+</sc-if>
+</sc-if>
+
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}"><div class="toast" role="status">{{toast}}</div></sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"desk":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(...args) {
+    super(...args);
+    this.state = this.seed();
+    this.cs = null; this.as = null; this.gal = null; this.key = ''; this.tt = null; this.seq = 0; this.imgSeq = 0;
+    this.setCS = (el) => { this.cs = el; };
+    this.setAS = (el) => { this.as = el; };
+    this.setGal = (el) => { this.gal = el; };
+    this.onGal = (e) => {
+      const el = e.currentTarget;
+      if (!el || !el.clientWidth) return;
+      const i = Math.round(el.scrollLeft / el.clientWidth);
+      if (i !== this.state.gIdx) this.setState({ gIdx: i });
+    };
+  }
+
+  seed() {
+    const P = (id, name, desc, price, cost, stock, active, tags, kind, tones) => ({
+      id, name, desc, price, cost, stock, active, tags,
+      images: tones.map((t, i) => ({ id: 'img' + id + '-' + i, kind, tone: t, v: i }))
+    });
+    const products = [
+      P(1, 'Argollas clásicas doradas', 'Argollas de acero quirúrgico con baño dorado. Livianas y cómodas para usar todo el día. 2,5 cm de diámetro.', 14500, 5200, 12, true, ['aros', 'dorado', 'acero'], 'hoop', ['sand', 'blush', 'stone']),
+      P(2, 'Aros perla mini', 'Perlitas de 6 mm sobre poste plateado. Un clásico que va con todo.', 11900, 4100, 8, true, ['aros', 'plateado', 'perlas'], 'stud', ['mist', 'shell']),
+      P(3, 'Aros gota martillada', 'Gotas con textura martillada y baño dorado. Livianos aunque se vean grandes.', 16800, 6000, 0, true, ['aros', 'dorado'], 'drop', ['blush', 'sand']),
+      P(4, 'Abridores de acero', 'Argollitas mini de acero quirúrgico, ideales para orejas sensibles o segundo agujero.', 8900, 2900, 6, true, ['aros', 'acero'], 'stud', ['stone']),
+      P(5, 'Pulsera eslabón fino', 'Cadena de eslabón fino con baño dorado y cierre mosquetón. Ajustable de 16 a 19 cm.', 18900, 7100, 2, true, ['pulseras', 'dorado', 'acero'], 'bracelet', ['sand', 'shell', 'blush']),
+      P(6, 'Esclava rígida plateada', 'Esclava abierta, se ajusta apretándola suave. Queda linda sola o en capas.', 21500, 8400, 5, true, ['pulseras', 'plateado'], 'bangle', ['mist', 'lilac']),
+      P(7, 'Pulsera de dijes', 'Cadena de acero con tres dijes chiquitos: luna, estrella y corazón.', 15700, 5900, 9, true, ['pulseras', 'acero', 'dijes'], 'bracelet', ['sage']),
+      P(8, 'Collar corazón', 'Dije de corazón liso en cadena fina plateada de 45 cm.', 19800, 7000, 7, true, ['collares', 'plateado', 'dijes'], 'pendant', ['lilac', 'mist', 'stone', 'shell']),
+      P(9, 'Collar inicial', 'Dije con la letra que elijas sobre cadena dorada de 42 cm. Avisanos la inicial por WhatsApp.', 22400, 8800, 10, true, ['collares', 'dorado', 'dijes'], 'pendant', ['shell', 'sand', 'blush']),
+      P(10, 'Collar de perlas corto', 'Perlas de río irregulares con cierre dorado. Largo gargantilla, 38 cm.', 26900, 10500, 4, true, ['collares', 'perlas', 'dorado'], 'pearls', ['sage', 'shell']),
+      P(11, 'Cadena veneciana 50 cm', 'Cadena veneciana de acero, firme y brillante. Sirve para colgar cualquier dije.', 17600, 6300, 15, true, ['cadenas', 'plateado', 'acero'], 'chain', ['mist', 'stone']),
+      P(12, 'Cadena barbada 45 cm', 'Barbada de 4 mm con baño dorado. Presencia sin ser pesada.', 24900, 9700, 6, true, ['cadenas', 'dorado', 'acero'], 'chain', ['sand', 'blush', 'shell']),
+      P(13, 'Anillo sello', 'Sello liso de acero dorado. Talles 14 a 18.', 13400, 4800, 11, true, ['anillos', 'dorado', 'acero'], 'ring', ['blush', 'sand']),
+      P(14, 'Anillo piedra verde', 'Anillo fino con piedra verde facetada. Sin reposición por ahora.', 15900, 5600, 5, false, ['anillos', 'dorado'], 'ring', ['sage'])
+    ];
+    const base = new Date();
+    const at = (daysAgo, h, m) => new Date(base.getFullYear(), base.getMonth(), base.getDate() - daysAgo, h, m).getTime();
+    const I = (productId, qty, unitPrice, unitCost) => ({ productId, qty, unitPrice, unitCost });
+    const O = (no, status, name, phone, ts, items, soldTs) => ({
+      id: 'o' + no, no, status, name, phone, ts, soldTs: soldTs || null, items,
+      total: items.reduce((s, i) => s + i.qty * i.unitPrice, 0)
+    });
+    const orders = [
+      O(1, 'vendido', 'Camila Ríos', '351 612-4488', at(23, 15, 20), [I(1, 1, 13900, 5000), I(11, 1, 17600, 6300)], at(22, 11, 0)),
+      O(2, 'cancelado', 'Martina Gómez', '351 455-9012', at(13, 11, 5), [I(6, 1, 21500, 8400)]),
+      O(3, 'vendido', 'Sofía Herrera', '3543 41-2290', at(10, 18, 40), [I(9, 1, 19900, 8100), I(2, 2, 11900, 4100)], at(9, 10, 30)),
+      O(4, 'vendido', 'Valentina Paz', '351 790-3321', at(4, 12, 15), [I(12, 1, 24900, 9700), I(13, 1, 13400, 4800)], at(4, 17, 45)),
+      O(5, 'pendiente', 'Lucía Benítez', '351 228-7710', at(1, 20, 32), [I(5, 1, 18900, 7100), I(8, 1, 19800, 7000)]),
+      O(6, 'pendiente', 'Julieta Ortiz', '11 5932-0418', at(0, 9, 12), [I(1, 2, 14500, 5200)])
+    ];
+    return {
+      mode: 'client', products, orders, nextNo: 7, nextPid: 15,
+      tags: ['aros', 'pulseras', 'collares', 'cadenas', 'anillos', 'dorado', 'plateado', 'acero', 'perlas', 'dijes'],
+      cScreen: 'catalog', cartFrom: 'catalog', fTags: [], fMode: 'all', detailId: null, gIdx: 0, qty: 1, cart: [],
+      form: { name: '', phone: '' }, fErr: {}, lastOrderId: null,
+      logged: false, login: { email: '', pass: '' }, loginErr: '',
+      aScreen: 'home', oFilter: 'pendiente', pFilter: 'all', orderId: null, orderFrom: 'orders', formFrom: 'products',
+      confirmCancel: false, delta: null, draft: null, dErr: {}, tagQ: '', toast: null,
+      qTitleIn: '', qTitle: '', qTitlePending: false, cTag: '',
+      qOrdersIn: '', qOrders: '', qOrdersPending: false,
+      qProductsIn: '', qProducts: '', qProductsPending: false,
+      settings: { phone: '+54 9 11 0000-0000', template: this.defaultTemplate() },
+      sPhone: '+54 9 11 0000-0000', sTemplate: this.defaultTemplate(), sErr: {},
+      tagEdit: null, tagEditVal: '', tagDel: null, tagErr: '', newTag: '', newTagErr: ''
+    };
+  }
+
+  money(n) { return '$' + Math.round(n || 0).toLocaleString('es-AR'); }
+  onum(no) { return '#' + String(no).padStart(4, '0'); }
+  prod(id) { return this.state.products.find((p) => p.id === id); }
+  metal(tags) {
+    if (tags.indexOf('dorado') >= 0) return '#9C7426';
+    if (tags.indexOf('plateado') >= 0) return '#737B84';
+    if (tags.indexOf('acero') >= 0) return '#535B63';
+    return '#6B665E';
+  }
+  tone(t) {
+    const T = { blush: '#EBDCD4', sage: '#DCE2D5', sand: '#E9E0CF', mist: '#DDE1E6', lilac: '#E3DDE6', shell: '#F0E7DF', stone: '#E4E1DB' };
+    return T[t] || '#E4E1DB';
+  }
+  ph(img, tags) {
+    if (!img) return { kind: 'pendant', tone: '#E4E1DB', metal: '#6B665E', v: 0 };
+    return { kind: img.kind, tone: this.tone(img.tone), metal: this.metal(tags), v: img.v };
+  }
+  fdate(ts) {
+    const d = new Date(ts);
+    const M = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    return d.getDate() + ' ' + M[d.getMonth()] + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  flash(msg) {
+    clearTimeout(this.tt);
+    this.setState({ toast: msg });
+    this.tt = setTimeout(() => this.setState({ toast: null }), 2800);
+  }
+  componentWillUnmount() { clearTimeout(this.tt); Object.values(this.timers || {}).forEach((t) => clearTimeout(t)); }
+  norm(v) { return String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+  // Búsqueda con espera: actualiza el campo al instante y filtra 350 ms después de la última tecla
+  typeSearch(k, v) {
+    this.timers = this.timers || {};
+    clearTimeout(this.timers[k]);
+    this.setState({ [k + 'In']: v, [k + 'Pending']: true });
+    this.timers[k] = setTimeout(() => this.setState({ [k]: v, [k + 'Pending']: false }), 350);
+  }
+  clearSearch(k) {
+    this.timers = this.timers || {};
+    clearTimeout(this.timers[k]);
+    this.setState({ [k + 'In']: '', [k]: '', [k + 'Pending']: false });
+  }
+  componentDidUpdate() {
+    const s = this.state;
+    const k = [s.mode, s.cScreen, s.detailId, s.aScreen, s.orderId, s.logged, s.draft ? s.draft.key : ''].join('|');
+    if (k !== this.key) {
+      this.key = k;
+      if (this.cs) this.cs.scrollTop = 0;
+      if (this.as) this.as.scrollTop = 0;
+    }
+  }
+
+  // ---------- Cliente ----------
+  toggleTag(t) {
+    const f = this.state.fTags;
+    this.setState({ fTags: f.indexOf(t) >= 0 ? f.filter((x) => x !== t) : f.concat(t) });
+  }
+  openDetail(id) { this.setState({ cScreen: 'detail', detailId: id, gIdx: 0, qty: 1 }); }
+  inCart(id) { const l = this.state.cart.find((c) => c.productId === id); return l ? l.qty : 0; }
+  goSlide(i) {
+    if (this.gal) this.gal.scrollTo({ left: i * this.gal.clientWidth, behavior: 'smooth' });
+    this.setState({ gIdx: i });
+  }
+  backClient() {
+    const s = this.state;
+    const map = { detail: 'catalog', cart: s.cartFrom === 'detail' && s.detailId ? 'detail' : 'catalog', checkout: 'cart', success: 'catalog' };
+    this.setState({ cScreen: map[s.cScreen] || 'catalog' });
+  }
+  addToCart() {
+    const s = this.state;
+    const p = this.prod(s.detailId);
+    if (!p) return;
+    const room = p.stock - this.inCart(p.id);
+    if (!p.active || room <= 0) return;
+    const q = Math.min(s.qty, room);
+    const exists = s.cart.some((c) => c.productId === p.id);
+    const cart = exists
+      ? s.cart.map((c) => (c.productId === p.id ? { productId: c.productId, qty: c.qty + q } : c))
+      : s.cart.concat({ productId: p.id, qty: q });
+    this.setState({ cart, qty: 1 });
+    this.flash(q < s.qty ? 'Solo quedaban ' + room + '; agregamos esa cantidad.' : (q === 1 ? 'Agregaste 1 unidad al carrito.' : 'Agregaste ' + q + ' unidades al carrito.'));
+  }
+  setLine(id, q) {
+    const p = this.prod(id);
+    const max = Math.max(1, p.stock);
+    q = Math.max(1, Math.min(q, max));
+    this.setState({ cart: this.state.cart.map((c) => (c.productId === id ? { productId: id, qty: q } : c)) });
+  }
+  removeLine(id) {
+    const p = this.prod(id);
+    this.setState({ cart: this.state.cart.filter((c) => c.productId !== id) });
+    this.flash('Quitaste ' + p.name + ' del carrito.');
+  }
+  stockIssues() {
+    return this.state.cart.map((c) => {
+      const p = this.prod(c.productId);
+      if (!p.active || p.stock <= 0) return { id: p.id, text: p.name + ': se agotó. Quitalo del carrito para seguir.' };
+      if (c.qty > p.stock) return { id: p.id, text: p.name + ': quedan ' + p.stock + ' y pediste ' + c.qty + '. Bajá la cantidad.' };
+      return null;
+    }).filter(Boolean);
+  }
+  fixCart() {
+    const cart = this.state.cart.map((c) => {
+      const p = this.prod(c.productId);
+      if (!p.active || p.stock <= 0) return null;
+      return { productId: c.productId, qty: Math.min(c.qty, p.stock) };
+    }).filter(Boolean);
+    if (!cart.length) {
+      this.setState({ cart, cScreen: 'cart' });
+      this.flash('Tu carrito quedó vacío: esas piezas se agotaron.');
+    } else {
+      this.setState({ cart });
+      this.flash('Ajustamos tu carrito al stock disponible.');
+    }
+  }
+  confirmOrder() {
+    const s = this.state;
+    const err = {};
+    const name = s.form.name.trim();
+    const digits = s.form.phone.replace(/\D/g, '');
+    if (!name) err.name = 'Escribí tu nombre así sabemos a quién le preparamos el pedido.';
+    else if (name.length < 2) err.name = 'El nombre es muy corto. Escribí al menos 2 letras.';
+    if (!digits) err.phone = 'Necesitamos un teléfono para coordinar por WhatsApp.';
+    else if (digits.length < 8 || digits.length > 13) err.phone = 'Revisá el número: tiene que tener entre 8 y 13 dígitos, con código de área (ej. 351 555-1234).';
+    const issues = this.stockIssues();
+    if (Object.keys(err).length || issues.length) {
+      this.setState({ fErr: err });
+      this.flash(issues.length ? 'Hay piezas sin stock suficiente. Corregí el carrito para seguir.' : 'Revisá los datos marcados.');
+      return;
+    }
+    const items = s.cart.map((c) => {
+      const p = this.prod(c.productId);
+      return { productId: p.id, qty: c.qty, unitPrice: p.price, unitCost: p.cost };
+    });
+    const total = items.reduce((a, i) => a + i.qty * i.unitPrice, 0);
+    const no = s.nextNo;
+    const order = { id: 'o' + no, no, status: 'pendiente', name, phone: s.form.phone.trim(), total, ts: Date.now(), soldTs: null, items };
+    this.setState({ orders: [order].concat(s.orders), nextNo: no + 1, cart: [], lastOrderId: order.id, cScreen: 'success', form: { name: '', phone: '' }, fErr: {} });
+  }
+  defaultTemplate() { return '¡Hola! Te escribo por mi pedido {pedido} de L&S.\n\n{items}\n\nTotal: {total}\nNombre: {nombre}\n\n¡Gracias!'; }
+  waText(o, tpl) {
+    const lines = o.items.map((i) => '• ' + i.qty + ' × ' + this.prod(i.productId).name + ' — ' + this.money(i.qty * i.unitPrice));
+    const t = tpl != null ? tpl : this.state.settings.template;
+    return t.split('{pedido}').join(this.onum(o.no)).split('{items}').join(lines.join('\n')).split('{total}').join(this.money(o.total)).split('{nombre}').join(o.name);
+  }
+
+  // ---------- Ajustes ----------
+  saveSettings() {
+    const s = this.state;
+    const e = {};
+    const dg = s.sPhone.replace(/\D/g, '');
+    if (!dg) e.phone = 'Ingresá el número de WhatsApp de la tienda.';
+    else if (dg.length < 10 || dg.length > 15) e.phone = 'Revisá el número: incluí código de país y de área, por ejemplo +54 9 11 0000-0000.';
+    if (!s.sTemplate.trim()) e.template = 'El mensaje no puede quedar vacío.';
+    else if (s.sTemplate.indexOf('{items}') < 0) e.template = 'Incluí {items} para que el mensaje diga qué piezas pidió el cliente.';
+    if (Object.keys(e).length) { this.setState({ sErr: e }); this.flash('Revisá los campos marcados.'); return; }
+    this.setState({ settings: { phone: s.sPhone.trim(), template: s.sTemplate }, sErr: {} });
+    this.flash('Guardamos el número y el mensaje.');
+  }
+  insertToken(k) {
+    const v = this.state.sTemplate;
+    this.setState({ sTemplate: v + (v && !/\s$/.test(v) ? ' ' : '') + k });
+  }
+  mapTags(fn) {
+    const s = this.state;
+    const out = { products: s.products.map((p) => Object.assign({}, p, { tags: fn(p.tags) })), tags: fn(s.tags), fTags: fn(s.fTags) };
+    if (s.draft) out.draft = Object.assign({}, s.draft, { tags: fn(s.draft.tags) });
+    return out;
+  }
+  renameTag(oldT) {
+    const s = this.state;
+    const nt = this.normTag(s.tagEditVal);
+    if (!nt) { this.setState({ tagErr: 'Escribí un nombre para la etiqueta.' }); return; }
+    if (nt === oldT) { this.setState({ tagEdit: null, tagErr: '' }); return; }
+    const merge = s.tags.indexOf(nt) >= 0;
+    const fn = (arr) => { const r = []; arr.forEach((t) => { const x = t === oldT ? nt : t; if (r.indexOf(x) < 0) r.push(x); }); return r; };
+    this.setState(Object.assign(this.mapTags(fn), { tagEdit: null, tagErr: '' }));
+    this.flash(merge ? 'Unimos «' + oldT + '» con «' + nt + '».' : 'Renombraste «' + oldT + '» a «' + nt + '».');
+  }
+  deleteTag(t) {
+    this.setState(Object.assign(this.mapTags((arr) => arr.filter((x) => x !== t)), { tagDel: null }));
+    this.flash('Eliminaste la etiqueta «' + t + '».');
+  }
+  addGlobalTag() {
+    const s = this.state;
+    const t = this.normTag(s.newTag);
+    if (!t) { this.setState({ newTagErr: 'Escribí el nombre de la etiqueta.' }); return; }
+    if (s.tags.indexOf(t) >= 0) { this.setState({ newTagErr: '«' + t + '» ya existe.' }); return; }
+    this.setState({ tags: s.tags.concat(t), newTag: '', newTagErr: '' });
+    this.flash('Creaste «' + t + '». Asignala desde cada producto.');
+  }
+
+  // ---------- Administradora ----------
+  doLogin() {
+    const l = this.state.login;
+    if (!l.email.trim() || !l.pass) {
+      this.setState({ loginErr: 'Completá email y contraseña para entrar. En el prototipo, cualquier dato sirve.' });
+      return;
+    }
+    this.setState({ logged: true, loginErr: '', aScreen: 'home' });
+  }
+  openOrder(id) {
+    this.setState({ aScreen: 'order', orderId: id, orderFrom: this.state.aScreen, confirmCancel: false, delta: null });
+  }
+  sell() {
+    const s = this.state;
+    const o = s.orders.find((x) => x.id === s.orderId);
+    if (!o || o.status !== 'pendiente') return;
+    const short = o.items.find((i) => this.prod(i.productId).stock < i.qty);
+    if (short) { this.flash('No alcanza el stock de ' + this.prod(short.productId).name + '.'); return; }
+    const rows = o.items.map((i) => { const p = this.prod(i.productId); return { name: p.name, from: p.stock, to: p.stock - i.qty }; });
+    const products = s.products.map((p) => {
+      const it = o.items.find((i) => i.productId === p.id);
+      return it ? Object.assign({}, p, { stock: p.stock - it.qty }) : p;
+    });
+    const orders = s.orders.map((x) => (x.id === o.id ? Object.assign({}, x, { status: 'vendido', soldTs: Date.now() }) : x));
+    this.setState({ products, orders, delta: { orderId: o.id, kind: 'sold', rows }, confirmCancel: false });
+    this.flash('Pedido ' + this.onum(o.no) + ' vendido. Stock actualizado.');
+  }
+  cancelOrder() {
+    const s = this.state;
+    const o = s.orders.find((x) => x.id === s.orderId);
+    if (!o || o.status === 'cancelado') return;
+    let products = s.products;
+    let delta = null;
+    if (o.status === 'vendido') {
+      const rows = o.items.map((i) => { const p = this.prod(i.productId); return { name: p.name, from: p.stock, to: p.stock + i.qty }; });
+      products = s.products.map((p) => {
+        const it = o.items.find((i) => i.productId === p.id);
+        return it ? Object.assign({}, p, { stock: p.stock + it.qty }) : p;
+      });
+      delta = { orderId: o.id, kind: 'restock', rows };
+    }
+    const orders = s.orders.map((x) => (x.id === o.id ? Object.assign({}, x, { status: 'cancelado' }) : x));
+    this.setState({ products, orders, delta, confirmCancel: false });
+    this.flash('Pedido ' + this.onum(o.no) + ' cancelado.' + (delta ? ' Stock repuesto.' : ''));
+  }
+  newProduct() {
+    this.seq += 1;
+    this.setState({
+      aScreen: 'form', formFrom: this.state.aScreen === 'form' ? 'products' : this.state.aScreen, dErr: {}, tagQ: '',
+      draft: { key: 'new' + this.seq, id: null, name: '', desc: '', price: '', cost: '', stock: '', active: true, tags: [], images: [] }
+    });
+  }
+  editProduct(id) {
+    const p = this.prod(id);
+    this.seq += 1;
+    this.setState({
+      aScreen: 'form', formFrom: this.state.aScreen, dErr: {}, tagQ: '',
+      draft: { key: 'p' + id + '-' + this.seq, id: p.id, name: p.name, desc: p.desc, price: String(p.price), cost: String(p.cost), stock: String(p.stock), active: p.active, tags: p.tags.slice(), images: p.images.map((i) => Object.assign({}, i)) }
+    });
+  }
+  setD(patch, errKey) {
+    const st = { draft: Object.assign({}, this.state.draft, patch) };
+    if (errKey) st.dErr = Object.assign({}, this.state.dErr, { [errKey]: '' });
+    this.setState(st);
+  }
+  kindFor(tags, fallback) {
+    const h = (t) => tags.indexOf(t) >= 0;
+    if (h('perlas') && h('collares')) return 'pearls';
+    if (h('aros')) return 'hoop';
+    if (h('pulseras')) return 'bracelet';
+    if (h('collares')) return 'pendant';
+    if (h('cadenas')) return 'chain';
+    if (h('anillos')) return 'ring';
+    return fallback || 'pendant';
+  }
+  addImg() {
+    const d = this.state.draft;
+    const T = ['shell', 'sand', 'mist', 'blush', 'sage', 'lilac', 'stone'];
+    this.imgSeq += 1;
+    const fallback = d.images.length ? d.images[0].kind : 'pendant';
+    const img = { id: 'n' + this.imgSeq + '-' + Date.now(), kind: this.kindFor(d.tags, fallback), tone: T[(d.images.length + this.imgSeq) % T.length], v: d.images.length % 4 };
+    this.setD({ images: d.images.concat(img) }, 'images');
+  }
+  moveImg(i, dir) {
+    const a = this.state.draft.images.slice();
+    const j = i + dir;
+    if (j < 0 || j >= a.length) return;
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+    this.setD({ images: a });
+  }
+  coverImg(i) {
+    if (i === 0) return;
+    const a = this.state.draft.images.slice();
+    const x = a.splice(i, 1)[0];
+    a.unshift(x);
+    this.setD({ images: a });
+    this.flash('Listo, esa imagen es la nueva portada.');
+  }
+  removeImg(i) {
+    const a = this.state.draft.images.slice();
+    a.splice(i, 1);
+    this.setD({ images: a });
+  }
+  normTag(t) { return String(t || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  addTag(raw) {
+    const t = this.normTag(raw);
+    if (!t) return;
+    const d = this.state.draft;
+    if (d.tags.indexOf(t) >= 0) { this.setState({ tagQ: '' }); return; }
+    this.setState({ draft: Object.assign({}, d, { tags: d.tags.concat(t) }), tagQ: '' });
+  }
+  intOf(s) { const d = String(s).replace(/[^\d]/g, ''); return d === '' ? null : parseInt(d, 10); }
+  saveProduct() {
+    const s = this.state;
+    const d = s.draft;
+    const e = {};
+    const price = this.intOf(d.price), cost = this.intOf(d.cost), stock = this.intOf(d.stock);
+    if (!d.name.trim()) e.name = 'Poné un nombre: es lo que ve el cliente en la vidriera.';
+    if (price === null || price <= 0) e.price = 'Ingresá un precio mayor a $0, solo con números.';
+    if (cost === null) e.cost = 'Ingresá el costo (puede ser 0). Solo lo ves vos.';
+    if (stock === null) e.stock = 'Ingresá cuántas unidades tenés (0 si está agotado).';
+    if (!d.images.length) e.images = 'Agregá al menos una imagen: la primera va a ser la portada.';
+    if (Object.keys(e).length) { this.setState({ dErr: e }); this.flash('Revisá los campos marcados en rojo.'); return; }
+    const data = { name: d.name.trim(), desc: d.desc.trim(), price, cost, stock, active: d.active, tags: d.tags.slice(), images: d.images };
+    let products, nextPid = s.nextPid, msg;
+    if (d.id == null) {
+      products = s.products.concat(Object.assign({ id: nextPid }, data));
+      nextPid += 1;
+      msg = 'Producto creado' + (d.active ? ' y visible en el catálogo.' : ' (inactivo).');
+    } else {
+      products = s.products.map((p) => (p.id === d.id ? Object.assign({}, p, data) : p));
+      msg = 'Cambios guardados.';
+    }
+    const tags = s.tags.concat(d.tags.filter((t) => s.tags.indexOf(t) < 0));
+    this.setState({ products, tags, nextPid, aScreen: s.formFrom === 'home' ? 'home' : 'products', draft: null, dErr: {} });
+    this.flash(msg);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const desk = !!this.props.desk;
+    const m = (n) => this.money(n);
+    const LABEL = { pendiente: 'Pendiente', vendido: 'Vendido', cancelado: 'Cancelado' };
+    const MM = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const DD = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const isClient = s.mode === 'client';
+    const has = (p, t) => p.tags.indexOf(t) >= 0;
+    const pieces = (n) => (n === 1 ? '1 pieza' : n + ' piezas');
+
+    // ----- Catálogo -----
+    const active = s.products.filter((p) => p.active);
+    const sel = s.fTags;
+    const all = s.fMode === 'all';
+    const tq = this.norm(s.qTitle);
+    const titleOk = (p) => !tq || this.norm(p.name).indexOf(tq) >= 0;
+    const tagOk = (p) => !sel.length || (all ? sel.every((t) => has(p, t)) : sel.some((t) => has(p, t)));
+    const res = active.filter((p) => titleOk(p) && tagOk(p)).sort((a, b) => (a.stock > 0 ? 0 : 1) - (b.stock > 0 ? 0 : 1));
+    const used = s.tags.filter((t) => active.some((p) => has(p, t)));
+    const base = all && sel.length ? res : active.filter(titleOk);
+    const ctq = this.norm(s.cTag);
+    const avail = used.filter((t) => sel.indexOf(t) < 0 && (!ctq || this.norm(t).indexOf(ctq) >= 0));
+    const chips = avail.map((t) => {
+      const count = base.filter((p) => has(p, t)).length;
+      return { label: t, count, pressed: 'false', cls: 'chip' + (count === 0 ? ' dim' : ''), toggle: () => { this.toggleTag(t); this.setState({ cTag: '' }); } };
+    });
+    const addFirstTag = () => {
+      if (!avail.length) return;
+      const exact = avail.find((t) => this.norm(t) === ctq);
+      this.toggleTag(exact || avail[0]);
+      this.setState({ cTag: '' });
+    };
+    const hasFilters = sel.length > 0 || !!tq;
+    const cat = {
+      chips,
+      selected: sel.map((t) => ({ label: t, remove: () => this.toggleTag(t) })), hasSel: sel.length > 0,
+      qIn: s.qTitleIn, hasQ: !!s.qTitleIn, onQ: (e) => this.typeSearch('qTitle', e.target.value), clearQ: () => this.clearSearch('qTitle'),
+      tagIn: s.cTag, hasTagIn: !!s.cTag, onTag: (e) => this.setState({ cTag: e.target.value }), clearTag: () => this.setState({ cTag: '' }),
+      onTagKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); addFirstTag(); } },
+      noTagMatch: !!ctq && !avail.length, noTagText: 'No hay otras etiquetas que coincidan con «' + s.cTag.trim() + '».',
+      mode: s.fMode, onMode: (e) => this.setState({ fMode: e.target.value }), canAny: all && sel.length > 1,
+      cards: res.map((p) => {
+        const out = p.stock <= 0;
+        return { name: p.name, price: m(p.price), out, cls: 'card' + (out ? ' out' : ''), label: p.name + ', ' + m(p.price) + (out ? ', agotado' : ''), ph: this.ph(p.images[0], p.tags), open: () => this.openDetail(p.id) };
+      }),
+      hasResults: res.length > 0, noResults: res.length === 0, hasFilters,
+      resultLabel: s.qTitlePending ? 'Buscando…' : (hasFilters ? (res.length + ' de ' + active.length + ' piezas') : (active.length + ' piezas en la vidriera')),
+      setAny: () => this.setState({ fMode: 'any' }),
+      clear: () => { this.clearSearch('qTitle'); this.setState({ fTags: [], cTag: '' }); },
+      emptyHint: (tq ? 'Ninguna pieza tiene «' + s.qTitle.trim() + '» en el nombre' + (sel.length ? ' con ' + (all ? 'todas estas etiquetas: ' : 'alguna de estas etiquetas: ') + sel.join(', ') : '') + '.' : 'Ninguna pieza es ' + sel.join(' + ') + ' a la vez.') + ' Probá cambiando la búsqueda o quitando una etiqueta.'
+    };
+
+    // ----- Detalle -----
+    const dp = s.detailId != null ? this.prod(s.detailId) : null;
+    let d = { slides: [], dots: [], tags: [], name: '', desc: '', price: '', multi: false, counter: '', out: false, canAdd: false, noRoom: false, qty: 1, minusOff: true, plusOff: true, hasNote: false, stockNote: '', noteCls: 'note', hasInCart: false, inCartNote: '' };
+    if (dp) {
+      const inC = this.inCart(dp.id);
+      const room = Math.max(0, dp.stock - inC);
+      const out = dp.stock <= 0 || !dp.active;
+      const n = dp.images.length;
+      const gi = Math.min(s.gIdx, n - 1);
+      d = {
+        name: dp.name, desc: dp.desc, price: m(dp.price),
+        slides: dp.images.map((im) => ({ ph: this.ph(im, dp.tags) })),
+        multi: n > 1, counter: (gi + 1) + ' / ' + n,
+        dots: dp.images.map((im, i) => ({ cls: 'dot' + (i === gi ? ' on' : ''), label: 'Ver foto ' + (i + 1) + ' de ' + n, go: () => this.goSlide(i) })),
+        tags: dp.tags.map((t) => ({ label: t, go: () => this.setState({ fTags: [t], fMode: 'all', cScreen: 'catalog' }) })),
+        out, canAdd: !out && room > 0, noRoom: !out && room <= 0,
+        qty: s.qty, minusOff: s.qty <= 1, plusOff: s.qty >= room,
+        minus: () => this.setState({ qty: Math.max(1, this.state.qty - 1) }),
+        plus: () => this.setState({ qty: Math.min(room, this.state.qty + 1) }),
+        add: () => this.addToCart(),
+        hasNote: out || dp.stock <= 3,
+        stockNote: out ? 'Esta pieza está agotada por ahora.' : (dp.stock === 1 ? 'Última unidad disponible' : 'Últimas ' + dp.stock + ' unidades'),
+        noteCls: 'note ' + (out ? 'out' : 'low'),
+        hasInCart: inC > 0, inCartNote: 'Ya tenés ' + inC + ' en el carrito ·'
+      };
+    }
+
+    // ----- Carrito -----
+    const issues = this.stockIssues();
+    const byId = {};
+    issues.forEach((i) => { byId[i.id] = i; });
+    const cartCount = s.cart.reduce((a, c) => a + c.qty, 0);
+    const total = s.cart.reduce((a, c) => a + c.qty * this.prod(c.productId).price, 0);
+    const hasCart = s.cart.length > 0;
+    const scr = s.cScreen;
+    const withBar = (scr === 'catalog' && hasCart) || scr === 'detail' || (scr === 'cart' && hasCart);
+    const c = {
+      isCatalog: scr === 'catalog', isDetail: scr === 'detail', isCart: scr === 'cart', isCheckout: scr === 'checkout', isSuccess: scr === 'success',
+      showBack: scr !== 'catalog', back: () => this.backClient(), home: () => this.setState({ cScreen: 'catalog' }),
+      toCart: () => this.setState({ cScreen: 'cart', cartFrom: this.state.cScreen === 'detail' ? 'detail' : 'catalog' }),
+      toCheckout: () => this.setState({ cScreen: 'checkout', fErr: {} }),
+      hasCart, cartEmpty: !hasCart, cartCount,
+      cartLabel: hasCart ? 'Carrito, ' + pieces(cartCount) : 'Carrito vacío',
+      countLabel: pieces(cartCount), total: m(total),
+      lines: s.cart.map((l) => {
+        const p = this.prod(l.productId);
+        const iss = byId[p.id];
+        return {
+          name: p.name, unit: m(p.price) + ' c/u', sub: m(p.price * l.qty), qty: l.qty, ph: this.ph(p.images[0], p.tags),
+          minus: () => this.setLine(p.id, l.qty - 1), plus: () => this.setLine(p.id, l.qty + 1),
+          minusOff: l.qty <= 1, plusOff: l.qty >= p.stock, remove: () => this.removeLine(p.id),
+          hasIssue: !!iss, issue: iss ? iss.text : '', label: 'Quitar ' + p.name + ' del carrito'
+        };
+      }),
+      showCartBar: scr === 'catalog' && hasCart, showCartNext: scr === 'cart' && hasCart,
+      scrollCls: 'scroll' + (withBar ? ' bar-b' : '')
+    };
+
+    // ----- Confirmación -----
+    const fe = s.fErr || {};
+    const co = {
+      summary: pieces(cartCount) + ' · Total ' + m(total),
+      hasIssues: issues.length > 0, issues, fix: () => this.fixCart(),
+      name: s.form.name, phone: s.form.phone,
+      onName: (e) => this.setState({ form: { name: e.target.value, phone: this.state.form.phone }, fErr: Object.assign({}, this.state.fErr, { name: '' }) }),
+      onPhone: (e) => this.setState({ form: { name: this.state.form.name, phone: e.target.value }, fErr: Object.assign({}, this.state.fErr, { phone: '' }) }),
+      nameErr: !!fe.name, nameErrText: fe.name || '', phoneErr: !!fe.phone, phoneErrText: fe.phone || '', phoneOk: !fe.phone,
+      nameCls: 'in' + (fe.name ? ' err' : ''), phoneCls: 'in' + (fe.phone ? ' err' : ''),
+      nameInv: fe.name ? 'true' : 'false', phoneInv: fe.phone ? 'true' : 'false',
+      confirm: () => this.confirmOrder()
+    };
+
+    // ----- Éxito -----
+    const lo = s.orders.find((o) => o.id === s.lastOrderId);
+    let su = { num: '', first: '', text: '', href: '#', phoneShown: '' };
+    if (lo) {
+      const text = this.waText(lo);
+      su = { num: this.onum(lo.no), first: lo.name.split(' ')[0], text, href: 'https://wa.me/' + s.settings.phone.replace(/\D/g, '') + '?text=' + encodeURIComponent(text), phoneShown: s.settings.phone };
+    }
+
+    // ----- Panel -----
+    const A = s.aScreen;
+    const now = new Date();
+    const pendingOrders = s.orders.filter((o) => o.status === 'pendiente').sort((a, b) => b.ts - a.ts);
+    const orow = (o) => ({ num: this.onum(o.no), name: o.name, phone: o.phone, date: this.fdate(o.ts), total: m(o.total), pillCls: 'pill ' + o.status, statusLabel: LABEL[o.status], label: 'Pedido ' + this.onum(o.no) + ' de ' + o.name + ', ' + LABEL[o.status], open: () => this.openOrder(o.id) });
+    const lowP = s.products.filter((p) => p.active && p.stock <= 3).sort((a, b) => a.stock - b.stock);
+    const prow = (p) => ({
+      name: p.name, price: m(p.price), cost: m(p.cost), ph: this.ph(p.images[0], p.tags),
+      stockLabel: p.stock <= 0 ? 'Agotado' : (p.stock <= 3 ? 'Quedan ' + p.stock : p.stock + ' en stock'),
+      stockCls: 'pill ' + (p.stock <= 0 ? 'out' : (p.stock <= 3 ? 'low' : 'ok')),
+      inactive: !p.active, cls: 'row' + (p.active ? '' : ' off'), label: 'Editar ' + p.name, tagsLabel: p.tags.join(' · ') || 'Sin etiquetas', edit: () => this.editProduct(p.id)
+    });
+    const sold = s.orders.filter((o) => {
+      if (o.status !== 'vendido' || !o.soldTs) return false;
+      const t = new Date(o.soldTs);
+      return t.getMonth() === now.getMonth() && t.getFullYear() === now.getFullYear();
+    });
+    const salesTotal = sold.reduce((a, o) => a + o.total, 0);
+    const salesProfit = sold.reduce((a, o) => a + o.items.reduce((b, i) => b + i.qty * (i.unitPrice - i.unitCost), 0), 0);
+    const outCount = lowP.filter((p) => p.stock <= 0).length;
+    const pendTotal = pendingOrders.reduce((a, o) => a + o.total, 0);
+    const sum = {
+      pending: pendingOrders.length,
+      pendingSub: pendingOrders.length ? 'Por ' + m(pendTotal) : 'Nada por atender',
+      low: lowP.length,
+      lowSub: outCount ? (outCount === 1 ? '1 agotado' : outCount + ' agotados') + ' · 3 u. o menos' : '3 unidades o menos',
+      month: MM[now.getMonth()], sales: m(salesTotal),
+      salesSub: (sold.length === 1 ? '1 pedido vendido' : sold.length + ' pedidos vendidos') + ' · ganancia ' + m(salesProfit),
+      pend: pendingOrders.slice(0, 3).map(orow), hasPend: pendingOrders.length > 0, noPend: pendingOrders.length === 0,
+      lowList: lowP.map(prow), hasLow: lowP.length > 0, noLow: lowP.length === 0
+    };
+
+    const pf = s.pFilter;
+    const pq = this.norm(s.qProducts);
+    const pSearch = s.products.filter((p) => !pq || this.norm(p.name).indexOf(pq) >= 0 || p.tags.some((t) => this.norm(t).indexOf(pq) >= 0));
+    const inF = (p, k) => k === 'all' || (k === 'active' && p.active) || (k === 'inactive' && !p.active) || (k === 'low' && p.active && p.stock <= 3);
+    const pDefs = [['all', 'Todos'], ['active', 'Activos'], ['inactive', 'Inactivos'], ['low', 'Stock bajo']].map((x) => [x[0], x[1], pSearch.filter((p) => inF(p, x[0])).length]);
+    const plist = pSearch.filter((p) => inF(p, pf));
+    const pl = {
+      filters: pDefs.map((x) => ({ label: x[1], n: x[2], cls: 'chip' + (pf === x[0] ? ' on' : ''), pressed: pf === x[0] ? 'true' : 'false', pick: () => this.setState({ pFilter: x[0] }) })),
+      rows: plist.map(prow), has: plist.length > 0, empty: plist.length === 0,
+      qIn: s.qProductsIn, hasQ: !!s.qProductsIn, onQ: (e) => this.typeSearch('qProducts', e.target.value), clearQ: () => this.clearSearch('qProducts'),
+      countLabel: s.qProductsPending ? 'Buscando…' : (plist.length === 1 ? '1 producto' : plist.length + ' productos') + (pq ? ' para «' + s.qProducts.trim() + '»' : ''),
+      emptyText: pq ? 'No hay productos con «' + s.qProducts.trim() + '» en el nombre o las etiquetas' + (pf !== 'all' ? ' en este estado' : '') + '. Probá con otra palabra o cambiá el filtro.' : pf === 'inactive' ? 'No hay productos desactivados. Cuando desactives uno, lo vas a ver acá.' : (pf === 'low' ? 'Todos los productos activos tienen más de 3 unidades.' : 'Todavía no cargaste productos. Tocá «Nuevo producto» para empezar.')
+    };
+
+    const of = s.oFilter;
+    const oq = this.norm(s.qOrders).replace(/^#/, '');
+    const oNum = /^\d+$/.test(oq) ? String(parseInt(oq, 10)) : null;
+    const oSearch = s.orders.filter((o) => !oq || this.norm(o.name).indexOf(oq) >= 0 || (oNum !== null && String(o.no).indexOf(oNum) === 0));
+    const cnt = (k) => (k === 'all' ? oSearch.length : oSearch.filter((o) => o.status === k).length);
+    const oDefs = [['pendiente', 'Pendientes'], ['vendido', 'Vendidos'], ['cancelado', 'Cancelados'], ['all', 'Todos']];
+    const olist = oSearch.filter((o) => of === 'all' || o.status === of).sort((a, b) => b.ts - a.ts);
+    const EMPTY = {
+      pendiente: ['No hay pedidos pendientes', 'Cuando un cliente confirme un pedido desde el catálogo, aparece acá.'],
+      vendido: ['Todavía no hay ventas', 'Marcá un pedido pendiente como vendido y lo vas a ver en esta lista.'],
+      cancelado: ['No hay pedidos cancelados', 'Mejor así.'],
+      all: ['Todavía no hay pedidos', 'Cuando un cliente confirme un pedido, aparece acá.']
+    };
+    const ol = {
+      filters: oDefs.map((x) => ({ label: x[1], n: cnt(x[0]), cls: 'chip' + (of === x[0] ? ' on' : ''), pressed: of === x[0] ? 'true' : 'false', pick: () => this.setState({ oFilter: x[0] }) })),
+      rows: olist.map(orow), has: olist.length > 0, empty: olist.length === 0,
+      emptyTitle: oq ? 'Sin resultados' : EMPTY[of][0],
+      emptyText: oq ? 'No hay pedidos ' + (of === 'all' ? '' : 'en este estado ') + 'para «' + s.qOrders.trim() + '». Buscá por nombre del cliente o por número (ej. 7 o #0007).' : EMPTY[of][1],
+      qIn: s.qOrdersIn, hasQ: !!s.qOrdersIn, onQ: (e) => this.typeSearch('qOrders', e.target.value), clearQ: () => this.clearSearch('qOrders'),
+      countLabel: s.qOrdersPending ? 'Buscando…' : (olist.length === 1 ? '1 pedido' : olist.length + ' pedidos') + (oq ? ' para «' + s.qOrders.trim() + '»' : '')
+    };
+
+    const o = s.orders.find((x) => x.id === s.orderId);
+    let od = { num: '', statusLabel: '', pillCls: 'pill', name: '', phone: '', date: '', total: '', profit: '', items: [], isPend: false, isSold: false, isCanc: false, short: false, shortText: '', sellOff: true, unitsLabel: '', canCancel: false, confirming: false, confirmText: '', hasDelta: false, deltaTitle: '', delta: [], soldDate: '' };
+    if (o) {
+      const isPend = o.status === 'pendiente', isSold = o.status === 'vendido', isCanc = o.status === 'cancelado';
+      const items = o.items.map((i) => {
+        const p = this.prod(i.productId);
+        const short = isPend && p.stock < i.qty;
+        return { name: p.name, qty: i.qty, unit: m(i.unitPrice), sub: m(i.qty * i.unitPrice), ph: this.ph(p.images[0], p.tags), priceChanged: p.price !== i.unitPrice, nowPrice: m(p.price), stockNow: 'Stock actual: ' + p.stock, stockCls: short ? 'em' : 'lu', short };
+      });
+      const shortItems = items.filter((i) => i.short);
+      const units = o.items.reduce((a, i) => a + i.qty, 0);
+      const dl = s.delta && s.delta.orderId === o.id ? s.delta : null;
+      od = {
+        num: this.onum(o.no), statusLabel: LABEL[o.status], pillCls: 'pill ' + o.status, name: o.name, phone: o.phone, date: this.fdate(o.ts),
+        total: m(o.total), profit: m(o.items.reduce((a, i) => a + i.qty * (i.unitPrice - i.unitCost), 0)), items,
+        isPend, isSold, isCanc,
+        short: shortItems.length > 0,
+        shortText: 'No hay unidades suficientes de ' + shortItems.map((i) => i.name).join(', ') + '. Actualizá el stock desde Productos o cancelá el pedido.',
+        sellOff: shortItems.length > 0, sell: () => this.sell(), unitsLabel: units === 1 ? '1 unidad' : units + ' unidades',
+        canCancel: (isPend || isSold) && !s.confirmCancel, confirming: (isPend || isSold) && s.confirmCancel,
+        askCancel: () => this.setState({ confirmCancel: true }), noCancel: () => this.setState({ confirmCancel: false }), doCancel: () => this.cancelOrder(),
+        confirmText: isSold ? 'Ya estaba vendido: se van a reponer ' + (units === 1 ? '1 unidad' : units + ' unidades') + ' al stock. Después no se puede volver a vender.' : 'Todavía no se vendió, así que el stock no cambia. Un pedido cancelado no se puede volver a vender.',
+        hasDelta: !!dl, deltaTitle: dl ? (dl.kind === 'sold' ? 'Listo: se descontó el stock' : 'Listo: se repuso el stock') : '', delta: dl ? dl.rows : [],
+        soldDate: o.soldTs ? 'Vendido el ' + this.fdate(o.soldTs) : 'Vendido'
+      };
+    }
+
+    // ----- Formulario de producto -----
+    const dr = s.draft;
+    const de = s.dErr || {};
+    let f = { name: '', desc: '', price: '', cost: '', stock: '', imgs: [], tags: [], sugg: [], hasTags: false, noTags: true, tagQ: '', tagQt: '', canCreate: false, suggHint: '', margin: '', marginSub: '', marginCls: 'mg', activeStr: 'true', swCls: 'sw on', activeHint: '', saveLabel: 'Guardar', nameCls: 'in', priceCls: 'in', costCls: 'in', stockCls: 'in', eName: false, ePrice: false, eCost: false, eStock: false, eImg: false };
+    if (dr) {
+      const pr = this.intOf(dr.price), cs = this.intOf(dr.cost);
+      let margin = '—', marginSub = 'Completá precio y costo para calcularla', marginCls = 'mg';
+      if (pr !== null && cs !== null && pr > 0) {
+        const mg = pr - cs;
+        margin = (mg < 0 ? '−' : '') + m(Math.abs(mg));
+        marginSub = mg < 0 ? 'Ojo: el precio está por debajo del costo' : Math.round((mg / pr) * 100) + '% del precio';
+        marginCls = 'mg ' + (mg < 0 ? 'neg' : 'pos');
+      }
+      const q = this.normTag(s.tagQ);
+      const pool = s.tags.filter((t) => dr.tags.indexOf(t) < 0);
+      const sugg = (q ? pool.filter((t) => t.indexOf(q) >= 0) : pool).slice(0, 10);
+      const canCreate = !!q && s.tags.indexOf(q) < 0 && dr.tags.indexOf(q) < 0;
+      const n = dr.images.length;
+      const digits = (k) => (e) => this.setD({ [k]: e.target.value.replace(/[^\d]/g, '') }, k);
+      f = {
+        name: dr.name, desc: dr.desc, price: dr.price, cost: dr.cost, stock: dr.stock,
+        onName: (e) => this.setD({ name: e.target.value }, 'name'),
+        onDesc: (e) => this.setD({ desc: e.target.value }),
+        onPrice: digits('price'), onCost: digits('cost'), onStock: digits('stock'),
+        nameCls: 'in' + (de.name ? ' err' : ''), priceCls: 'in' + (de.price ? ' err' : ''), costCls: 'in' + (de.cost ? ' err' : ''), stockCls: 'in' + (de.stock ? ' err' : ''),
+        eName: !!de.name, eNameText: de.name || '', ePrice: !!de.price, ePriceText: de.price || '', eCost: !!de.cost, eCostText: de.cost || '', eStock: !!de.stock, eStockText: de.stock || '', eImg: !!de.images, eImgText: de.images || '',
+        margin, marginSub, marginCls,
+        imgs: dr.images.map((im, i) => ({
+          ph: this.ph(im, dr.tags), isCover: i === 0, cls: 'im' + (i === 0 ? ' cover' : ''),
+          coverLabel: i === 0 ? 'Imagen 1, portada' : 'Imagen ' + (i + 1) + '. Tocá para hacerla portada',
+          cover: () => this.coverImg(i), left: () => this.moveImg(i, -1), right: () => this.moveImg(i, 1), remove: () => this.removeImg(i),
+          leftOff: i === 0, rightOff: i === n - 1
+        })),
+        addImg: () => this.addImg(),
+        tags: dr.tags.map((t) => ({ label: t, remove: () => this.setD({ tags: this.state.draft.tags.filter((x) => x !== t) }) })),
+        hasTags: dr.tags.length > 0, noTags: dr.tags.length === 0,
+        tagQ: s.tagQ, tagQt: q,
+        onTagQ: (e) => this.setState({ tagQ: e.target.value }),
+        onTagKey: (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const qq = this.normTag(this.state.tagQ);
+            const p2 = this.state.tags.filter((t) => this.state.draft.tags.indexOf(t) < 0 && t.indexOf(qq) >= 0);
+            this.addTag(p2.indexOf(qq) >= 0 || !p2.length ? qq : p2[0]);
+          }
+        },
+        sugg: sugg.map((t) => ({ label: t, count: s.products.filter((p) => has(p, t)).length, add: () => this.addTag(t) })),
+        canCreate, create: () => this.addTag(q),
+        suggHint: q ? (sugg.length ? 'Sugerencias: tocá una o presioná Enter.' : 'No hay etiquetas parecidas. Podés crearla.') : 'Etiquetas que ya usás:',
+        activeStr: dr.active ? 'true' : 'false', swCls: 'sw' + (dr.active ? ' on' : ''),
+        activeHint: dr.active ? 'Los clientes lo ven en la vidriera.' : 'Oculto para los clientes. Los productos no se borran: se desactivan.',
+        toggleActive: () => this.setD({ active: !this.state.draft.active }),
+        saveLabel: dr.id == null ? 'Crear producto' : 'Guardar cambios',
+        save: () => this.saveProduct()
+      };
+    }
+
+    const sp = s.sErr || {};
+    const sample = s.orders.find((x) => x.status === 'pendiente') || s.orders[0];
+    const typed = this.normTag(s.tagEditVal);
+    const st = {
+      phone: s.sPhone, onPhone: (e) => this.setState({ sPhone: e.target.value, sErr: Object.assign({}, this.state.sErr, { phone: '' }) }),
+      phoneCls: 'in' + (sp.phone ? ' err' : ''), ePhone: !!sp.phone, ePhoneText: sp.phone || '', phoneOk: !sp.phone,
+      tpl: s.sTemplate, onTpl: (e) => this.setState({ sTemplate: e.target.value, sErr: Object.assign({}, this.state.sErr, { template: '' }) }),
+      tplCls: 'in ta tpl' + (sp.template ? ' err' : ''), eTpl: !!sp.template, eTplText: sp.template || '',
+      tokens: [['{pedido}', 'Nº de pedido'], ['{items}', 'Piezas'], ['{total}', 'Total'], ['{nombre}', 'Nombre']].map((x) => ({ k: x[0], l: x[1], add: () => this.insertToken(x[0]) })),
+      preview: sample ? this.waText(sample, s.sTemplate) : '', previewNote: sample ? 'Vista previa con los datos del pedido ' + this.onum(sample.no) + '.' : '',
+      dirty: s.sPhone !== s.settings.phone || s.sTemplate !== s.settings.template,
+      save: () => this.saveSettings(),
+      discard: () => this.setState({ sPhone: this.state.settings.phone, sTemplate: this.state.settings.template, sErr: {} }),
+      reset: () => this.setState({ sTemplate: this.defaultTemplate() }),
+      notDefault: s.sTemplate !== this.defaultTemplate(),
+      newTag: s.newTag, onNewTag: (e) => this.setState({ newTag: e.target.value, newTagErr: '' }),
+      onNewKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.addGlobalTag(); } },
+      addTag: () => this.addGlobalTag(), hasNewErr: !!s.newTagErr, newErr: s.newTagErr || '',
+      tags: s.tags.slice().sort((x, y) => x.localeCompare(y, 'es')).map((t) => {
+        const n = s.products.filter((p) => has(p, t)).length;
+        const cl = n === 1 ? '1 producto' : n + ' productos';
+        const editing = s.tagEdit === t, deleting = s.tagDel === t;
+        const merge = editing && !!typed && typed !== t && s.tags.indexOf(typed) >= 0;
+        return {
+          label: t, countLabel: cl, isEditing: editing, isDeleting: deleting, isNormal: !editing && !deleting,
+          edit: () => this.setState({ tagEdit: t, tagEditVal: t, tagDel: null, tagErr: '' }),
+          val: s.tagEditVal, onVal: (e) => this.setState({ tagEditVal: e.target.value, tagErr: '' }),
+          onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.renameTag(t); } else if (e.key === 'Escape') { this.setState({ tagEdit: null, tagErr: '' }); } },
+          save: () => this.renameTag(t), cancel: () => this.setState({ tagEdit: null, tagErr: '' }),
+          hasHint: editing && (!!s.tagErr || merge), hint: s.tagErr || ('Ya existe «' + typed + '»: al guardar se unen las dos.'), hintCls: s.tagErr ? 'em' : 'hint',
+          askDel: () => this.setState({ tagDel: t, tagEdit: null }), noDel: () => this.setState({ tagDel: null }), doDel: () => this.deleteTag(t),
+          delText: n ? 'Se va a quitar de ' + cl + '. Los productos no se borran.' : 'Ningún producto la usa.'
+        };
+      })
+    };
+
+    const showTabs = s.logged && (desk || A === 'home' || A === 'products' || A === 'orders' || A === 'settings');
+    const back = () => {
+      if (A === 'form') this.setState({ aScreen: s.formFrom === 'home' ? 'home' : 'products', draft: null, dErr: {} });
+      else this.setState({ aScreen: s.orderFrom === 'home' ? 'home' : 'orders', confirmCancel: false, delta: null });
+    };
+    const a = {
+      notLogged: !s.logged, logged: s.logged,
+      email: s.login.email, pass: s.login.pass,
+      onEmail: (e) => this.setState({ login: { email: e.target.value, pass: this.state.login.pass }, loginErr: '' }),
+      onPass: (e) => this.setState({ login: { email: this.state.login.email, pass: e.target.value }, loginErr: '' }),
+      onLoginKey: (e) => { if (e.key === 'Enter') this.doLogin(); },
+      loginErr: !!s.loginErr, loginErrText: s.loginErr, login: () => this.doLogin(),
+      logout: () => this.setState({ logged: false, login: { email: '', pass: '' }, aScreen: 'home' }),
+      title: { home: 'Resumen', products: 'Productos', orders: 'Pedidos', settings: 'Ajustes', form: dr && dr.id != null ? 'Editar producto' : 'Nuevo producto', order: o ? 'Pedido ' + this.onum(o.no) : 'Pedido' }[A],
+      showBack: A === 'form' || A === 'order', back,
+      isHome: A === 'home', isProducts: A === 'products', isForm: A === 'form' && !!dr, isOrders: A === 'orders', isSettings: A === 'settings', isOrder: A === 'order' && !!o,
+      showTabs, scrollCls: 'scroll' + (showTabs ? ' tabs-b' : '') + (A === 'form' ? ' bar-b' : ''),
+      tHome: 'tab' + (A === 'home' ? ' on' : ''), tProducts: 'tab' + (A === 'products' ? ' on' : ''), tOrders: 'tab' + (A === 'orders' ? ' on' : ''), tSettings: 'tab' + (A === 'settings' ? ' on' : ''),
+      cHome: A === 'home' ? 'page' : 'false', cProducts: A === 'products' ? 'page' : 'false', cOrders: A === 'orders' ? 'page' : 'false', cSettings: A === 'settings' ? 'page' : 'false',
+      goHome: () => this.setState({ aScreen: 'home' }), goProducts: () => this.setState({ aScreen: 'products' }), goOrders: () => this.setState({ aScreen: 'orders' }), goSettings: () => this.setState({ aScreen: 'settings' }),
+      goPending: () => this.setState({ aScreen: 'orders', oFilter: 'pendiente' }),
+      goLow: () => this.setState({ aScreen: 'products', pFilter: 'low' }),
+      goSold: () => this.setState({ aScreen: 'orders', oFilter: 'vendido' }),
+      newProduct: () => this.newProduct(),
+      pendBadge: pendingOrders.length > 0,
+      today: DD[now.getDay()] + ' ' + now.getDate() + ' de ' + MM[now.getMonth()]
+    };
+
+    return {
+      yes: true, appCls: 'app' + (desk ? ' desk' : ''),
+      isClient, isAdmin: !isClient,
+      isClientStr: isClient ? 'true' : 'false', isAdminStr: isClient ? 'false' : 'true',
+      swClient: isClient ? 'on' : '', swAdmin: isClient ? '' : 'on',
+      toClient: () => this.setState({ mode: 'client' }), toAdmin: () => this.setState({ mode: 'admin' }),
+      setCS: this.setCS, setAS: this.setAS, setGal: this.setGal, onGal: this.onGal,
+      hasToast: !!s.toast, toast: s.toast || '',
+      c, cat, d, co, su, a, sum, pl, ol, od, f, st
+    };
+  }
+}
+</script>
+</body>
+</html>

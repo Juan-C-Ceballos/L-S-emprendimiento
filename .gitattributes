@@ -1,0 +1,5 @@
+# Fines de línea LF en el repo (CI corre en Linux; evita problemas en scripts y SQL)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary

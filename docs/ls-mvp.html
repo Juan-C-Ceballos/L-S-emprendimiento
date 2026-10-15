@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L&S · MVP del sistema de pedidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #F5F6F9; --surface: #FFFFFF; --ink: #1B2230; --muted: #566074; --line: #DADFE8;
+  --accent: #2F5D8A; --accent-soft: #E2EBF5; --plum: #7A4A68; --plum-soft: #F1E5EE;
+  --ok: #2F6B4F; --ok-soft: #E0F0E7; --warn: #8A5A12; --warn-soft: #F7ECD3;
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161E; --surface: #1A202B; --ink: #E7EAF0; --muted: #9AA4B5; --line: #2B3342;
+    --accent: #8DB4DC; --accent-soft: #1F2E41; --plum: #D9A8C6; --plum-soft: #3A2634;
+    --ok: #8FD1AE; --ok-soft: #1B3328; --warn: #E8C27A; --warn-soft: #3A2E14;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161E; --surface: #1A202B; --ink: #E7EAF0; --muted: #9AA4B5; --line: #2B3342;
+  --accent: #8DB4DC; --accent-soft: #1F2E41; --plum: #D9A8C6; --plum-soft: #3A2634;
+  --ok: #8FD1AE; --ok-soft: #1B3328; --warn: #E8C27A; --warn-soft: #3A2E14;
+}
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); scroll-behavior: smooth; }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.65; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 20; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { padding: 40px 20px 28px; max-width: 880px; margin: 0 auto; }
+header.top h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 9vw, 64px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -0.01em; }
+header.top p { margin: 0; color: var(--muted); max-width: 60ch; font-size: 18px; }
+.meta { margin-top: 18px; font-size: 14px; color: var(--muted); }
+
+nav.sections { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+nav.sections ul { list-style: none; margin: 0 auto; padding: 10px 20px; max-width: 880px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; }
+nav.sections a { display: inline-block; padding: 6px 12px; border-radius: 999px; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); font-size: 14px; font-weight: 500; }
+
+main { max-width: 880px; margin: 0 auto; padding: 8px 20px 72px; }
+section { padding-top: 44px; }
+h2 { font-family: var(--serif); font-weight: 400; font-size: 34px; line-height: 1.15; margin: 0 0 14px; }
+h3 { font-size: 18px; font-weight: 600; margin: 28px 0 8px; }
+p { margin: 0 0 14px; max-width: 70ch; }
+ul, ol { margin: 0 0 14px; padding-left: 22px; max-width: 70ch; }
+li { margin-bottom: 6px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 4px; }
+
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 0 0 18px; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+th, td { text-align: left; padding: 10px 14px; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; background: var(--accent-soft); color: var(--ink); }
+tr:last-child td { border-bottom: none; }
+td:first-child { font-weight: 500; white-space: nowrap; }
+
+.split { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 18px; }
+@media (min-width: 700px) { .split { grid-template-columns: 1fr 1fr; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.panel h3 { margin-top: 0; }
+.panel ul { padding-left: 20px; margin-bottom: 0; }
+.panel.mvp { border-top: 3px solid var(--accent); }
+.panel.later { border-top: 3px solid var(--plum); }
+
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; margin: 0 0 18px; border-radius: 0; max-width: 70ch; }
+.note.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.note p:last-child { margin-bottom: 0; }
+.note strong { font-weight: 600; }
+
+.flow { list-style: none; padding: 0; counter-reset: step; max-width: 70ch; }
+.flow li { counter-increment: step; position: relative; padding: 10px 14px 10px 52px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; }
+.flow li::before { content: counter(step); position: absolute; left: 14px; top: 10px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--surface); font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.flow small { display: block; color: var(--muted); }
+
+.tag { display: inline-block; font-size: 13px; padding: 1px 8px; border-radius: 999px; font-weight: 500; }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.no { background: var(--plum-soft); color: var(--plum); }
+.tag.open { background: var(--warn-soft); color: var(--warn); }
+
+.erd { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; margin-bottom: 18px; }
+.erd pre.mermaid { margin: 0; min-width: 520px; text-align: center; }
+footer { max-width: 880px; margin: 0 auto; padding: 0 20px 48px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>L&amp;S</h1>
+  <p>Catálogo público con pedidos por WhatsApp y un panel de administración para gestionar productos, stock y ventas.</p>
+  <div class="meta">Documento de diseño del MVP, actualizado el 15 de octubre de 2026. Precios y condiciones de terceros: verificar en sus páginas oficiales antes de contratar.</div>
+</header>
+
+<nav class="sections" aria-label="Secciones">
+  <ul>
+    <li><a href="#resumen">Resumen</a></li>
+    <li><a href="#roles">Roles</a></li>
+    <li><a href="#funciones">Funcionalidades</a></li>
+    <li><a href="#flujos">Flujos</a></li>
+    <li><a href="#datos">Datos</a></li>
+    <li><a href="#seguridad">Seguridad</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#hosting">Hosting</a></li>
+    <li><a href="#pendientes">Pendientes</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<section id="resumen">
+  <h2>Resumen</h2>
+  <p>L&amp;S vende accesorios (cadenas, pulseras, collares, aros, anillos). El sistema tiene dos caras: una página donde cualquiera ve los productos, arma un pedido y lo envía por WhatsApp, y un panel privado donde la administradora carga productos, controla el stock y sigue los pedidos.</p>
+  <h3>Principios</h3>
+  <ul>
+    <li>Lo mínimo indispensable, sin sobreingeniería.</li>
+    <li>Fácil de usar, sobre todo el panel, que probablemente se use desde el celular.</li>
+    <li>Fácil de escalar: sumar pagos, variantes o reportes no debe obligar a rehacer el modelo.</li>
+    <li>Sin pagos online. El cobro se coordina por chat (alias, transferencia).</li>
+  </ul>
+</section>
+
+<section id="roles">
+  <h2>Roles y usuarios</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Rol</th><th>Cómo entra</th><th>Puede</th><th>No puede</th></tr></thead>
+      <tbody>
+        <tr><td>Cliente</td><td>Sin cuenta, anónimo</td><td>Ver productos activos con fotos, precios y etiquetas. Filtrar. Armar un carrito. Confirmar un pedido.</td><td>Escribir en tablas directamente, ver pedidos (propios o ajenos), ver productos inactivos, cambiar precios.</td></tr>
+        <tr><td>Administradora</td><td>Email y contraseña (Supabase Auth)</td><td>Todo: productos, imágenes, etiquetas, stock, precios y pedidos.</td><td>Nada está vedado, por eso el acceso es una sola cuenta y el registro público está cerrado.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>No hay tabla de clientes ni cuentas de cliente: los datos de contacto viven dentro de cada pedido. Tampoco hay tabla propia de usuarios; el login lo resuelve Supabase Auth.</p>
+</section>
+
+<section id="funciones">
+  <h2>Funcionalidades</h2>
+  <div class="split">
+    <div class="panel mvp">
+      <h3>En el MVP</h3>
+      <ul>
+        <li>Catálogo con fotos, precios y estado agotado.</li>
+        <li>Pantalla de detalle por producto, con galería de varias fotos y botón para sumar al carrito.</li>
+        <li>Etiquetas libres por producto (aros, plateado, etc.).</li>
+        <li>Filtro por etiquetas con modo elegido por el cliente: que tenga todas, o que tenga alguna. Estado en la URL para compartir búsquedas.</li>
+        <li>Carrito en el navegador, con varios productos en un único pedido.</li>
+        <li>Confirmación: el pedido se guarda y se abre WhatsApp con el resumen y el número de pedido.</li>
+        <li>Panel: alta y edición de productos, imágenes con orden, etiquetas con autocompletado, activar o desactivar.</li>
+        <li>Pedidos con estados pendiente, vendido y cancelado.</li>
+        <li>Stock descontado al marcar vendido, repuesto si se cancela.</li>
+        <li>Nombre y teléfono obligatorios en cada pedido.</li>
+        <li>Costo por producto, visible solo en el panel, para calcular ganancia.</li>
+        <li>Vista previa general al compartir el link del catálogo (título e imagen fija).</li>
+        <li>Fotos achicadas en el navegador al subirlas, para que el catálogo cargue rápido.</li>
+      </ul>
+    </div>
+    <div class="panel later">
+      <h3>Después</h3>
+      <ul>
+        <li>Captcha invisible y límite de pedidos por IP.</li>
+        <li>Filtro "pendientes de más de 7 días" para limpiar el panel.</li>
+        <li>Reportes: ventas por período, más vendidos, ventas por etiqueta, stock bajo.</li>
+        <li>Reporte de ganancia (precio menos costo), por producto y por período.</li>
+        <li>Panel instalable como PWA en el celular.</li>
+        <li>Vistas previas por producto (foto y precio) al compartir por WhatsApp o Instagram, con una función chica de Cloudflare solo para esas páginas.</li>
+        <li>Colecciones o sets que combinan, si hacen falta.</li>
+        <li>Pagos online y variantes (talle, color), con tablas nuevas y sin tocar lo existente.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="flujos">
+  <h2>Flujos</h2>
+  <h3>Cliente</h3>
+  <ol class="flow">
+    <li>Explora el catálogo y filtra por etiquetas<small>Product, ProductImage, Tag (solo lectura)</small></li>
+    <li>Suma productos al carrito<small>Cart y CartItem: producto y cantidad, solo en el navegador, sin precios</small></li>
+    <li>Revisa el carrito y completa nombre y teléfono<small>Los precios se vuelven a leer de la base</small></li>
+    <li>Confirma el pedido<small>La función <code>crear_pedido</code> valida stock y precios y crea Order y OrderItem en estado pendiente</small></li>
+    <li>Se abre WhatsApp con el resumen y el número de pedido<small>Ella lo identifica después en el panel</small></li>
+  </ol>
+  <p>Si entre que agregó algo y confirmó cambió un precio o se agotó un producto, la función lo detecta y se lo muestra antes de guardar.</p>
+
+  <h3>Administradora</h3>
+  <ol class="flow">
+    <li>Inicia sesión<small>Session de Supabase Auth</small></li>
+    <li>Gestiona productos<small>Crea, edita precio y stock, sube imágenes, asigna etiquetas, activa o desactiva</small></li>
+    <li>Revisa pedidos<small>Lista filtrable por estado, con detalle de ítems</small></li>
+    <li>Marca como vendido<small>La función <code>marcar_vendido</code> cambia el estado y descuenta stock en una sola transacción</small></li>
+    <li>Cancela si hace falta<small>Si el pedido ya estaba vendido, repone el stock con la misma lógica</small></li>
+  </ol>
+</section>
+
+<section id="datos">
+  <h2>Modelo de datos</h2>
+  <div class="erd">
+<pre class="mermaid">
+erDiagram
+  PRODUCTS ||--o{ PRODUCT_IMAGES : tiene
+  PRODUCTS ||--o| PRODUCT_COSTS : tiene_costo
+  PRODUCTS }o--o{ TAGS : etiquetado
+  PRODUCTS ||--o{ ORDER_ITEMS : incluido_en
+  ORDERS ||--|{ ORDER_ITEMS : contiene
+  PRODUCTS {
+    uuid id PK
+    string nombre
+    string descripcion
+    number precio
+    int stock
+    bool activo
+  }
+  PRODUCT_IMAGES {
+    uuid id PK
+    uuid product_id FK
+    string url
+    int orden
+  }
+  TAGS {
+    uuid id PK
+    string nombre UK
+  }
+  PRODUCT_COSTS {
+    uuid product_id PK
+    number costo
+  }
+  ORDERS {
+    uuid id PK
+    string estado
+    string cliente
+    string telefono
+    number total
+    timestamp fecha
+  }
+  ORDER_ITEMS {
+    uuid id PK
+    uuid order_id FK
+    uuid product_id FK
+    int cantidad
+    number precio_unitario
+    number costo_unitario
+  }
+</pre>
+  </div>
+  <p>La relación entre productos y etiquetas es de muchos a muchos. En la base se resuelve con una tabla intermedia <code>product_tags</code> (producto y etiqueta), que a nivel de modelo no hace falta dibujar.</p>
+  <h3>Reglas del modelo</h3>
+  <ul>
+    <li>Cada <code>order_items</code> guarda <code>precio_unitario</code> y <code>costo_unitario</code>: si cambian después, el historial y la ganancia calculada quedan intactos.</li>
+    <li>El costo vive en su propia tabla, <code>product_costs</code>, con acceso solo para la administradora. Las políticas RLS filtran filas, no columnas: si el costo estuviera dentro de <code>products</code>, que el cliente puede leer, quedaría expuesto.</li>
+    <li>Los productos no se borran, se desactivan (<code>activo</code>). Si no, los pedidos viejos apuntarían a algo inexistente.</li>
+    <li>El stock se descuenta al marcar vendido, no al crear el pedido. Un pedido falso no bloquea productos.</li>
+    <li>Las etiquetas son libres, sin jerarquías ni grupos. El filtro "todas" usa Y y el filtro "alguna" usa O, y lo decide el cliente.</li>
+    <li>El cliente no tiene tabla propia: nombre y teléfono se guardan en el pedido.</li>
+  </ul>
+  <h3>Funciones en la base</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Función</th><th>Quién la llama</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><code>crear_pedido</code></td><td>Cliente, directo desde el navegador (vía función de Cloudflare cuando se sume captcha)</td><td>Recibe producto y cantidad. Busca precios y costos reales, valida producto activo y stock, calcula el total e inserta pedido e ítems.</td></tr>
+        <tr><td><code>marcar_vendido</code></td><td>Administradora</td><td>Cambia el estado y descuenta stock de forma atómica.</td></tr>
+        <tr><td>Cancelar</td><td>Administradora</td><td>Cambia el estado y, si estaba vendido, repone el stock.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="seguridad">
+  <h2>Seguridad</h2>
+  <p>Los permisos los aplica la base con Row Level Security (RLS), así que valen aunque alguien llame a la API saltándose la página.</p>
+  <ol>
+    <li>RLS activado en todas las tablas. En Supabase una tabla nueva queda abierta hasta activarlo.</li>
+    <li>Cliente: solo lectura de productos activos con sus imágenes y etiquetas, nunca de costos. Sin permiso de insertar en <code>orders</code>: solo puede llamar a <code>crear_pedido</code>.</li>
+    <li>El cliente nunca manda precios. Manda producto y cantidad, y la función busca los precios reales.</li>
+    <li>Administradora: lectura y escritura total, con una regla atada a su identidad. El registro público de usuarios queda desactivado.</li>
+    <li>En el código de la página va solo la clave pública (<code>anon</code>). La clave <code>service_role</code> nunca va en el frontend.</li>
+    <li>Imágenes: lectura pública, subida y borrado solo para ella.</li>
+    <li>El mensaje de WhatsApp no es la fuente de verdad: aunque el cliente lo edite, el pedido ya está guardado con los precios correctos.</li>
+  </ol>
+  <h3>Contra pedidos innecesarios</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Medida</th><th>Cuándo</th></tr></thead>
+      <tbody>
+        <tr><td>Validación en <code>crear_pedido</code>: rechaza productos inactivos y cantidades mayores al stock</td><td><span class="tag ok">MVP</span></td></tr>
+        <tr><td>Topes por pedido: máximo de productos distintos y de unidades por producto</td><td><span class="tag no">Después</span></td></tr>
+        <tr><td>Nombre y teléfono obligatorios</td><td><span class="tag ok">MVP</span></td></tr>
+        <tr><td>Captcha invisible (Cloudflare Turnstile), validado en una función de Cloudflare</td><td><span class="tag no">Después</span></td></tr>
+        <tr><td>Límite por IP, por ejemplo 3 pedidos por hora, guardando un hash de la IP</td><td><span class="tag no">Después</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>En el MVP el navegador llama directo a <code>crear_pedido</code>. Cuando se sumen captcha y límite por IP, el pedido pasa por una función chica de Cloudflare que los valida y recién ahí llama a <code>crear_pedido</code>; en ese momento se le quita al cliente el permiso de llamarla directo. Es agregar una pieza, no rediseñar.</p>
+</section>
+
+<section id="stack">
+  <h2>Stack</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Capa</th><th>Elección</th><th>Motivo</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend</td><td>React con Vite y TypeScript (SPA), con React Router</td><td>Catálogo, carrito y panel en un solo proyecto y con tecnología conocida. Se compila a archivos estáticos.</td></tr>
+        <tr><td>Backend</td><td>Supabase: Postgres, Auth, Storage, RLS</td><td>Todo en un servicio, sin armar API aparte. El navegador habla directo con Supabase.</td></tr>
+        <tr><td>Hosting</td><td>Cloudflare, plan gratuito</td><td>Los archivos estáticos son gratis e ilimitados. Sin la restricción de uso personal de Vercel gratis (confirmar en sus términos).</td></tr>
+        <tr><td>Interfaz</td><td>Tailwind con shadcn/ui</td><td>Componentes listos y consistentes.</td></tr>
+        <tr><td>Validación</td><td>Zod</td><td>Valida los formularios del panel y del pedido.</td></tr>
+        <tr><td>Migraciones</td><td>Supabase CLI y tipos de TypeScript generados</td><td>El esquema queda versionado y se replica entre dev y prod.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Para que escale sin sobreingeniería: la lógica de negocio va en una carpeta <code>services/</code> (productos, pedidos) que habla con Supabase, y las pantallas solo la usan. Si algún día cambia el backend o el framework, se toca una capa.</p>
+
+  <h3>¿Por qué React con Vite?</h3>
+  <ol>
+    <li><strong>Sin servidor propio.</strong> El sitio se compila a archivos estáticos que Cloudflare sirve gratis. No hay límite de CPU por solicitud, ni adaptadores, ni compatibilidad con Node que revisar.</li>
+    <li><strong>Tecnología conocida.</strong> Catálogo, carrito y panel son React normal, sin nada nuevo que aprender.</li>
+    <li><strong>El filtrado ya vive en el navegador.</strong> El catálogo carga los productos activos una vez y filtra ahí.</li>
+    <li><strong>Escala por partes.</strong> Captcha, límite por IP y vistas previas se agregan como funciones chicas de Cloudflare, sin migrar el proyecto.</li>
+  </ol>
+  <div class="note warn">
+    <p><strong>Lo que se pierde:</strong> las vistas previas por producto al compartir un link por WhatsApp o Instagram. Esos rastreadores leen el HTML que llega del servidor, y una SPA arma la página recién en el navegador. El link al catálogo sí puede tener una vista previa general. Tampoco hay buena indexación en Google de productos individuales. Si hace falta, se resuelve después con una función de Cloudflare solo para esas páginas.</p>
+  </div>
+
+  <h3>Alternativas consideradas</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Alternativa</th><th>A favor</th><th>En contra</th></tr></thead>
+      <tbody>
+        <tr><td>Next.js</td><td>Vistas previas por producto y código de servidor en el mismo proyecto.</td><td>Rinde mejor en Vercel, que no es gratis para uso comercial. En Cloudflare requiere un adaptador.</td></tr>
+        <tr><td>Astro</td><td>Excelente para catálogos: rápido y con poco JavaScript.</td><td>Suma una pieza nueva a cambio de beneficios que pesan poco a este volumen. En Cloudflare, sharp no corre y el servidor tiene 10 ms de CPU por solicitud.</td></tr>
+        <tr><td>SvelteKit o Nuxt</td><td>Equivalentes a Next.js en lo que se necesita. Más livianos.</td><td>Habría que aprender un framework nuevo.</td></tr>
+        <tr><td>Tienda lista (Tiendanube, Shopify)</td><td>Cero desarrollo, con pagos y envíos incluidos.</td><td>Menos control, costo mensual, y no calza con el flujo de pedidos por WhatsApp.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Fotos</h3>
+  <p>Las imágenes se achican en el navegador antes de subirlas a Supabase Storage, con un <code>canvas</code>. Una foto de celular de varios MB queda en unos 100 a 200 KB.</p>
+  <ul>
+    <li>Foto de detalle: 1600 px de lado largo, calidad 0,85. A esa calidad la diferencia no se nota; por debajo de 0,7 los detalles de joyas (brillos, cierres) sí se resienten.</li>
+    <li>Miniatura para la grilla: 400 px.</li>
+    <li>Formato: JPEG como opción segura, porque algunos navegadores no generan WebP desde el canvas.</li>
+    <li>La foto original no se guarda en el sistema: ella tiene que conservarla en el celular o en la nube.</li>
+  </ul>
+</section>
+
+<section id="hosting">
+  <h2>Hosting, entornos y costos</h2>
+  <h3>Entornos dev y prod</h3>
+  <p>Supabase gratis permite 2 proyectos activos, así que alcanza para uno de desarrollo y otro de producción, sin costo. Se mantienen iguales con las migraciones del CLI, y cada entorno solo cambia las variables de entorno (URL y clave).</p>
+
+  <h3>Lo que hay que saber de cada servicio</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Servicio</th><th>Plan gratuito</th><th>Plan pago</th></tr></thead>
+      <tbody>
+        <tr><td>Supabase</td><td>2 proyectos, 500 MB de base, 1 GB de archivos. El proyecto se pausa tras una semana sin actividad y hay que reactivarlo a mano.</td><td>Pro desde USD 25 por mes más uso. No se pausa y suma backups diarios.</td></tr>
+        <tr><td>Vercel</td><td>Gratis solo para uso personal no comercial. Vender accesorios cuenta como comercial.</td><td>Pro, USD 20 por usuario por mes más uso.</td></tr>
+        <tr><td>Cloudflare</td><td>Según una comparación reciente, su plan gratuito no impone esa restricción. Confirmar en sus términos.</td><td>Planes pagos opcionales.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Qué incluye Cloudflare gratis</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Recurso</th><th>Límite gratuito</th><th>Para L&amp;S</th></tr></thead>
+      <tbody>
+        <tr><td>Archivos estáticos</td><td>Solicitudes ilimitadas y gratis</td><td>CSS, JavaScript y recursos del sitio no consumen cuota.</td></tr>
+        <tr><td>Código de servidor</td><td>100.000 solicitudes por día, con reinicio a medianoche UTC</td><td>Solo para funciones chicas: el chequeo contra la pausa de Supabase y, más adelante, captcha y vistas previas. Sobra para este volumen.</td></tr>
+        <tr><td>CPU por solicitud</td><td>10 ms</td><td>Alcanza para lógica liviana. La espera de respuestas de Supabase no cuenta como CPU.</td></tr>
+        <tr><td>Compilaciones (Pages)</td><td>500 por mes</td><td>Más que suficiente.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Evitar la pausa de Supabase</h3>
+  <p>Una tarea programada hace una consulta liviana a la API de Supabase cada pocos días, por ejemplo cada tres, para dejar margen. Puede ser un Cron Trigger de Cloudflare, que ya está en el stack, o un workflow programado de GitHub Actions. Hay que confirmar la disponibilidad y los límites de los Cron Triggers en el plan gratuito, y comprobar con el tiempo que Supabase cuente esa consulta como actividad. El proyecto de desarrollo puede pausarse sin problema.</p>
+  <h3>Opciones</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Opción</th><th>Costo aproximado</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td>1. Costo cero <span class="tag ok">Elegida</span></td><td>USD 0</td><td>Hosting en Cloudflare y Supabase gratis, con un chequeo programado semanal que evite la pausa. Más trabajo de configuración.</td></tr>
+        <tr><td>2. Estable y simple</td><td>USD 20 por mes</td><td>Vercel Pro y Supabase gratis con el mismo chequeo semanal.</td></tr>
+        <tr><td>3. Sin preocupaciones</td><td>USD 45 por mes</td><td>Vercel Pro y Supabase Pro. Excesivo para arrancar.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <p><strong>Decidido:</strong> opción 1, costo cero, y pasar a algo pago cuando el emprendimiento lo justifique. Como la lógica vive en Supabase y en <code>services/</code>, cambiar de hosting es mover el despliegue, sin tocar el modelo.</p>
+  </div>
+  <p>Backups: el plan gratuito de Supabase no incluye los diarios. Mientras tanto, conviene exportar los datos cada tanto. De momento se usa el subdominio gratuito que da Cloudflare. Un dominio propio con el nombre del emprendimiento se puede sumar más adelante: cuesta poco y da confianza al cliente. Al cambiarlo hay que actualizar las URL permitidas en Supabase Auth, y los links ya compartidos dejarían de funcionar si no se redirigen.</p>
+</section>
+
+<section id="pendientes">
+  <h2>Decisiones pendientes</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Tema</th><th>Estado</th><th>Detalle</th></tr></thead>
+      <tbody>
+        <tr><td>Hosting</td><td><span class="tag ok">Cerrada</span></td><td>Cloudflare gratis y Supabase gratis con chequeo programado contra la pausa (opción 1).</td></tr>
+        <tr><td>Framework</td><td><span class="tag ok">Cerrada</span></td><td>React con Vite (SPA), hosting estático en Cloudflare.</td></tr>
+        <tr><td>Vista del producto</td><td><span class="tag ok">Cerrada</span></td><td>Pantalla de detalle por producto dentro de la app. Las vistas previas por producto al compartir quedan para después.</td></tr>
+        <tr><td>Dominio</td><td><span class="tag ok">Cerrada</span></td><td>De momento, el subdominio gratuito de Cloudflare. Un dominio propio se suma más adelante.</td></tr>
+        <tr><td>Campo de costo</td><td><span class="tag ok">Cerrada</span></td><td>Tabla <code>product_costs</code> aislada, más <code>costo_unitario</code> en cada ítem del pedido.</td></tr>
+        <tr><td>Topes por pedido, captcha y límite por IP</td><td><span class="tag no">Diferida</span></td><td>Se suma cuando haga falta. El endpoint de servidor queda desde el inicio.</td></tr>
+        <tr><td>Etiquetas y filtros</td><td><span class="tag ok">Cerrada</span></td><td>Etiquetas libres, filtro todas o alguna a elección del cliente.</td></tr>
+        <tr><td>Stock</td><td><span class="tag ok">Cerrada</span></td><td>Se descuenta al marcar vendido.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="roadmap">
+  <h2>Orden de construcción</h2>
+  <ol class="flow">
+    <li>Proyecto React con Vite, repositorio y los dos proyectos de Supabase<small>Migraciones con el CLI, variables de entorno por entorno</small></li>
+    <li>Esquema, políticas RLS y funciones<small>Tablas, <code>crear_pedido</code> y <code>marcar_vendido</code></small></li>
+    <li>Login y panel de productos<small>Carga de imágenes, etiquetas, stock</small></li>
+    <li>Catálogo público con filtros<small>Todas o alguna, estado en la URL</small></li>
+    <li>Carrito, confirmación y WhatsApp<small>Datos de contacto obligatorios</small></li>
+    <li>Panel de pedidos<small>Estados y descuento de stock</small></li>
+    <li>Despliegue en Cloudflare con su subdominio gratuito y chequeo programado contra la pausa de Supabase</li>
+    <li>Topes, captcha, límite por IP, vistas previas por producto y reportes</li>
+  </ol>
+</section>
+
+</main>
+
+<footer>Estimaciones de costos tomadas de páginas públicas de octubre de 2026. Revisar las condiciones vigentes de cada proveedor antes de contratar.</footer>
+
+</body>
+</html>

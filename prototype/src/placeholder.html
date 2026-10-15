@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Placeholder de producto</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: absolute; inset: 0; overflow: hidden; background: {{bg}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true"><circle cx="{{sx}}" cy="{{sy}}" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="{{metal}}" opacity="0.10"></ellipse></svg>
+
+<sc-if value="{{isHoop}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Aros"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-width="2.6" stroke-linecap="round"><path d="M70 72v14"></path><circle cx="70" cy="122" r="36"></circle><path d="M46 110a28 28 0 0 1 16-20" stroke-width="1.1" opacity="0.6"></path><path d="M130 64v14"></path><circle cx="130" cy="114" r="36"></circle><path d="M106 102a28 28 0 0 1 16-20" stroke-width="1.1" opacity="0.6"></path></g></svg>
+</sc-if>
+
+<sc-if value="{{isStud}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Aros pequeños"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-width="2.4" stroke-linecap="round"><circle cx="78" cy="116" r="15"></circle><circle cx="78" cy="116" r="22" stroke-width="1" opacity="0.45"></circle><path d="M71 109a9 9 0 0 1 9-3" stroke-width="1.4"></path><path d="M78 131v22" stroke-width="1.6"></path><circle cx="126" cy="138" r="15"></circle><circle cx="126" cy="138" r="22" stroke-width="1" opacity="0.45"></circle><path d="M119 131a9 9 0 0 1 9-3" stroke-width="1.4"></path><path d="M126 153v22" stroke-width="1.6"></path></g></svg>
+</sc-if>
+
+<sc-if value="{{isDrop}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Aros gota"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M74 60a7 7 0 0 1 14 0v14"></path><path d="M88 78C66 112 64 142 88 154C112 142 110 112 88 78Z"></path><path d="M80 120c-2 10 0 18 6 24" stroke-width="1.1" opacity="0.6"></path><path d="M116 74a7 7 0 0 1 14 0v14"></path><path d="M130 92C108 126 106 156 130 168C154 156 152 126 130 92Z"></path><path d="M122 134c-2 10 0 18 6 24" stroke-width="1.1" opacity="0.6"></path></g></svg>
+</sc-if>
+
+<sc-if value="{{isBracelet}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Pulsera"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-linecap="round"><ellipse cx="100" cy="128" rx="64" ry="40" stroke-width="5" stroke-dasharray="9 5"></ellipse><ellipse cx="100" cy="128" rx="64" ry="40" stroke-width="1" opacity="0.5"></ellipse><circle cx="164" cy="128" r="6" stroke-width="2.2"></circle><path d="M100 168v12" stroke-width="1.6"></path><circle cx="100" cy="186" r="5" stroke-width="2"></circle></g></svg>
+</sc-if>
+
+<sc-if value="{{isBangle}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Pulsera rígida"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-linecap="round"><path d="M162 116A64 46 0 1 1 150 98" stroke-width="2.6"></path><path d="M152 118A56 38 0 1 1 142 103" stroke-width="1.2" opacity="0.7"></path><circle cx="151" cy="99" r="4" stroke-width="2.2"></circle><circle cx="162" cy="117" r="4" stroke-width="2.2"></circle></g></svg>
+</sc-if>
+
+<sc-if value="{{isPendant}}" hint-placeholder-val="{{true}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Collar con dije"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M36 36C46 116 80 148 100 150C120 148 154 116 164 36" stroke-dasharray="3 3"></path><circle cx="100" cy="155" r="4.5"></circle><path d="M100 196C78 180 78 162 90 162C96 162 100 168 100 172C100 168 104 162 110 162C122 162 122 180 100 196Z" stroke-width="2.5"></path></g></svg>
+</sc-if>
+
+<sc-if value="{{isPearls}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Collar de perlas"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-linecap="round"><path d="M32 44C42 138 80 166 100 166C120 166 158 138 168 44" stroke-width="1" opacity="0.5"></path><path d="M32 44C42 138 80 166 100 166C120 166 158 138 168 44" stroke-width="11" stroke-dasharray="0.1 13" opacity="0.85"></path></g></svg>
+</sc-if>
+
+<sc-if value="{{isChain}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Cadena"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-linecap="round"><path d="M28 40C42 150 84 178 100 178C116 178 158 150 172 40" stroke-width="4" stroke-dasharray="7 4"></path><path d="M28 40C42 150 84 178 100 178C116 178 158 150 172 40" stroke-width="1" opacity="0.5"></path><path d="M50 40C62 126 88 150 100 150C112 150 138 126 150 40" stroke-width="3.2" stroke-dasharray="6 4" opacity="0.6"></path></g></svg>
+</sc-if>
+
+<sc-if value="{{isRing}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" role="img" aria-label="Anillo"><g transform="{{tf}}" fill="none" stroke="{{metal}}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="100" cy="142" r="38"></circle><circle cx="100" cy="142" r="31" stroke-width="1.2" opacity="0.6"></circle><rect x="84" y="90" width="32" height="20" rx="6"></rect><path d="M90 96h20" stroke-width="1" opacity="0.5"></path></g></svg>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"kind":{"editor":"enum","options":["hoop","stud","drop","bracelet","bangle","pendant","pearls","chain","ring"],"default":"pendant"},"tone":{"editor":"color","default":"#F0E7DF"},"metal":{"editor":"color","default":"#9C7426"},"v":{"editor":"int","min":0,"max":3,"default":0},"$preview":{"width":200,"height":250}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const k = this.props.kind || 'pendant';
+    const v = Math.abs(Number(this.props.v) || 0) % 4;
+    const tfs = [
+      '',
+      'rotate(-14 100 125)',
+      'translate(100 125) scale(1.5) translate(-100 -118)',
+      'translate(100 125) rotate(10) scale(0.9) translate(-92 -122)'
+    ];
+    const spots = [[150, 64], [52, 84], [140, 196], [62, 200]];
+    return {
+      bg: this.props.tone || '#F0E7DF',
+      metal: this.props.metal || '#9C7426',
+      tf: tfs[v], sx: spots[v][0], sy: spots[v][1],
+      isHoop: k === 'hoop', isStud: k === 'stud', isDrop: k === 'drop', isBracelet: k === 'bracelet', isBangle: k === 'bangle',
+      isPendant: k === 'pendant', isPearls: k === 'pearls', isChain: k === 'chain', isRing: k === 'ring'
+    };
+  }
+}
+</script>
+</body>
+</html>

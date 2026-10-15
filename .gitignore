@@ -1,0 +1,41 @@
+# Dependencias y builds
+node_modules/
+dist/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Secretos: nunca se versionan
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
+.dev.vars
+supabase/.env
+
+# Supabase CLI (estado local)
+supabase/.branches/
+supabase/.temp/
+
+# Cloudflare / Wrangler
+.wrangler/
+
+# Respaldos de datos (contienen datos personales de clientes)
+backups/
+*.dump
+*.backup
+
+# Editor y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Claude Code: configuración local de cada máquina
+.claude/settings.local.json

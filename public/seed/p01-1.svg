@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="800" height="1000" role="img" aria-label="Aros">
+<rect width="200" height="250" fill="#EBDCD4"/>
+<circle cx="52" cy="84" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="#9C7426" opacity="0.10"></ellipse>
+<g transform="rotate(-14 100 125)" fill="none" stroke="#9C7426" stroke-width="2.6" stroke-linecap="round"><path d="M70 72v14"></path><circle cx="70" cy="122" r="36"></circle><path d="M46 110a28 28 0 0 1 16-20" stroke-width="1.1" opacity="0.6"></path><path d="M130 64v14"></path><circle cx="130" cy="114" r="36"></circle><path d="M106 102a28 28 0 0 1 16-20" stroke-width="1.1" opacity="0.6"></path></g>
+</svg>

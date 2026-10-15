@@ -12,7 +12,8 @@ El repositorio se borró y se volvió a crear para eliminar del historial un dat
 - [ ] *Require branches to be up to date before merging*: **desactivado** (`strict: false`). Recomendado activarlo: obliga a traer `develop` a la rama antes de mergear, que es la regla de integración del proyecto.
 - [ ] Métodos de merge del ruleset: permite `merge`, `squash` y `rebase`. Mejora opcional: dividir en dos rulesets para que GitHub haga cumplir la estrategia: `develop` solo `squash` y `main` solo `merge`.
 - [?] Tipos de merge del repositorio (sección 2) y lista de bypass: la API pública no los muestra; revisarlos a mano.
-- Nota: el check `frontend` todavía no existe. Lo crea el workflow de la etapa 0 (`ci.yml`, job con nombre exacto `frontend`), que corre en el mismo PR que lo agrega, así que ese PR puede mergearse cuando el CI pase. Desde la etapa 1, sumar `base-de-datos` como check requerido.
+- [ ] El PR #1 (etapa 0) entró a `develop` con *merge commit* en vez de *squash*. No rompe nada, pero confirma que conviene restringir los métodos de merge (punto anterior) para que no se repita.
+- Checks del CI: `frontend` existe desde la etapa 0. **`base-de-datos` existe desde la etapa 1** (`ci.yml`, job con nombre exacto `base-de-datos`). Pendiente del usuario: después de que corra una vez en el PR de la etapa 1, sumarlo como check requerido del ruleset (Settings → Rules → `proteger-main-develop` → Require status checks → agregar `base-de-datos`).
 
 ## 1. Crear el repositorio y subir las ramas
 

@@ -4,9 +4,9 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 1 · Base de datos (sin empezar). La etapa 0 está terminada en `feature/00-fundacion`, con el [PR #1](https://github.com/Juan-C-Ceballos/L-S-emprendimiento/pull/1) a `develop` abierto y CI en verde; falta el merge (squash).
-- **Rama:** crear `feature/01-base-de-datos` desde `develop` **después** de mergear la etapa 0.
-- **Próximo paso:** mergear el PR de la etapa 0, verificar `develop` en verde, y abrir `docs/plan/etapa-01-base-de-datos.md`.
+- **Etapa en curso:** 2 · Autenticación y panel (sin empezar). La etapa 1 está terminada en `feature/01-base-de-datos`, con PR a `develop` pendiente de CI en verde y merge (squash). La etapa 0 ya está en `develop` (PR #1).
+- **Rama:** crear `feature/02-auth-panel` desde `develop` **después** de mergear la etapa 1.
+- **Próximo paso:** mergear el PR de la etapa 1 (squash), sumar `base-de-datos` como check requerido (ver `docs/github-setup.md`), verificar `develop` en verde, y abrir `docs/plan/etapa-02-auth-panel.md`. Las migraciones **todavía no se aplicaron** al Supabase de desarrollo: falta el proyecto (ver tabla de abajo).
 - **Ojo en Windows:** la carpeta del proyecto no puede tener `&` en la ruta (rompe `npx` y los scripts de npm). Ya se renombró a `L-S` y los scripts volvieron a la forma estándar (D-29).
 - **Remoto de GitHub:** https://github.com/Juan-C-Ceballos/L-S-emprendimiento (público). `main`, `develop` y `feature/00-fundacion` subidas el 2026-10-15. Rama por defecto `develop` y ruleset activo en `main` y `develop` (PR obligatorio, check `frontend`, sin force push). Mejoras opcionales pendientes en `docs/github-setup.md` ("Estado verificado").
 
@@ -14,7 +14,7 @@
 
 - [x] **0 · Fundación** — [`etapa-00-fundacion.md`](docs/plan/etapa-00-fundacion.md) · `feature/00-fundacion`
   Scaffold Vite + React + TS + Tailwind + shadcn + Router, tokens de diseño, Vitest, ESLint, capa `services/` y cliente de Supabase, CI.
-- [ ] **1 · Base de datos** — [`etapa-01-base-de-datos.md`](docs/plan/etapa-01-base-de-datos.md) · `feature/01-base-de-datos`
+- [x] **1 · Base de datos** — [`etapa-01-base-de-datos.md`](docs/plan/etapa-01-base-de-datos.md) · `feature/01-base-de-datos`
   Migraciones, RLS, `product_costs`, `crear_pedido`, `marcar_vendido`, `cancelar_pedido`, semillas, pgTAP, tipos generados, job de CI de base.
 - [ ] **2 · Autenticación y panel** — [`etapa-02-auth-panel.md`](docs/plan/etapa-02-auth-panel.md) · `feature/02-auth-panel`
   Login, guardia de rutas, layout del panel, registro público desactivado.
@@ -41,8 +41,9 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 |---|---|---|
 | Crear el repositorio en GitHub | Antes del primer PR (etapa 0) | Hecho: `Juan-C-Ceballos/L-S-emprendimiento` (público) |
 | Configurar la protección de ramas y los tipos de merge (ver `docs/github-setup.md`; no hay `gh` CLI) | Antes del primer PR (etapa 0) | Hecho (verificado 2026-10-15); quedan mejoras opcionales |
-| Instalar Docker Desktop y dejarlo corriendo | 1 | Docker detectado en la máquina |
-| Proyecto de Supabase **de desarrollo**: `project ref`, URL, clave anon, contraseña de la base, token personal (`SUPABASE_ACCESS_TOKEN`) | Al mergear la 1 en `develop` (se puede trabajar en local antes) | Pendiente |
+| Sumar `base-de-datos` como check requerido del ruleset | Después de que corra en el PR de la etapa 1 | Pendiente |
+| Instalar Docker Desktop y dejarlo corriendo | 1 | Hecho: Docker Desktop 29.7, Supabase local funcionando |
+| Proyecto de Supabase **de desarrollo**: `project ref`, URL, clave anon, contraseña de la base, token personal (`SUPABASE_ACCESS_TOKEN`) | Al mergear la 1 en `develop` (se puede trabajar en local antes) | Pendiente: con eso se corre `supabase link` + `supabase db push` (etapa 1, "Al mergear") |
 | Número de WhatsApp de la tienda | 5 | Pendiente |
 | Email de la administradora | 2 (dev) / 8 (prod) | Pendiente |
 | Proyecto de Supabase **de producción** + cuenta de Cloudflare conectada al repositorio de GitHub | 8 | Pendiente |
@@ -55,6 +56,12 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-15 · Etapa 1 · `feature/01-base-de-datos`
+- Hecho: Supabase CLI 2.121 como devDependency, `supabase/config.toml` (registro desactivado, `site_url` en 5173) y scripts `db:*`. Migración `esquema_inicial`: 7 tablas con CHECKs, índices, `es_admin()`, `set_updated_at`, `revoke` de permisos por defecto y RLS con políticas en todas. Migración `funciones_pedidos`: `crear_pedido` (security definer), `marcar_vendido` y `cancelar_pedido` (security invoker, solo admin, bloqueo de productos ordenado por id). Semillas del prototipo con UUID fijos, 31 SVG en `public/seed/` (`scripts/generar-placeholders.mjs`) y 6 pedidos. 98 pruebas pgTAP en 7 archivos. `src/types/database.ts` generado y `src/types/dominio.ts`. Job `base-de-datos` en el CI.
+- Verificado en local: `db:reset` desde cero, `db:lint` sin errores, `db:test` 98/98, tipos al día; lint, typecheck, test y build del frontend en verde. Por la API REST con la clave anon: 13 productos, `permission denied` en `product_costs` y `orders`, y `crear_pedido` responde.
+- Decisiones nuevas: D-30 (detalles de la base). D-29 actualizada (carpeta renombrada a `L-S`, scripts estándar).
+- Pendiente: CI en verde en el PR y merge con squash; sumar `base-de-datos` como check requerido; aplicar migraciones al Supabase de desarrollo cuando exista.
 
 ### 2026-10-15 · Etapa 0 · `feature/00-fundacion`
 - Hecho: scaffold Vite 8 + React 19 + TypeScript 6 estricto (`noUncheckedIndexedAccess`, alias `@`); Tailwind v4 con los tokens del prototipo en `src/index.css`; shadcn/ui (Radix + Nova) con `button` (variantes `default`, `ghost`, `wa`, `danger`, `dangerSolid`; tamaño `sm`), `input`, `label`, `textarea` con el look de L&S; React Router 8 con todas las rutas y páginas placeholder + 404; `HeaderCliente`, `Logo`, `LayoutCliente`, `ToastProvider`/`useToast`; `env.ts` (Zod) con pantalla "Falta configurar el sitio"; `supabase.ts` tipado; `ErrorServicio` + `desdeErrorSupabase`; `formato.ts`; `useAsync`; ESLint `strictTypeChecked` con `no-restricted-imports` para Supabase fuera de `src/services/`; Vitest (30 pruebas); CI `.github/workflows/ci.yml` con el job `frontend`.

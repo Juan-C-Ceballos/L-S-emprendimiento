@@ -7,7 +7,7 @@
 - **Etapa en curso:** 0 · Fundación (sin empezar).
 - **Rama:** `feature/00-fundacion` (creada desde `develop`, sin commits propios todavía).
 - **Próximo paso:** abrir `docs/plan/etapa-00-fundacion.md` y ejecutar la tarea 1.
-- **Remoto de GitHub:** https://github.com/Juan-C-Ceballos/L-S-emprendimiento (público). `main`, `develop` y `feature/00-fundacion` subidas el 2026-10-15. Pendiente: default branch `develop`, tipos de merge y protección de ramas (ver `docs/github-setup.md`, secciones 1 a 3).
+- **Remoto de GitHub:** https://github.com/Juan-C-Ceballos/L-S-emprendimiento (público). `main`, `develop` y `feature/00-fundacion` subidas el 2026-10-15. Rama por defecto `develop` y ruleset activo en `main` y `develop` (PR obligatorio, check `frontend`, sin force push). Mejoras opcionales pendientes en `docs/github-setup.md` ("Estado verificado").
 
 ## Etapas
 
@@ -39,7 +39,7 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 | Qué | Para qué etapa | Estado |
 |---|---|---|
 | Crear el repositorio en GitHub | Antes del primer PR (etapa 0) | Hecho: `Juan-C-Ceballos/L-S-emprendimiento` (público) |
-| Configurar la protección de ramas y los tipos de merge (ver `docs/github-setup.md`; no hay `gh` CLI) | Antes del primer PR (etapa 0) | Pendiente |
+| Configurar la protección de ramas y los tipos de merge (ver `docs/github-setup.md`; no hay `gh` CLI) | Antes del primer PR (etapa 0) | Hecho (verificado 2026-10-15); quedan mejoras opcionales |
 | Instalar Docker Desktop y dejarlo corriendo | 1 | Docker detectado en la máquina |
 | Proyecto de Supabase **de desarrollo**: `project ref`, URL, clave anon, contraseña de la base, token personal (`SUPABASE_ACCESS_TOKEN`) | Al mergear la 1 en `develop` (se puede trabajar en local antes) | Pendiente |
 | Número de WhatsApp de la tienda | 5 | Pendiente |
@@ -57,7 +57,8 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 
 ### 2026-10-15 · Preparación · `main`
 - Hecho: repositorio git con `main` → `develop` → `feature/00-fundacion`; prototipo desempaquetado en `prototype/` (`src/main.html` es el código legible); `docs/ls-mvp.html` movido a `docs/`; `docs/prototype-analysis.md`, `docs/decisions.md` (D-01 a D-27), `docs/github-setup.md`, `docs/release-checklist.md` (v1); `README.md`, `CLAUDE.md`, `.env.example`, `.gitignore`, `.nvmrc`, plantilla de PR; plan por etapas.
-- Pendiente: protección de ramas en GitHub (no hay `gh` CLI instalado; pasos en `docs/github-setup.md`); el resto, según las etapas.
+- Repo recreado para borrar del historial el número de WhatsApp del prototipo (reemplazado por `+54 9 11 0000-0000`); GitHub configurado por el usuario y verificado.
+- Pendiente: según las etapas.
 
 ## Dónde quedé y qué sigue
 

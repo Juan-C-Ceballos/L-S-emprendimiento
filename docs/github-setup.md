@@ -2,6 +2,18 @@
 
 En la sesión de preparación **no había `gh` CLI instalado**, así que estos pasos quedan para hacer a mano (o con `gh` cuando esté instalado y autenticado). Una vez hechos, marcá las casillas y anotá la fecha.
 
+## Estado verificado (2026-10-15, con la API pública de GitHub)
+
+El repositorio se borró y se volvió a crear para eliminar del historial un dato sensible del prototipo. Configuración actual:
+
+- [x] Repositorio **público**, ramas `main`, `develop` y `feature/00-fundacion` subidas.
+- [x] Rama por defecto: `develop`.
+- [x] Ruleset `proteger-main-develop` (id 25198032) **activo** sobre `main` y `develop`: impide borrar las ramas, bloquea force push, exige PR (0 aprobaciones, conversaciones resueltas) y exige el check `frontend`.
+- [ ] *Require branches to be up to date before merging*: **desactivado** (`strict: false`). Recomendado activarlo: obliga a traer `develop` a la rama antes de mergear, que es la regla de integración del proyecto.
+- [ ] Métodos de merge del ruleset: permite `merge`, `squash` y `rebase`. Mejora opcional: dividir en dos rulesets para que GitHub haga cumplir la estrategia: `develop` solo `squash` y `main` solo `merge`.
+- [?] Tipos de merge del repositorio (sección 2) y lista de bypass: la API pública no los muestra; revisarlos a mano.
+- Nota: el check `frontend` todavía no existe. Lo crea el workflow de la etapa 0 (`ci.yml`, job con nombre exacto `frontend`), que corre en el mismo PR que lo agrega, así que ese PR puede mergearse cuando el CI pase. Desde la etapa 1, sumar `base-de-datos` como check requerido.
+
 ## 1. Crear el repositorio y subir las ramas
 
 1. Repositorio creado por el usuario: **https://github.com/Juan-C-Ceballos/L-S-emprendimiento** (verificar en Settings si es público o privado; ver la nota de la sección 3).

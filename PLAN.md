@@ -7,7 +7,7 @@
 - **Etapa en curso:** 0 · Fundación (sin empezar).
 - **Rama:** `feature/00-fundacion` (creada desde `develop`, sin commits propios todavía).
 - **Próximo paso:** abrir `docs/plan/etapa-00-fundacion.md` y ejecutar la tarea 1.
-- **Remoto de GitHub:** https://github.com/Juan-C-Ceballos/L-S-emprendimiento (público). Protección de ramas pendiente: ver `docs/github-setup.md`.
+- **Remoto de GitHub:** https://github.com/Juan-C-Ceballos/L-S-emprendimiento (público). `main`, `develop` y `feature/00-fundacion` subidas el 2026-10-15. Pendiente: default branch `develop`, tipos de merge y protección de ramas (ver `docs/github-setup.md`, secciones 1 a 3).
 
 ## Etapas
 

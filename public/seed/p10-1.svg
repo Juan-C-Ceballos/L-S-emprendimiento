@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="800" height="1000" role="img" aria-label="Collar de perlas">
+<rect width="200" height="250" fill="#F0E7DF"/>
+<circle cx="52" cy="84" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="#9C7426" opacity="0.10"></ellipse>
+<g transform="rotate(-14 100 125)" fill="none" stroke="#9C7426" stroke-linecap="round"><path d="M32 44C42 138 80 166 100 166C120 166 158 138 168 44" stroke-width="1" opacity="0.5"></path><path d="M32 44C42 138 80 166 100 166C120 166 158 138 168 44" stroke-width="11" stroke-dasharray="0.1 13" opacity="0.85"></path></g>
+</svg>

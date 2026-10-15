@@ -140,6 +140,16 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Resolución:** la carpeta se renombró a `L-S`. Los scripts de `package.json` volvieron a la forma estándar (`vite`, `tsc -b`, `eslint .`, `vitest run`) y `npx <herramienta>` funciona (verificado con `vite` y `eslint`). Los scripts `db:*` de la etapa 1 usan la forma estándar (`supabase …`).
 - Regla: no usar `&` (ni otros caracteres especiales de `cmd`) en la ruta del proyecto. Si alguien lo clona en una carpeta así, renombrarla.
 
+### D-30 · Detalles de la base de datos (etapa 1)
+- **Políticas con `(select public.es_admin())`**: envolver la función en un `select` hace que Postgres la evalúe una vez por consulta y no una por fila (recomendación de Supabase para RLS). El resultado es el mismo.
+- **Cantidad por línea en `crear_pedido`**: además de entero > 0, se acepta como máximo 6 dígitos. No es un tope de negocio (esos quedan fuera del MVP); evita que una cantidad enorme rompa la conversión a `integer` con un error genérico en vez de `datos_invalidos`.
+- **Una sola lectura en `crear_pedido`**: precios, stock y costos se leen una vez y los chequeos y lo insertado usan esos mismos datos, así no pueden diferir dentro de la llamada.
+- **Detalle de los errores de `marcar_vendido`**: `stock_insuficiente` lleva en `detail` un JSON con `[{producto_id, nombre, disponible, pedido}]`, y `estado_invalido` lleva el estado actual. El servicio de la etapa 6 los lee desde el error de PostgREST.
+- **Semillas**: el pedido #2 (cancelado) no tiene fecha de cancelación en el prototipo; se usa "hace 12 días a las 10:00". Las fechas de las semillas nunca quedan en el futuro (si todavía no son las 9:12, el #6 queda con la hora actual).
+- **Numeración en las pruebas**: las secuencias no vuelven atrás con `rollback`, así que las pruebas no esperan un `numero` exacto: chequean que sea mayor que el de las semillas y correlativo (huecos aceptados en D-14).
+- **CLI de Supabase 2.121**: los tipos generados salen sin formatear. No se formatean porque el CI compara la salida cruda del CLI. El servicio de correo local ahora se llama `mailpit` (antes `inbucket`) y se excluye con `-x`.
+- **`src/types/dominio.ts`** incluye, además de los tipos de dominio, `RespuestaCrearPedidoRpc`: la forma exacta (snake_case) del jsonb de `crear_pedido`, para que el servicio de la etapa 5 la valide y la convierta.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

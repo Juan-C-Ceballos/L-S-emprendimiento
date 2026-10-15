@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="800" height="1000" role="img" aria-label="Cadena">
+<rect width="200" height="250" fill="#E9E0CF"/>
+<circle cx="150" cy="64" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="#9C7426" opacity="0.10"></ellipse>
+<g fill="none" stroke="#9C7426" stroke-linecap="round"><path d="M28 40C42 150 84 178 100 178C116 178 158 150 172 40" stroke-width="4" stroke-dasharray="7 4"></path><path d="M28 40C42 150 84 178 100 178C116 178 158 150 172 40" stroke-width="1" opacity="0.5"></path><path d="M50 40C62 126 88 150 100 150C112 150 138 126 150 40" stroke-width="3.2" stroke-dasharray="6 4" opacity="0.6"></path></g>
+</svg>

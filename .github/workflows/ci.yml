@@ -32,3 +32,23 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # Valida migraciones, semillas, RLS y funciones contra un Supabase local en Docker.
+  base-de-datos:
+    name: base-de-datos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Aplica migraciones y semillas al arrancar. Sin los servicios que no usan las pruebas.
+      - run: npx supabase start -x studio,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,realtime
+      - run: npm run db:lint
+      - run: npm run db:test
+      - name: Tipos al día
+        run: |
+          npx supabase gen types typescript --local > /tmp/database.ts
+          diff -u src/types/database.ts /tmp/database.ts

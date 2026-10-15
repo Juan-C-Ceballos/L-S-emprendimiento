@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="800" height="1000" role="img" aria-label="Aros pequeños">
+<rect width="200" height="250" fill="#E4E1DB"/>
+<circle cx="150" cy="64" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="#535B63" opacity="0.10"></ellipse>
+<g fill="none" stroke="#535B63" stroke-width="2.4" stroke-linecap="round"><circle cx="78" cy="116" r="15"></circle><circle cx="78" cy="116" r="22" stroke-width="1" opacity="0.45"></circle><path d="M71 109a9 9 0 0 1 9-3" stroke-width="1.4"></path><path d="M78 131v22" stroke-width="1.6"></path><circle cx="126" cy="138" r="15"></circle><circle cx="126" cy="138" r="22" stroke-width="1" opacity="0.45"></circle><path d="M119 131a9 9 0 0 1 9-3" stroke-width="1.4"></path><path d="M126 153v22" stroke-width="1.6"></path></g>
+</svg>

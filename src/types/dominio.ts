@@ -88,6 +88,26 @@ export type Pedido = {
   items: ItemPedido[]
 }
 
+/** Fila de la lista de pedidos del panel. */
+export type PedidoResumen = Pick<
+  Pedido,
+  'id' | 'numero' | 'estado' | 'cliente' | 'telefono' | 'total' | 'creadoEn'
+>
+
+/** Ítem del detalle: precio y costo del momento + datos actuales del producto. */
+export type ItemPedidoDetalle = ItemPedido & {
+  precioActual: number
+  stockActual: number
+  miniaturaUrl: string | null
+}
+
+/** Detalle de un pedido para la administradora. */
+export type PedidoDetalle = Omit<Pedido, 'items'> & {
+  items: ItemPedidoDetalle[]
+  /** Σ cantidad × (precio − costo) con los valores guardados al crear el pedido. */
+  ganancia: number
+}
+
 // ---------------------------------------------------------------------------
 // crear_pedido
 // ---------------------------------------------------------------------------

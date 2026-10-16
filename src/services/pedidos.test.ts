@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { crearPedido, guardarUltimoPedido, leerUltimoPedido, PedidoRechazado } from './pedidos'
+import {
+  cancelarPedido,
+  crearPedido,
+  guardarUltimoPedido,
+  leerUltimoPedido,
+  marcarVendido,
+  PedidoRechazado,
+} from './pedidos'
 
 const rpc = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/supabase', () => ({ obtenerSupabase: () => ({ rpc }) }))
@@ -123,5 +130,50 @@ describe('último pedido', () => {
     expect(leerUltimoPedido()).toEqual(pedido)
     sessionStorage.setItem('ls:ultimo-pedido', '{roto')
     expect(leerUltimoPedido()).toBeNull()
+  })
+})
+
+describe('marcarVendido y cancelarPedido', () => {
+  it('devuelven los cambios de stock', async () => {
+    rpc.mockResolvedValue({
+      data: { ok: true, cambios: [{ producto_id: B, nombre: 'Pulsera eslabón fino', desde: 2, hasta: 1 }] },
+      error: null,
+    })
+    await expect(marcarVendido('o5')).resolves.toEqual([
+      { productoId: B, nombre: 'Pulsera eslabón fino', desde: 2, hasta: 1 },
+    ])
+    expect(rpc).toHaveBeenCalledWith('marcar_vendido', { p_pedido_id: 'o5' })
+
+    rpc.mockResolvedValue({ data: { ok: true, repuesto: false, cambios: [] }, error: null })
+    await expect(cancelarPedido('o6')).resolves.toEqual([])
+    expect(rpc).toHaveBeenLastCalledWith('cancelar_pedido', { p_pedido_id: 'o6' })
+  })
+
+  it('stock insuficiente lee los nombres del detail JSON', async () => {
+    rpc.mockResolvedValue({
+      data: null,
+      error: {
+        code: 'P0001',
+        message: 'stock_insuficiente',
+        details: JSON.stringify([
+          { producto_id: A, nombre: 'Argollas clásicas doradas', disponible: 1, pedido: 2 },
+          { producto_id: B, nombre: 'Pulsera eslabón fino', disponible: 0, pedido: 1 },
+        ]),
+      },
+    })
+    await expect(marcarVendido('o5')).rejects.toMatchObject({
+      codigo: 'stock_insuficiente',
+      message: 'No alcanza el stock de Argollas clásicas doradas, Pulsera eslabón fino.',
+    })
+  })
+
+  it.each([
+    [{ code: 'P0001', message: 'estado_invalido', details: 'vendido' }, 'estado_invalido', 'Este pedido ya estaba vendido. Actualizamos la pantalla.'],
+    [{ code: 'P0001', message: 'estado_invalido', details: 'cancelado' }, 'estado_invalido', 'Este pedido ya estaba cancelado. Actualizamos la pantalla.'],
+    [{ code: '42501', message: 'no_autorizado' }, 'sin_acceso', 'Tu sesión no tiene permiso para cambiar pedidos.'],
+    [{ code: 'P0002', message: 'pedido_inexistente' }, 'pedido_inexistente', 'Este pedido ya no existe.'],
+  ])('mapea %o', async (error, codigo, message) => {
+    rpc.mockResolvedValue({ data: null, error })
+    await expect(cancelarPedido('o1')).rejects.toMatchObject({ codigo, message })
   })
 })

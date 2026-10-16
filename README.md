@@ -40,7 +40,14 @@ npm run db:reset             # aplica migraciones y semillas
 npm run dev                  # http://localhost:5173
 ```
 
-Para trabajar en local, `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` salen de la salida de `npm run db:start` (o de `npx supabase status`).
+`.env.local` puede apuntar a uno de dos lugares (D-32):
+
+- **Supabase de desarrollo en la nube (`ls-dev`), lo habitual para probar la app a mano**: `VITE_SUPABASE_URL=https://<project-ref>.supabase.co` y en `VITE_SUPABASE_ANON_KEY` la clave pública del proyecto (*Project Settings → API Keys*: la `anon` o la `publishable`, cualquiera de las dos). No hace falta Docker. Se ingresa con la cuenta real de la administradora.
+- **Supabase local**: la URL y la clave salen de la salida de `npm run db:start` (o de `npx supabase status`). Se ingresa con los usuarios de prueba de `supabase/seed.sql`.
+
+El nombre de la variable tiene que ser exactamente `VITE_SUPABASE_ANON_KEY`, aunque la clave sea la `publishable`.
+
+Supabase local (Docker) sigue haciendo falta para las pruebas de la base (`npm run db:test`), para probar una migración nueva antes de subirla (`npm run db:reset`) y para regenerar los tipos (`npm run db:types`).
 
 ### Comandos habituales
 

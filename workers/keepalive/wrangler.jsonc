@@ -1,0 +1,19 @@
+// Worker anti-pausa del Supabase de producción (etapa 8, D-41). Se despliega a mano:
+//   cd workers/keepalive && npm install && npx wrangler deploy
+// Los secretos SUPABASE_URL y SUPABASE_ANON_KEY se cargan con `npx wrangler secret put` (no van acá).
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ls-keepalive",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-30",
+  // Sin URL pública: solo corre por el cron.
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    // Todos los días a las 12:00 UTC (9 h de Argentina). Cloudflare usa siempre UTC.
+    "crons": ["0 12 * * *"]
+  },
+  "observability": {
+    "enabled": true
+  }
+}

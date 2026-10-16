@@ -32,7 +32,7 @@ Fuentes de verdad: `docs/ls-mvp.html` (funcional) y `prototype/` (visual: pantal
 - **El pedido se guarda en la base antes de abrir WhatsApp** (`wa.me` con mensaje prearmado y número de pedido). Número y plantilla del mensaje en la tabla `settings`, editables en Ajustes (D-34).
 - **Fotos** achicadas en el navegador antes de subir: detalle 1600 px de lado largo, calidad 0,85; miniatura 400 px; JPEG. La original no se guarda.
 - **Secretos**: la clave `service_role` jamás aparece en el frontend ni en el repositorio. Secretos en `.env.local` (ignorado) y en las variables del hosting. `.env.example` solo con nombres.
-- Contra la pausa de Supabase gratis: Cron Trigger de Cloudflare con una consulta liviana cada 3 días (etapa 8).
+- Contra la pausa de Supabase gratis: Cron Trigger de Cloudflare con una consulta liviana todos los días (etapa 8, D-41).
 
 ## Convenciones de código
 - TypeScript estricto: sin `any` (usá `unknown` y estrechá), sin `@ts-ignore`. Tipos de la base en `src/types/database.ts` (generados, no se editan a mano); tipos de dominio en `src/types/`.

@@ -11,6 +11,7 @@ export default defineConfig([
     'coverage',
     'prototype',
     'supabase',
+    '**/.wrangler', // temporales de wrangler dev
     'src/components/ui', // código de shadcn
     'src/types/database.ts', // generado
   ]),

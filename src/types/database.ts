@@ -191,6 +191,12 @@ isOneToOne: false
                            },
 "marcar_vendido":
 { Args: { "p_pedido_id": string }; Returns: Json
+                           },
+"renombrar_etiqueta":
+{ Args: { "p_id": string,"p_nombre": string }; Returns: Json
+                           },
+"resumen_panel":
+{ Args: { "p_ahora"?: string }; Returns: Json
                            }
           }
           Enums: {

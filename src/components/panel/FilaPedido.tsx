@@ -4,22 +4,38 @@ import { formatearFechaCorta, formatearNumeroPedido, formatearPrecio } from '@/l
 import { TEXTO_ESTADO } from '@/lib/pedidos'
 import type { PedidoResumen } from '@/types/dominio'
 
+type Props = {
+  pedido: PedidoResumen
+  /** `resumen`: nombre arriba y "#0006 · fecha" abajo, sin teléfono (prototipo: "Para atender"). */
+  variante?: 'lista' | 'resumen'
+}
+
 /** Fila de la lista de pedidos (prototipo: `.row`, `orow`). */
-export function FilaPedido({ pedido }: { pedido: PedidoResumen }) {
+export function FilaPedido({ pedido, variante = 'lista' }: Props) {
   const numero = formatearNumeroPedido(pedido.numero)
+  const fecha = formatearFechaCorta(pedido.creadoEn)
   return (
     <Link
       to={`/admin/pedidos/${pedido.numero}`}
       aria-label={`Pedido ${numero} de ${pedido.cliente}, ${TEXTO_ESTADO[pedido.estado]}`}
       className="flex min-h-[68px] w-full items-center gap-3 border-b border-divisor bg-white px-3.5 py-3 text-left text-tinta no-underline last:border-b-0 hover:bg-fila-hover"
     >
-      <span className="flex min-w-0 flex-1 flex-col gap-px">
-        <span className="truncate text-[15px] font-semibold">
-          {numero} · {pedido.cliente}
+      {variante === 'resumen' ? (
+        <span className="flex min-w-0 flex-1 flex-col gap-px">
+          <span className="truncate text-[15px] font-semibold">{pedido.cliente}</span>
+          <span className="text-[12.5px] text-texto-suave tabular-nums">
+            {numero} · {fecha}
+          </span>
         </span>
-        <span className="text-[12.5px] text-texto-suave tabular-nums">{pedido.telefono}</span>
-        <span className="text-[12.5px] text-texto-suave tabular-nums">{formatearFechaCorta(pedido.creadoEn)}</span>
-      </span>
+      ) : (
+        <span className="flex min-w-0 flex-1 flex-col gap-px">
+          <span className="truncate text-[15px] font-semibold">
+            {numero} · {pedido.cliente}
+          </span>
+          <span className="text-[12.5px] text-texto-suave tabular-nums">{pedido.telefono}</span>
+          <span className="text-[12.5px] text-texto-suave tabular-nums">{fecha}</span>
+        </span>
+      )}
       <span className="flex flex-none flex-col items-end gap-[5px]">
         <span className="font-bold tabular-nums">{formatearPrecio(pedido.total)}</span>
         <PillEstado estado={pedido.estado} />

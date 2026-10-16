@@ -227,6 +227,16 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Botones mientras procesa**: "Marcando como vendido…" / "Cancelando…" y ambos deshabilitados (el prototipo no lo tenía; evita el doble clic).
 - **Ítems del detalle** ordenados por nombre (como los `cambios` que devuelven las funciones de la base). El nombre es el actual del producto: `order_items` no guarda el nombre.
 
+### D-39 · Resumen y gestión de etiquetas (etapa 7)
+- **`resumen_panel(p_ahora timestamptz default null)`**: el parámetro opcional existe solo para probar en pgTAP el cambio de mes con fechas fijas (una venta del 31/1 a las 22 h de Argentina es de enero aunque en UTC ya sea 1/2). La app lo llama sin parámetro (usa `now()`).
+- **Prueba pgTAP `09_resumen_y_etiquetas`** (el plan decía `08_`, que ya usa la de Storage). Se sumaron `renombrar_etiqueta` y `resumen_panel` a la lista de funciones permitidas de `00_estructura`.
+- **Eliminar etiqueta** no usa una función: es un `delete` en `tags` (RLS solo admin) y `product_tags` tiene `on delete cascade`. Si no se borra ninguna fila (sin permiso u otra pestaña ya la borró), el servicio avisa.
+- **"Para reponer"** reusa `listarProductosAdmin` y "Para atender" reusa `listarPedidosAdmin`; el Resumen hace las tres consultas en paralelo (`obtenerDatosResumen`). Filas compactas como el prototipo: `FilaPedido` y `FilaProducto` tienen `variante="resumen"`.
+- **Cantidad de productos por etiqueta** en Ajustes cuenta activos e inactivos (como el prototipo); el catálogo cuenta solo activos.
+- **`useAsync` devuelve `previos`** (los últimos datos que llegaron), para seguir mostrando la lista de etiquetas mientras se relee después de un cambio.
+- **Placeholders borrados**: `SeccionPendiente` y `TituloPagina` ya no se usan (todas las pantallas están hechas).
+- **Aviso en el panel si falta el número de WhatsApp** (pendiente de D-37): no se agregó al Resumen; queda para después del MVP junto con otros avisos (etapa 9).
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

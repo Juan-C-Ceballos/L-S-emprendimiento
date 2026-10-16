@@ -134,3 +134,35 @@ from (values
   (5, 8, 1, 19800, 7000),
   (6, 1, 2, 14500, 5200)
 ) as x (pedido, producto, cantidad, precio, costo);
+
+-- Usuarios de Auth para DESARROLLO LOCAL (etapa 2). NO correr este bloque en un proyecto remoto:
+-- las contraseñas están en el repositorio (público) y admin@ls.test tendría acceso al panel.
+-- En los remotos la administradora se crea desde el panel de Supabase (README, "Administradora").
+-- Contraseñas de prueba:
+--   admin@ls.test      / ls-admin-local    (app_metadata.role = 'admin': entra al panel)
+--   vendedora@ls.test  / ls-vendedora-local (sin rol: el panel la rechaza)
+-- Formato de auth.users y auth.identities de GoTrue v2.19x (Supabase CLI 2.121). Los campos de
+-- token van en '' porque GoTrue falla al leer NULL en ellos.
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  email_change_token_current, phone_change, phone_change_token, reauthentication_token
+)
+select '00000000-0000-0000-0000-000000000000', x.id, 'authenticated', 'authenticated', x.email,
+  extensions.crypt(x.contrasena, extensions.gen_salt('bf')), now(),
+  x.app_meta, '{}'::jsonb, now(), now(),
+  '', '', '', '', '', '', '', ''
+from (values
+  ('00000000-0000-4000-c000-000000000001'::uuid, 'admin@ls.test', 'ls-admin-local',
+    '{"provider":"email","providers":["email"],"role":"admin"}'::jsonb),
+  ('00000000-0000-4000-c000-000000000002'::uuid, 'vendedora@ls.test', 'ls-vendedora-local',
+    '{"provider":"email","providers":["email"]}'::jsonb)
+) as x (id, email, contrasena, app_meta);
+
+insert into auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+select gen_random_uuid(), u.id, u.id::text, 'email',
+  jsonb_build_object('sub', u.id::text, 'email', u.email, 'email_verified', true, 'phone_verified', false),
+  now(), now(), now()
+from auth.users as u
+where u.id in ('00000000-0000-4000-c000-000000000001', '00000000-0000-4000-c000-000000000002');

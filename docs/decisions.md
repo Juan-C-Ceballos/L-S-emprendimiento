@@ -150,6 +150,22 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **CLI de Supabase 2.121**: los tipos generados salen sin formatear. No se formatean porque el CI compara la salida cruda del CLI. El servicio de correo local ahora se llama `mailpit` (antes `inbucket`) y se excluye con `-x`.
 - **`src/types/dominio.ts`** incluye, además de los tipos de dominio, `RespuestaCrearPedidoRpc`: la forma exacta (snake_case) del jsonb de `crear_pedido`, para que el servicio de la etapa 5 la valide y la convierta.
 
+### D-31 · Autenticación y panel (etapa 2)
+- **`[auth.email] enable_signup` tiene que quedar en `true`** en `supabase/config.toml`. En el CLI esa opción prende o apaga el proveedor de email entero (con `false`, `signInWithPassword` responde `email_provider_disabled` y nadie puede ingresar). El registro público queda cortado por `[auth] enable_signup = false` (verificado: `/auth/v1/signup` responde `signup_disabled`). En los proyectos remotos el equivalente es el interruptor "Allow new users to sign up" (README, "Administradora").
+- **Sin red en el login**: se reusa el código `sin_conexion` y `MENSAJE_SIN_CONEXION` de `errores.ts` en lugar del `red` / "No pudimos conectarnos…" del archivo de la etapa, para que todos los servicios usen el mismo código y el mismo texto.
+- **`useSesion` en su propio archivo** (`src/lib/useSesion.ts`, con el contexto y el tipo), y `SesionProvider` en `src/lib/sesion.tsx`: igual que `Toast.tsx` / `useToast.ts`, para que Fast Refresh funcione (un archivo de componentes no exporta hooks).
+- **`SesionProvider` envuelve solo las rutas `/admin/*`** (en `src/router.tsx`): el catálogo no escucha la sesión.
+- **Título, "Volver", acción del header y tabs por ruta** van en el `handle` de cada ruta del panel (`RutaPanel`, `src/components/panel/rutasPanel.ts`); `PanelLayout` los lee con `useMatches()`. Las páginas del panel ya no tienen su propio `h1`: el título es el `h1` del header, como en el prototipo.
+- **`volver` del login**: solo se acepta una ruta que empiece con `/admin` (evita redirigir a otro sitio con `?volver=//…`); si no, va a `/admin`.
+- **Validación del login**: los errores de Zod se muestran debajo de cada campo (como el resto de los formularios del prototipo); el error del servicio va abajo con `role="alert"`. Se borra al volver a escribir, como en el prototipo.
+- **Usuarios de prueba** en `supabase/seed.sql` con UUID `00000000-0000-4000-c000-00000000000N`. Los campos de token de `auth.users` van en `''` (GoTrue falla al leer `NULL`). Formato verificado con GoTrue v2.197 / CLI 2.121.
+- **Token nuevo** `--color-texto-tab: #7a766f` (texto de las tabs inactivas del prototipo).
+
+### D-32 · La app se prueba a mano contra `ls-dev`
+- El usuario prefiere probar la app contra el Supabase de desarrollo en la nube en vez del local: para eso existe `ls-dev`, que ya tiene las semillas de productos y la cuenta real de la administradora. `.env.local` apunta ahí.
+- Supabase local (Docker) **no se elimina**: lo siguen necesitando `npm run db:test` (pgTAP), probar una migración nueva desde cero antes de `db push` (`npm run db:reset`) y `npm run db:types`. El CI levanta su propia base y no depende de ninguno de los dos.
+- Cuidado: lo que se hace en la app con `.env.local` apuntando a `ls-dev` cambia datos reales de desarrollo (pedidos, stock, productos). Las pruebas automáticas nunca apuntan a la nube.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

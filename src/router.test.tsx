@@ -1,12 +1,34 @@
 import { render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { rutas } from './router'
+import { ToastProvider } from '@/components/Toast'
+import type { SesionAdmin } from '@/types/dominio'
+
+const auth = vi.hoisted(() => ({ sesion: null as SesionAdmin | null }))
+
+vi.mock('@/services/auth', () => ({
+  escucharSesion: (cb: (sesion: SesionAdmin | null) => void) => {
+    cb(auth.sesion)
+    return () => undefined
+  },
+  ingresar: vi.fn(),
+  salir: vi.fn(),
+}))
 
 function renderizarEn(ruta: string) {
   const router = createMemoryRouter(rutas, { initialEntries: [ruta] })
-  render(<RouterProvider router={router} />)
+  render(
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>,
+  )
+  return router
 }
+
+beforeEach(() => {
+  auth.sesion = { email: 'admin@ls.test' }
+})
 
 describe('router', () => {
   it('en / muestra el header con el logo y el catálogo', () => {
@@ -23,7 +45,6 @@ describe('router', () => {
     ['/carrito', 'Tu carrito'],
     ['/confirmar', 'Confirmar pedido'],
     ['/pedido/confirmado', 'Pedido confirmado'],
-    ['/admin/ingresar', 'Panel de la tienda'],
     ['/admin', 'Resumen'],
     ['/admin/productos', 'Productos'],
     ['/admin/productos/nuevo', 'Nuevo producto'],
@@ -34,6 +55,32 @@ describe('router', () => {
   ])('%s muestra «%s»', (ruta, titulo) => {
     renderizarEn(ruta)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(titulo)
+  })
+
+  it('sin sesión, una ruta del panel lleva al login con volver', () => {
+    auth.sesion = null
+    const router = renderizarEn('/admin/productos')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Panel de la tienda')
+    expect(router.state.location.pathname + router.state.location.search).toBe(
+      '/admin/ingresar?volver=/admin/productos',
+    )
+  })
+
+  it('el Resumen tiene Salir y las cuatro secciones del panel', () => {
+    renderizarEn('/admin')
+    expect(screen.getByRole('button', { name: 'Salir del panel' })).toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: 'Secciones del panel' })
+    expect(nav).toHaveClass('flex')
+    for (const seccion of ['Resumen', 'Productos', 'Pedidos', 'Ajustes']) {
+      expect(screen.getByRole('link', { name: seccion })).toBeInTheDocument()
+    }
+    expect(screen.getByRole('link', { name: 'Resumen' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('en el formulario hay Volver y las tabs se ocultan en móvil', () => {
+    renderizarEn('/admin/productos/nuevo')
+    expect(screen.getByRole('link', { name: 'Volver' })).toHaveAttribute('href', '/admin/productos')
+    expect(screen.getByRole('navigation', { name: 'Secciones del panel' })).toHaveClass('hidden')
   })
 
   it('una ruta inexistente muestra la página 404', () => {

@@ -1,5 +1,4 @@
 import { Link, useLocation, useNavigate } from 'react-router'
-import { Logo } from '@/components/Logo'
 import { textoPiezas } from '@/lib/carritoReglas'
 import { useCarrito } from '@/lib/useCarrito'
 
@@ -44,7 +43,7 @@ export function HeaderCliente() {
         aria-label="L&S, ir al catálogo"
         className="flex min-h-11 items-center px-2.5 py-1 text-tinta no-underline"
       >
-        <Logo />
+        <img src="/logo-sello.webp" alt="" width={52} height={52} className="size-[52px] lg:size-16" />
       </Link>
       <div className="flex size-11 items-center justify-center">
         <Link

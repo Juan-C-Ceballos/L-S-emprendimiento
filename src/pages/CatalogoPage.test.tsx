@@ -8,8 +8,8 @@ import type { ProductoVidriera } from '@/types/dominio'
 
 vi.mock('@/services/productos', () => ({ listarCatalogo: vi.fn() }))
 
-function producto(nombre: string, etiquetas: string[], stock = 5): ProductoVidriera {
-  return { id: nombre, nombre, precio: 10000, stock, agotado: stock <= 0, portadaUrl: null, etiquetas }
+function producto(nombre: string, etiquetas: string[], stock = 5, precio = 10000): ProductoVidriera {
+  return { id: nombre, nombre, precio, stock, agotado: stock <= 0, portadaUrl: null, etiquetas }
 }
 
 function renderizar(ruta = '/') {
@@ -29,10 +29,10 @@ beforeEach(() => {
   localStorage.clear()
   vi.mocked(listarCatalogo).mockResolvedValue({
     productos: [
-      producto('Aros gota martillada', ['aros', 'dorado'], 0),
-      producto('Argollas clásicas doradas', ['aros', 'dorado', 'acero']),
-      producto('Aros perla mini', ['aros', 'plateado', 'perlas']),
-      producto('Pulsera eslabón fino', ['pulseras', 'dorado', 'acero'], 2),
+      producto('Aros gota martillada', ['aros', 'dorado'], 0, 16800),
+      producto('Argollas clásicas doradas', ['aros', 'dorado', 'acero'], 5, 14500),
+      producto('Aros perla mini', ['aros', 'plateado', 'perlas'], 5, 11900),
+      producto('Pulsera eslabón fino', ['pulseras', 'dorado', 'acero'], 2, 18900),
     ],
     etiquetas: ['aros', 'pulseras', 'dorado', 'plateado', 'acero', 'perlas'],
   })
@@ -145,6 +145,57 @@ describe('CatalogoPage', () => {
       expect(barra).toHaveTextContent('$20.000')
     })
     expect(barra).toHaveAttribute('href', '/carrito')
+  })
+
+  it('ordenar por precio cambia la URL y la grilla; «Limpiar filtros» conserva el orden', async () => {
+    const usuario = userEvent.setup()
+    const router = renderizar('/?tags=aros')
+    await screen.findByText('3 de 4 piezas')
+    await usuario.selectOptions(screen.getByRole('combobox', { name: 'Ordenar las piezas' }), 'precio-asc')
+    expect(router.state.location.search).toBe('?tags=aros&orden=precio-asc')
+    await waitFor(() => {
+      expect(tarjetas()).toEqual(['Aros perla mini', 'Argollas clásicas doradas', 'Aros gota martillada'])
+    })
+
+    await usuario.selectOptions(screen.getByRole('combobox', { name: 'Ordenar las piezas' }), 'precio-desc')
+    await waitFor(() => {
+      expect(tarjetas()).toEqual(['Argollas clásicas doradas', 'Aros perla mini', 'Aros gota martillada'])
+    })
+
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+    expect(router.state.location.search).toBe('?orden=precio-desc')
+    await waitFor(() => {
+      expect(tarjetas()).toEqual([
+        'Pulsera eslabón fino',
+        'Argollas clásicas doradas',
+        'Aros perla mini',
+        'Aros gota martillada',
+      ])
+    })
+  })
+
+  it('en el teléfono muestra 8 etiquetas y «Ver todas» despliega el resto', async () => {
+    const usuario = userEvent.setup()
+    const nombres = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10']
+    vi.mocked(listarCatalogo).mockResolvedValue({
+      productos: [producto('Pieza', nombres)],
+      etiquetas: nombres,
+    })
+    renderizar()
+    const ver = await screen.findByRole('button', { name: 'Ver todas (10)' })
+    expect(ver).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('button', { name: 'a8, 1 pieza' })).not.toHaveClass('hidden')
+    expect(screen.getByRole('button', { name: 'a9, 1 pieza' })).toHaveClass('hidden', 'lg:inline-flex')
+
+    await usuario.click(ver)
+    expect(screen.getByRole('button', { name: 'a9, 1 pieza' })).not.toHaveClass('hidden')
+    expect(screen.getByRole('button', { name: 'Ver menos' })).toHaveAttribute('aria-expanded', 'true')
+
+    // Al buscar una etiqueta se ven todas las que coinciden y no hace falta el botón.
+    await usuario.click(screen.getByRole('button', { name: 'Ver menos' }))
+    await usuario.type(screen.getByRole('textbox', { name: 'Buscar etiqueta para filtrar' }), 'a1')
+    expect(screen.getByRole('button', { name: 'a10, 1 pieza' })).not.toHaveClass('hidden')
+    expect(screen.queryByRole('button', { name: /Ver todas/ })).not.toBeInTheDocument()
   })
 
   it('si falla la carga, ofrece reintentar', async () => {

@@ -237,6 +237,13 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Placeholders borrados**: `SeccionPendiente` y `TituloPagina` ya no se usan (todas las pantallas están hechas).
 - **Aviso en el panel si falta el número de WhatsApp** (pendiente de D-37): no se agregó al Resumen; queda para después del MVP junto con otros avisos (etapa 9).
 
+### D-40 · Ajustes pedidos antes de producción (2026-10-16)
+- **Logo**: el login centra el logo con marco y también el título y la bajada (con solo el logo centrado quedaba descolgado). El header del cliente y la barra lateral del panel usan `public/logo-sello.webp`: el mismo logo sin el marco cuadrado exterior, recortado de `logo.webp` y achicado a 192 px (25 KB), porque con el marco el monograma se veía muy chico a 52 px. Reemplaza a la marca en texto del prototipo en el header (pedido de la dueña).
+- **Etiquetas en el teléfono**: se ven las primeras 8 (`LIMITE_CHIPS_MOVIL`) y "Ver todas (N)" / "Ver menos". Se ocultan con CSS (`hidden lg:inline-flex`), así en escritorio se ven todas sin lógica de pantalla. Mientras se busca una etiqueta se muestran todas las que coinciden y el botón no aparece.
+- **Orden del catálogo**: "Más nuevos" (por defecto), "Menor precio", "Mayor precio", en la URL como `orden=precio-asc|precio-desc`. Los agotados siguen al final en cualquier orden. El orden no es un filtro: "Limpiar filtros" lo conserva y no cuenta para "N de M piezas".
+- **Centrados**: "Nuevo producto" en la lista de productos y la confirmación inline de cancelar pedido (título, texto y botones).
+- `SelectPildora`: select nativo genérico del catálogo; lo usan el modo de etiquetas y el orden.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

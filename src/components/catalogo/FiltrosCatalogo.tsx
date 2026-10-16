@@ -1,17 +1,23 @@
+import { useState } from 'react'
 import { BuscadorConEspera } from '@/components/BuscadorConEspera'
 import { ChipEtiqueta } from '@/components/catalogo/ChipEtiqueta'
 import { SelectorModo } from '@/components/catalogo/SelectorModo'
+import { SelectPildora } from '@/components/catalogo/SelectPildora'
 import { claseBotonIcono, claseLink } from '@/components/estilos'
 import { Input } from '@/components/ui/input'
 import {
   contarEtiquetas,
   etiquetaParaEnter,
   hayFiltros,
+  ORDENES,
   SIN_FILTROS,
   type FiltrosCatalogo as Filtros,
 } from '@/lib/filtros'
 import { cn } from '@/lib/utils'
 import type { ProductoVidriera } from '@/types/dominio'
+
+/** Chips de etiquetas visibles en el teléfono antes de "Ver todas" (D-40). */
+export const LIMITE_CHIPS_MOVIL = 8
 
 type Props = {
   filtros: Filtros
@@ -40,6 +46,9 @@ export function FiltrosCatalogo({
   className,
 }: Props) {
   const disponibles = contarEtiquetas(productos, etiquetasUsadas, filtros, buscada)
+  const [verTodas, setVerTodas] = useState(false)
+  // Mientras se busca una etiqueta se muestran todas las que coinciden.
+  const recortar = !verTodas && buscada.trim() === ''
 
   function alternar(etiqueta: string) {
     const etiquetas = filtros.etiquetas.includes(etiqueta)
@@ -66,6 +75,18 @@ export function FiltrosCatalogo({
       />
 
       <div className="mt-5 flex items-center justify-between gap-3">
+        <span className="text-[13px] font-bold text-tinta">Ordenar</span>
+        <SelectPildora
+          ariaLabel="Ordenar las piezas"
+          valor={filtros.orden}
+          opciones={ORDENES}
+          onCambiar={(orden) => {
+            onCambiar({ ...filtros, orden }, { reemplazar: false })
+          }}
+        />
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-3">
         <span className="text-[13px] font-bold text-tinta">Etiquetas</span>
         <SelectorModo
           modo={filtros.modo}
@@ -151,18 +172,32 @@ export function FiltrosCatalogo({
 
       {disponibles.length > 0 && (
         <div className="mt-3.5 flex flex-wrap gap-2">
-          {disponibles.map((c) => (
+          {disponibles.map((c, i) => (
             <ChipEtiqueta
               key={c.nombre}
               tipo="disponible"
               nombre={c.nombre}
               cantidad={c.cantidad}
+              // En el teléfono se ven las primeras; en escritorio, todas.
+              className={recortar && i >= LIMITE_CHIPS_MOVIL ? 'hidden lg:inline-flex' : undefined}
               onClick={() => {
                 elegir(c.nombre)
               }}
             />
           ))}
         </div>
+      )}
+      {buscada.trim() === '' && disponibles.length > LIMITE_CHIPS_MOVIL && (
+        <button
+          type="button"
+          aria-expanded={verTodas}
+          className={cn(claseLink, 'mt-1 lg:hidden')}
+          onClick={() => {
+            setVerTodas((v) => !v)
+          }}
+        >
+          {verTodas ? 'Ver menos' : `Ver todas (${disponibles.length})`}
+        </button>
       )}
       {buscada.trim() !== '' && disponibles.length === 0 && (
         <p className="mt-2 mb-0 text-[13px] leading-[1.45] text-texto-suave">
@@ -177,7 +212,8 @@ export function FiltrosCatalogo({
             type="button"
             className={claseLink}
             onClick={() => {
-              onCambiar(SIN_FILTROS, { reemplazar: false })
+              // El orden no es un filtro: se conserva.
+              onCambiar({ ...SIN_FILTROS, orden: filtros.orden }, { reemplazar: false })
             }}
           >
             Limpiar filtros

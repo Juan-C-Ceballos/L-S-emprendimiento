@@ -71,12 +71,12 @@ export function IngresarPage() {
         alt="L&S"
         width={132}
         height={132}
-        className="size-[132px] self-start"
+        className="size-[132px] self-center"
       />
-      <h1 className="m-0 mt-3.5 text-[11px] font-semibold tracking-[0.16em] text-texto-suave uppercase">
+      <h1 className="m-0 mt-3.5 text-center text-[11px] font-semibold tracking-[0.16em] text-texto-suave uppercase">
         Panel de la tienda
       </h1>
-      <p className="mt-1.5 text-[15px] leading-[1.55] text-texto-medio">
+      <p className="mt-1.5 text-center text-[15px] leading-[1.55] text-texto-medio">
         Ingresá para ver pedidos y cargar productos.
       </p>
       <form noValidate className="mt-7" onSubmit={(e) => void alEnviar(e)}>

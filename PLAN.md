@@ -4,10 +4,10 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 2 · Autenticación y panel (sin empezar). Las etapas 0 y 1 están en `develop` (PR #1 y #2) con el CI en verde.
-- **Rama:** crear `feature/02-auth-panel` desde `develop` (`git checkout develop && git pull && git checkout -b feature/02-auth-panel`).
-- **Próximo paso:** abrir `docs/plan/etapa-02-auth-panel.md`. Para trabajar en local: Docker Desktop abierto y `npm run db:start` (queda apagado al cerrar cada sesión con `npm run db:stop`).
-- **Supabase en la nube:** proyecto de **desarrollo** `ls-dev` creado (ref `nhsjichuumyflklqkhxw`, URL `https://nhsjichuumyflklqkhxw.supabase.co`, São Paulo, Postgres 17, organización `L&S-Emprendimiento`, plan gratuito). Migraciones de la etapa 1 aplicadas con `supabase db push`; registro público desactivado; **sin semillas** (opcional: correr `supabase/seed.sql` en el SQL Editor). La carpeta local quedó vinculada a ese proyecto (`supabase/.temp/`, ignorado). Producción se crea en la etapa 8 en la misma organización.
+- **Etapa en curso:** 3 · Panel de productos (sin empezar). La etapa 2 está en `feature/02-auth-panel`, lista para PR contra `develop` (falta CI en verde y squash merge).
+- **Rama:** cuando la etapa 2 esté mergeada, crear `feature/03-panel-productos` desde `develop` (`git checkout develop && git pull && git checkout -b feature/03-panel-productos`).
+- **Próximo paso:** abrir `docs/plan/etapa-03-panel-productos.md`. Para trabajar en local: Docker Desktop abierto, `npm run db:start` y `.env.local` con la URL y la clave anon **locales** (salen de `npm run db:start`); el usuario de prueba es `admin@ls.test` (contraseña en `supabase/seed.sql`).
+- **Supabase en la nube:** proyecto de **desarrollo** `ls-dev` creado (ref `nhsjichuumyflklqkhxw`, URL `https://nhsjichuumyflklqkhxw.supabase.co`, São Paulo, Postgres 17, organización `L&S-Emprendimiento`, plan gratuito). Migraciones de la etapa 1 aplicadas con `supabase db push`; registro público desactivado; **sin semillas** (opcional: correr `supabase/seed.sql` en el SQL Editor **sin el bloque final de usuarios de Auth**: sus contraseñas están en el repo público y `admin@ls.test` tendría acceso al panel). La carpeta local quedó vinculada a ese proyecto (`supabase/.temp/`, ignorado). Producción se crea en la etapa 8 en la misma organización.
 - **Al mergear cada etapa con migraciones nuevas:** `npx supabase db push --dry-run` y después `npx supabase db push` contra dev (lo corre el usuario; pide la contraseña de la base).
 - **Ojo en Windows:** la carpeta del proyecto no puede tener `&` en la ruta (rompe `npx` y los scripts de npm). Ya se renombró a `L-S` y los scripts volvieron a la forma estándar (D-29).
 - **Remoto de GitHub:** https://github.com/Juan-C-Ceballos/L-S-emprendimiento (público). Ramas remotas `main` y `develop`; rama por defecto `develop`. Ruleset activo en las dos: PR obligatorio, checks `frontend` y `base-de-datos`, rama al día antes de mergear, sin force push. Permite squash y merge commit: **hacia `develop` elegir siempre "Squash and merge"**; "Create a merge commit" solo en las releases `develop` → `main` (ver `docs/github-setup.md`, "Estado verificado").
@@ -18,7 +18,7 @@
   Scaffold Vite + React + TS + Tailwind + shadcn + Router, tokens de diseño, Vitest, ESLint, capa `services/` y cliente de Supabase, CI.
 - [x] **1 · Base de datos** — [`etapa-01-base-de-datos.md`](docs/plan/etapa-01-base-de-datos.md) · `feature/01-base-de-datos`
   Migraciones, RLS, `product_costs`, `crear_pedido`, `marcar_vendido`, `cancelar_pedido`, semillas, pgTAP, tipos generados, job de CI de base.
-- [ ] **2 · Autenticación y panel** — [`etapa-02-auth-panel.md`](docs/plan/etapa-02-auth-panel.md) · `feature/02-auth-panel`
+- [x] **2 · Autenticación y panel** — [`etapa-02-auth-panel.md`](docs/plan/etapa-02-auth-panel.md) · `feature/02-auth-panel`
   Login, guardia de rutas, layout del panel, registro público desactivado.
 - [ ] **3 · Panel de productos** — [`etapa-03-panel-productos.md`](docs/plan/etapa-03-panel-productos.md) · `feature/03-panel-productos`
   Lista, alta, edición, activar/desactivar, costo y margen, etiquetas con autocompletado, imágenes comprimidas en el navegador, Storage.
@@ -48,7 +48,7 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 | Instalar Docker Desktop y dejarlo corriendo | 1 | Hecho: Docker Desktop 29.7, Supabase local funcionando |
 | Proyecto de Supabase **de desarrollo**: `project ref`, URL, clave anon, contraseña de la base, token personal (`SUPABASE_ACCESS_TOKEN`) | 1 (al mergear) | Hecho (2026-10-15): `ls-dev`, ref `nhsjichuumyflklqkhxw`, migraciones aplicadas y verificadas por la API con la clave pública (anónimo sin acceso a costos ni pedidos, registro desactivado). La clave pública va en `.env.local` y en las variables del hosting, no en el repo; la contraseña y el token quedan solo en la máquina del usuario |
 | Número de WhatsApp de la tienda | 5 | Pendiente |
-| Email de la administradora | 2 (dev) / 8 (prod) | Pendiente |
+| Email de la administradora | 2 (dev) / 8 (prod) | Pendiente: con el email, crear la cuenta en `ls-dev` siguiendo el README ("Administradora") o pedírmelo con el email |
 | Proyecto de Supabase **de producción** + cuenta de Cloudflare conectada al repositorio de GitHub | 8 | Pendiente |
 
 ## Registro de avance
@@ -59,6 +59,13 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-15 · Etapa 2 · `feature/02-auth-panel`
+- Hecho: usuarios de prueba en `supabase/seed.sql` (`admin@ls.test` con rol admin y `vendedora@ls.test` sin rol). `src/services/auth.ts` (`ingresar`, `salir`, `obtenerSesion`, `escucharSesion`) con errores `credenciales`, `sin_acceso` (cierra la sesión) y `sin_conexion`. `SesionProvider` + `useSesion` (solo en `/admin/*`), `RutaProtegida` con pantalla neutra mientras carga y `?volver=`. `IngresarPage` con Zod, "Ingresando…", Enter y redirección (solo a rutas `/admin`). `PanelLayout` + `HeaderPanel` + `NavPanel` (tabs abajo en móvil solo en las 4 secciones, barra lateral de 220 px en `lg`, prop `pendientes` para el badge) + `BotonSalir`; título, "Volver" y acción del header en el `handle` de cada ruta. README: sección "Administradora".
+- Arreglo: `[auth.email] enable_signup` en `true` (con `false` el CLI apaga el proveedor de email y nadie podía ingresar). El registro sigue cortado por `[auth] enable_signup = false` (D-31).
+- Verificado en local: `db:reset` desde cero, `db:test` 98/98; lint, typecheck, 47 pruebas y build en verde. En el navegador contra Supabase local: `/admin/productos` sin sesión → `/admin/ingresar?volver=/admin/productos`; `vendedora@ls.test` rechazada sin quedar logueada; contraseña incorrecta muestra el error sin borrar el email; admin entra y vuelve a Productos; recargar mantiene la sesión; tabs en 375 px y barra lateral en 1280 px; "Salir" vuelve al login.
+- Decisiones nuevas: D-31.
+- Pendiente: PR contra `develop` y squash merge con CI en verde. Crear la administradora en `ls-dev` cuando el usuario indique el email (no hay migraciones nuevas: no hace falta `db push`; sí revisar que "Allow new users to sign up" siga apagado).
 
 ### 2026-10-15 · Cierre de sesión · `fix/docs-estado-github`
 - Hecho: etapa 1 mergeada (PR #2, squash) y CI de `develop` en verde. El usuario sumó `base-de-datos` como check requerido y dejó el ruleset con squash y merge (sin rebase); verificado con la API. Limpieza local: ramas `feature/00` y `feature/01` borradas, `develop` al día, Supabase local apagado. Actualizados `PLAN.md` y `docs/github-setup.md`.

@@ -1,13 +1,6 @@
-import { useParams } from 'react-router'
-import { TituloPagina } from '@/components/TituloPagina'
-import { formatearNumeroPedido } from '@/lib/formato'
+import { SeccionPendiente } from '@/components/panel/SeccionPendiente'
 
+// El título lo muestra el header del panel (handle de la ruta en src/router.tsx).
 export function PedidoDetallePage() {
-  const { numero } = useParams()
-  const n = Number(numero)
-  return (
-    <TituloPagina>
-      {Number.isInteger(n) && n > 0 ? `Pedido ${formatearNumeroPedido(n)}` : 'Pedido'}
-    </TituloPagina>
-  )
+  return <SeccionPendiente etapa={6} />
 }

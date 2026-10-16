@@ -57,6 +57,31 @@ Para trabajar en local, `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` salen de 
 | `npm run db:types` | Regenera `src/types/database.ts` desde la base local |
 | `npx supabase migration new <nombre>` | Crea una migración nueva |
 
+## Administradora
+
+El panel (`/admin`) acepta una sola cuenta: la que tiene `app_metadata.role = 'admin'` (la misma regla que usa `es_admin()` en la base). No hay registro público: el registro está desactivado y las cuentas se crean a mano.
+
+**En local**, `npm run db:reset` crea dos usuarios de prueba desde `supabase/seed.sql` (las contraseñas están ahí):
+
+- `admin@ls.test`: administradora, entra al panel.
+- `vendedora@ls.test`: sin rol; el panel la rechaza con "Esta cuenta no tiene acceso al panel.".
+
+`supabase/config.toml` tiene `enable_signup = false` en `[auth]` y `[auth.email]`.
+
+**En los proyectos remotos** (desarrollo y producción), desde el panel de Supabase:
+
+1. Desactivar el registro: **Authentication → Sign In / Providers → User Signups → Allow new users to sign up: off**. Así solo pueden ingresar cuentas que ya existen.
+2. Crear la cuenta: **Authentication → Users → Add user → Create new user**, con el email y una contraseña, y tildando **Auto Confirm User**.
+3. Darle el rol en **SQL Editor**:
+   ```sql
+   update auth.users
+   set raw_app_meta_data = raw_app_meta_data || '{"role":"admin"}'::jsonb
+   where email = '<email de la administradora>';
+   ```
+4. El rol viaja dentro del token de sesión: si la administradora ya estaba adentro, tiene que **salir y volver a ingresar** para que el panel la reconozca.
+
+**Olvido de contraseña**: en el MVP no hay pantalla para recuperarla. Se resuelve desde el panel de Supabase, en **Authentication → Users**, abriendo el menú de la cuenta: **Send password recovery** (manda un mail con el link) o cambiándole la contraseña directamente.
+
 ## Cómo trabajar con ramas
 
 | Rama | Rol | Entorno |

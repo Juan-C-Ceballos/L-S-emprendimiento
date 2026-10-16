@@ -1,7 +1,6 @@
-import { useParams } from 'react-router'
-import { TituloPagina } from '@/components/TituloPagina'
+import { SeccionPendiente } from '@/components/panel/SeccionPendiente'
 
+// El título lo muestra el header del panel (handle de la ruta en src/router.tsx).
 export function ProductoFormPage() {
-  const { id } = useParams()
-  return <TituloPagina>{id === undefined ? 'Nuevo producto' : 'Editar producto'}</TituloPagina>
+  return <SeccionPendiente etapa={3} />
 }

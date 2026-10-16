@@ -133,3 +133,8 @@ export type CambioStock = {
   desde: number
   hasta: number
 }
+
+/** Sesión de la administradora. Solo existe si la cuenta tiene `app_metadata.role = 'admin'`. */
+export type SesionAdmin = {
+  email: string
+}

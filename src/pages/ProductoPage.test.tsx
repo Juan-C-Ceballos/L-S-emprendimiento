@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ProductoPage } from './ProductoPage'
 import { obtenerProductoPublico } from '@/services/productos'
+import { renderizarRutas } from '@/test/renderizar'
 import type { ProductoCatalogo } from '@/types/dominio'
 
 vi.mock('@/services/productos', () => ({ obtenerProductoPublico: vi.fn() }))
@@ -12,8 +12,10 @@ function imagen(n: number) {
   return { id: `i${n}`, orden: n, path: `${n}.jpg`, pathMiniatura: `${n}-min.jpg`, url: `${n}.jpg`, urlMiniatura: `${n}-min.jpg` }
 }
 
+const ID = '00000000-0000-4000-8000-000000000005'
+
 const PULSERA: ProductoCatalogo = {
-  id: 'p5',
+  id: ID,
   nombre: 'Pulsera eslabón fino',
   descripcion: 'Cadena de eslabón fino con baño dorado.',
   precio: 18900,
@@ -23,18 +25,20 @@ const PULSERA: ProductoCatalogo = {
 }
 
 function renderizar() {
-  const router = createMemoryRouter(
+  return renderizarRutas(
     [
       { path: '/producto/:id', element: <ProductoPage /> },
       { path: '/', element: <p>Catálogo</p> },
+      { path: '/carrito', element: <p>Carrito</p> },
     ],
-    { initialEntries: ['/producto/p5'] },
+    `/producto/${ID}`,
   )
-  render(<RouterProvider router={router} />)
-  return router
 }
 
+const carritoGuardado = () => JSON.parse(localStorage.getItem('ls:carrito:v1') ?? '[]') as unknown
+
 beforeEach(() => {
+  localStorage.clear()
   vi.mocked(obtenerProductoPublico).mockResolvedValue(PULSERA)
 })
 
@@ -47,10 +51,26 @@ describe('ProductoPage', () => {
     expect(screen.getByText('1 / 3')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ver foto 1 de 3' })).toHaveAttribute('aria-current', 'true')
     expect(document.title).toBe('Pulsera eslabón fino · L&S')
-    // El carrito llega en la etapa 5.
-    for (const boton of screen.getAllByRole('button', { name: 'Agregar al carrito' })) {
-      expect(boton).toBeDisabled()
-    }
+  })
+
+  it('agrega al carrito sin pasar del stock y avisa', async () => {
+    const usuario = userEvent.setup()
+    renderizar()
+    const [sumar] = await screen.findAllByRole('button', { name: 'Sumar una unidad' })
+    const [agregar] = screen.getAllByRole('button', { name: 'Agregar al carrito' })
+    if (sumar === undefined || agregar === undefined) throw new Error('falta el stepper')
+    await usuario.click(sumar)
+    await usuario.click(agregar)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Agregaste 2 unidades al carrito.')
+    expect(carritoGuardado()).toEqual([{ productoId: ID, cantidad: 2 }])
+    expect(screen.getByText(/Ya tenés 2 en el carrito/)).toBeInTheDocument()
+    // Con el stock completo en el carrito ya no se puede agregar más.
+    expect(screen.queryByRole('button', { name: 'Agregar al carrito' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Ya tenés todo el stock · Ver carrito' })[0]).toHaveAttribute(
+      'href',
+      '/carrito',
+    )
   })
 
   it('los puntos cambian la foto y el stepper respeta el stock', async () => {

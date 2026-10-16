@@ -5,19 +5,31 @@ import { EtiquetasProducto } from '@/components/catalogo/EtiquetasProducto'
 import { Galeria } from '@/components/catalogo/Galeria'
 import { NotaStock } from '@/components/catalogo/NotaStock'
 import { SelectorCantidad } from '@/components/catalogo/SelectorCantidad'
+import { useToast } from '@/components/useToast'
 import { Button } from '@/components/ui/button'
 import { formatearPrecio } from '@/lib/formato'
 import { useAsync } from '@/lib/useAsync'
+import { useCarrito } from '@/lib/useCarrito'
 import { TITULO_SITIO, useTituloDocumento } from '@/lib/useTituloDocumento'
 import { obtenerProductoPublico } from '@/services/productos'
 import type { ProductoCatalogo } from '@/types/dominio'
 
-/**
- * Stepper y botón de agregar (prototipo: `.bar` en móvil, `.dadd` en escritorio). El botón
- * queda deshabilitado hasta que exista el carrito (etapa 5).
- */
-function AgregarAlCarrito({ producto, className }: { producto: ProductoCatalogo; className?: string }) {
-  const [cantidad, setCantidad] = useState(1)
+const claseLinkCarrito =
+  'font-semibold text-bronce underline underline-offset-[3px] hover:text-bronce-hover'
+
+type PropsAgregar = {
+  producto: ProductoCatalogo
+  cantidad: number
+  onCantidad: (cantidad: number) => void
+  className?: string
+}
+
+/** Stepper y botón de agregar (prototipo: `.bar` en móvil, `.dadd` en escritorio). */
+function AgregarAlCarrito({ producto, cantidad, onCantidad, className }: PropsAgregar) {
+  const { enCarrito, agregar } = useCarrito()
+  const { mostrarToast } = useToast()
+  const lugar = Math.max(0, producto.stock - enCarrito(producto.id))
+
   if (producto.stock <= 0) {
     return (
       <div className={className}>
@@ -25,10 +37,28 @@ function AgregarAlCarrito({ producto, className }: { producto: ProductoCatalogo;
       </div>
     )
   }
+  if (lugar === 0) {
+    return (
+      <div className={className}>
+        <Button asChild variant="ghost" className="lg:w-auto lg:flex-none">
+          <Link to="/carrito">Ya tenés todo el stock · Ver carrito</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const valor = Math.min(cantidad, lugar)
+  function alAgregar() {
+    const agregada = agregar(producto.id, valor, producto.stock)
+    onCantidad(1)
+    if (agregada < valor) mostrarToast(`Solo quedaban ${agregada}; agregamos esa cantidad.`)
+    else mostrarToast(agregada === 1 ? 'Agregaste 1 unidad al carrito.' : `Agregaste ${agregada} unidades al carrito.`)
+  }
+
   return (
     <div className={className}>
-      <SelectorCantidad valor={cantidad} max={producto.stock} onCambiar={setCantidad} />
-      <Button disabled className="lg:w-auto lg:min-w-[240px] lg:flex-none">
+      <SelectorCantidad valor={valor} max={lugar} onCambiar={onCantidad} />
+      <Button className="lg:w-auto lg:min-w-[240px] lg:flex-none" onClick={alAgregar}>
         Agregar al carrito
       </Button>
     </div>
@@ -36,6 +66,9 @@ function AgregarAlCarrito({ producto, className }: { producto: ProductoCatalogo;
 }
 
 function Detalle({ producto }: { producto: ProductoCatalogo }) {
+  const [cantidad, setCantidad] = useState(1)
+  const { enCarrito } = useCarrito()
+  const tengo = enCarrito(producto.id)
   return (
     <div className="pb-20 lg:pb-0">
       <div className="mx-auto max-w-[720px] lg:grid lg:max-w-[1180px] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-14 lg:px-10 lg:pt-9 lg:pb-14">
@@ -59,16 +92,26 @@ function Detalle({ producto }: { producto: ProductoCatalogo }) {
             </p>
           )}
           <NotaStock stock={producto.stock} />
+          {tengo > 0 && (
+            <p className="mt-3.5 mb-0 flex flex-wrap items-center gap-1 text-[13px] text-texto-suave">
+              Ya tenés {tengo} en el carrito ·
+              <Link to="/carrito" className={`${claseLinkCarrito} flex min-h-11 items-center px-1 text-sm`}>
+                Ver carrito
+              </Link>
+            </p>
+          )}
           <AgregarAlCarrito
-            key={producto.id}
             producto={producto}
+            cantidad={cantidad}
+            onCantidad={setCantidad}
             className="mt-7 hidden flex-wrap items-center gap-2.5 lg:flex"
           />
         </div>
       </div>
       <AgregarAlCarrito
-        key={producto.id}
         producto={producto}
+        cantidad={cantidad}
+        onCantidad={setCantidad}
         className="fixed inset-x-0 bottom-0 z-[5] flex min-h-20 items-center gap-2.5 border-t border-borde bg-crema px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))] lg:hidden"
       />
     </div>
@@ -126,5 +169,5 @@ export function ProductoPage() {
     )
   }
 
-  return <Detalle producto={producto.datos} />
+  return <Detalle key={producto.datos.id} producto={producto.datos} />
 }

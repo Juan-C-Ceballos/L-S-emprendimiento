@@ -98,6 +98,29 @@ export type LineaPedido = {
   cantidad: number
 }
 
+/** Línea del carrito guardada en el navegador. Igual que `LineaPedido`: sin precios. */
+export type LineaCarrito = LineaPedido
+
+/**
+ * Producto del carrito con precio y stock leídos de la base al mostrar. Solo vienen los activos
+ * (RLS): uno que falta se desactivó y cuenta como agotado.
+ */
+export type ProductoCarrito = {
+  id: FilaProducto['id']
+  nombre: FilaProducto['nombre']
+  precio: FilaProducto['precio']
+  stock: FilaProducto['stock']
+  miniaturaUrl: string | null
+}
+
+/** Por qué una línea del carrito no se puede pedir así. */
+export type ProblemaCarrito = {
+  productoId: string
+  tipo: 'agotado' | 'excede'
+  disponible: number
+  texto: string
+}
+
 export type ErrorCrearPedido =
   | { tipo: 'inexistente'; productoId: string }
   | { tipo: 'inactivo'; productoId: string; nombre: string }

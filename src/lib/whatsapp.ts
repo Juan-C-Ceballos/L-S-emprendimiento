@@ -54,3 +54,18 @@ export function soloDigitos(texto: string): string {
 export function enlaceWhatsApp(numero: string, mensaje: string): string {
   return `https://wa.me/${soloDigitos(numero)}?text=${encodeURIComponent(mensaje)}`
 }
+
+/**
+ * Número de la tienda para mostrar. Celular argentino (`549` + 10 dígitos): `+54 9 11 0000-0000`
+ * (Buenos Aires) o `+54 9 351 555-1234` (característica de 3 dígitos; las de 4 se ven con el
+ * mismo agrupado, los dígitos son correctos). Cualquier otro: `+` y los dígitos.
+ */
+export function formatearTelefonoTienda(numero: string): string {
+  const d = soloDigitos(numero)
+  const resto = d.startsWith('549') && d.length === 13 ? d.slice(3) : null
+  if (resto === null) return `+${d}`
+  const area = resto.startsWith('11') ? 2 : 3
+  const local = resto.slice(area)
+  const corte = local.length - 4
+  return `+54 9 ${resto.slice(0, area)} ${local.slice(0, corte)}-${local.slice(corte)}`
+}

@@ -49,7 +49,6 @@ describe('router', () => {
   it.each([
     ['/carrito', 'Tu carrito'],
     ['/confirmar', 'Confirmar pedido'],
-    ['/pedido/confirmado', 'Pedido confirmado'],
     ['/admin', 'Resumen'],
     ['/admin/productos', 'Productos'],
     ['/admin/productos/nuevo', 'Nuevo producto'],
@@ -69,6 +68,14 @@ describe('router', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ver catálogo' })).toHaveAttribute('href', '/')
     expect(screen.getByRole('button', { name: 'Volver' })).toBeInTheDocument()
+  })
+
+  it('sin pedido recién creado, /pedido/confirmado vuelve al catálogo', async () => {
+    const router = renderizarEn('/pedido/confirmado')
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent(
+      'Accesorios para usar todos los días.',
+    )
+    expect(router.state.location.pathname).toBe('/')
   })
 
   it('sin sesión, una ruta del panel lleva al login con volver', () => {

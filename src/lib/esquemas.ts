@@ -55,3 +55,25 @@ export const esquemaProducto = z.object({
 })
 
 export type CampoProducto = keyof z.input<typeof esquemaProducto>
+
+/** Confirmar pedido. Mensajes del prototipo (`confirmOrder`) con el ajuste de D-25 (8 a 15 dígitos). */
+export const esquemaConfirmacion = z.object({
+  nombre: z
+    .string()
+    .trim()
+    .min(1, { error: 'Escribí tu nombre así sabemos a quién le preparamos el pedido.', abort: true })
+    .min(2, { error: 'El nombre es muy corto. Escribí al menos 2 letras.', abort: true })
+    .max(80, { error: 'El nombre es muy largo: dejalo en 80 letras o menos.' }),
+  telefono: z
+    .string()
+    .trim()
+    .refine((t) => soloDigitos(t) !== '', {
+      error: 'Necesitamos un teléfono para coordinar por WhatsApp.',
+      abort: true,
+    })
+    .refine((t) => /^\d{8,15}$/.test(soloDigitos(t)), {
+      error: 'Revisá el número: tiene que tener entre 8 y 15 dígitos, con código de área (ej. 351 555-1234).',
+    }),
+})
+
+export type CampoConfirmacion = keyof z.input<typeof esquemaConfirmacion>

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { armarMensaje, enlaceWhatsApp, MENSAJE_WHATSAPP_ORIGINAL, PEDIDO_EJEMPLO } from './whatsapp'
-import { esquemaAjustesWhatsApp } from './esquemas'
+import {
+  armarMensaje,
+  enlaceWhatsApp,
+  formatearTelefonoTienda,
+  MENSAJE_WHATSAPP_ORIGINAL,
+  PEDIDO_EJEMPLO,
+} from './whatsapp'
+import { esquemaAjustesWhatsApp, esquemaConfirmacion } from './esquemas'
 
 describe('armarMensaje', () => {
   it('arma el mensaje original con los datos del pedido', () => {
@@ -24,6 +30,41 @@ describe('enlaceWhatsApp', () => {
     expect(enlaceWhatsApp('+54 9 11 0000-0000', 'Hola & chau\n#1')).toBe(
       'https://wa.me/5491100000000?text=Hola%20%26%20chau%0A%231',
     )
+  })
+})
+
+describe('formatearTelefonoTienda', () => {
+  it('agrupa celulares argentinos y deja el resto con +', () => {
+    expect(formatearTelefonoTienda('5491100000000')).toBe('+54 9 11 0000-0000')
+    expect(formatearTelefonoTienda('5493515551234')).toBe('+54 9 351 555-1234')
+    expect(formatearTelefonoTienda('+1 (555) 010-9999')).toBe('+15550109999')
+  })
+})
+
+describe('esquemaConfirmacion', () => {
+  const errores = (datos: { nombre: string; telefono: string }) => {
+    const r = esquemaConfirmacion.safeParse(datos)
+    return r.success ? {} : Object.fromEntries(r.error.issues.map((i) => [String(i.path[0]), i.message]))
+  }
+
+  it('acepta nombre y teléfono válidos y recorta espacios', () => {
+    expect(esquemaConfirmacion.parse({ nombre: '  Ana ', telefono: ' +54 9 351 555-1234 ' })).toEqual({
+      nombre: 'Ana',
+      telefono: '+54 9 351 555-1234',
+    })
+  })
+
+  it('muestra los mensajes del prototipo', () => {
+    expect(errores({ nombre: ' ', telefono: '' })).toEqual({
+      nombre: 'Escribí tu nombre así sabemos a quién le preparamos el pedido.',
+      telefono: 'Necesitamos un teléfono para coordinar por WhatsApp.',
+    })
+    expect(errores({ nombre: 'A', telefono: '351 555' })).toEqual({
+      nombre: 'El nombre es muy corto. Escribí al menos 2 letras.',
+      telefono:
+        'Revisá el número: tiene que tener entre 8 y 15 dígitos, con código de área (ej. 351 555-1234).',
+    })
+    expect(errores({ nombre: 'Ana', telefono: '1234567890123456' })).toHaveProperty('telefono')
   })
 })
 

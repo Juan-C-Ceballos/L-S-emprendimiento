@@ -14,12 +14,12 @@ import {
 
 // Subconjunto de las semillas del prototipo.
 const PRODUCTOS = [
-  { nombre: 'Argollas clásicas doradas', stock: 12, etiquetas: ['aros', 'dorado', 'acero'] },
-  { nombre: 'Aros perla mini', stock: 8, etiquetas: ['aros', 'plateado', 'perlas'] },
-  { nombre: 'Aros gota martillada', stock: 0, etiquetas: ['aros', 'dorado'] },
-  { nombre: 'Abridores de acero', stock: 6, etiquetas: ['aros', 'acero'] },
-  { nombre: 'Pulsera eslabón fino', stock: 2, etiquetas: ['pulseras', 'dorado', 'acero'] },
-  { nombre: 'Esclava rígida plateada', stock: 5, etiquetas: ['pulseras', 'plateado'] },
+  { nombre: 'Argollas clásicas doradas', precio: 14500, stock: 12, etiquetas: ['aros', 'dorado', 'acero'] },
+  { nombre: 'Aros perla mini', precio: 11900, stock: 8, etiquetas: ['aros', 'plateado', 'perlas'] },
+  { nombre: 'Aros gota martillada', precio: 16800, stock: 0, etiquetas: ['aros', 'dorado'] },
+  { nombre: 'Abridores de acero', precio: 8900, stock: 6, etiquetas: ['aros', 'acero'] },
+  { nombre: 'Pulsera eslabón fino', precio: 18900, stock: 2, etiquetas: ['pulseras', 'dorado', 'acero'] },
+  { nombre: 'Esclava rígida plateada', precio: 21500, stock: 5, etiquetas: ['pulseras', 'plateado'] },
 ]
 const USADAS = ['aros', 'pulseras', 'dorado', 'plateado', 'acero', 'perlas']
 
@@ -31,18 +31,20 @@ const nombres = (lista: { nombre: string }[]) => lista.map((p) => p.nombre)
 
 describe('URL', () => {
   it('lee q, tags y modo', () => {
-    expect(leerFiltrosDeURL(new URLSearchParams('q=perla&tags=aros,dorado&modo=alguna'))).toEqual({
+    expect(leerFiltrosDeURL(new URLSearchParams('q=perla&tags=aros,dorado&modo=alguna&orden=precio-asc'))).toEqual({
       q: 'perla',
       etiquetas: ['aros', 'dorado'],
       modo: 'alguna',
+      orden: 'precio-asc',
     })
   })
 
   it('es tolerante: modo inválido, etiquetas vacías, repetidas o con mayúsculas', () => {
-    expect(leerFiltrosDeURL(new URLSearchParams('tags=Aros,,aros, dorado &modo=cualquiera'))).toEqual({
+    expect(leerFiltrosDeURL(new URLSearchParams('tags=Aros,,aros, dorado &modo=cualquiera&orden=raro'))).toEqual({
       q: '',
       etiquetas: ['aros', 'dorado'],
       modo: 'todas',
+      orden: 'recientes',
     })
     expect(leerFiltrosDeURL(new URLSearchParams(''))).toEqual(SIN_FILTROS)
   })
@@ -51,6 +53,7 @@ describe('URL', () => {
     expect(escribirFiltrosEnURL(SIN_FILTROS)).toBe('')
     expect(escribirFiltrosEnURL(filtros({ etiquetas: ['aros', 'dorado'] }))).toBe('tags=aros,dorado')
     expect(escribirFiltrosEnURL(filtros({ q: ' perla ', modo: 'alguna' }))).toBe('q=perla&modo=alguna')
+    expect(escribirFiltrosEnURL(filtros({ orden: 'precio-desc' }))).toBe('orden=precio-desc')
   })
 
   it('ida y vuelta, con espacios y tildes codificados', () => {
@@ -86,6 +89,25 @@ describe('aplicarFiltros', () => {
       expect(nombres(aplicarFiltros(PRODUCTOS, filtros({ q })))).toEqual(['Aros perla mini'])
     }
     expect(nombres(aplicarFiltros(PRODUCTOS, filtros({ q: 'rigida' })))).toEqual(['Esclava rígida plateada'])
+  })
+
+  it('ordena por precio y los agotados siguen al final', () => {
+    expect(nombres(aplicarFiltros(PRODUCTOS, filtros({ orden: 'precio-asc' })))).toEqual([
+      'Abridores de acero',
+      'Aros perla mini',
+      'Argollas clásicas doradas',
+      'Pulsera eslabón fino',
+      'Esclava rígida plateada',
+      'Aros gota martillada',
+    ])
+    expect(nombres(aplicarFiltros(PRODUCTOS, filtros({ orden: 'precio-desc', etiquetas: ['aros'] })))).toEqual([
+      'Argollas clásicas doradas',
+      'Aros perla mini',
+      'Abridores de acero',
+      'Aros gota martillada',
+    ])
+    // No modifica la lista original.
+    expect(PRODUCTOS[0]?.nombre).toBe('Argollas clásicas doradas')
   })
 
   it('los agotados van al final manteniendo el orden', () => {

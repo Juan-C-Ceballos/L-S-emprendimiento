@@ -2,7 +2,7 @@ import { claseChip, claseChipActiva } from '@/components/estilos'
 import { cn } from '@/lib/utils'
 
 type Props =
-  | { tipo: 'disponible'; nombre: string; cantidad: number; onClick: () => void }
+  | { tipo: 'disponible'; nombre: string; cantidad: number; onClick: () => void; className?: string }
   | { tipo: 'elegida'; nombre: string; onClick: () => void }
 
 /**
@@ -41,7 +41,12 @@ export function ChipEtiqueta(props: Props) {
     <button
       type="button"
       aria-label={`${props.nombre}, ${props.cantidad === 1 ? '1 pieza' : `${props.cantidad} piezas`}`}
-      className={cn(claseChip, 'transition-[opacity,border-color]', props.cantidad === 0 && 'opacity-[0.36]')}
+      className={cn(
+        claseChip,
+        'transition-[opacity,border-color]',
+        props.cantidad === 0 && 'opacity-[0.36]',
+        props.className,
+      )}
       onClick={props.onClick}
     >
       {props.nombre}

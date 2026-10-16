@@ -132,7 +132,7 @@ export function ProductosPage() {
         </>
       )}
 
-      <div className="px-4 pt-3 lg:px-8">
+      <div className="flex justify-center px-4 pt-3 lg:px-8">
         <Button asChild variant="ghost" className="lg:max-w-[260px]">
           <Link to="/admin/productos/nuevo">Nuevo producto</Link>
         </Button>

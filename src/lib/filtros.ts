@@ -5,15 +5,28 @@ import { normalizarEtiqueta, normalizarTexto } from '@/lib/formato'
 export const MODOS_ETIQUETAS = ['todas', 'alguna'] as const
 export type ModoEtiquetas = (typeof MODOS_ETIQUETAS)[number]
 
+export const ORDENES = [
+  { valor: 'recientes', texto: 'Más nuevos' },
+  { valor: 'precio-asc', texto: 'Menor precio' },
+  { valor: 'precio-desc', texto: 'Mayor precio' },
+] as const
+export type OrdenCatalogo = (typeof ORDENES)[number]['valor']
+
+export function esOrdenCatalogo(valor: string | null): valor is OrdenCatalogo {
+  return ORDENES.some((o) => o.valor === valor)
+}
+
 export type FiltrosCatalogo = {
   q: string
   etiquetas: string[]
   modo: ModoEtiquetas
+  /** No es un filtro: "Limpiar filtros" lo conserva. */
+  orden: OrdenCatalogo
 }
 
-export const SIN_FILTROS: FiltrosCatalogo = { q: '', etiquetas: [], modo: 'todas' }
+export const SIN_FILTROS: FiltrosCatalogo = { q: '', etiquetas: [], modo: 'todas', orden: 'recientes' }
 
-type ProductoFiltrable = { nombre: string; stock: number; etiquetas: string[] }
+type ProductoFiltrable = { nombre: string; precio: number; stock: number; etiquetas: string[] }
 
 /** Lee los filtros de la URL. Modo desconocido → `todas`; etiquetas normalizadas y sin repetir. */
 export function leerFiltrosDeURL(params: URLSearchParams): FiltrosCatalogo {
@@ -22,7 +35,8 @@ export function leerFiltrosDeURL(params: URLSearchParams): FiltrosCatalogo {
     .map(normalizarEtiqueta)
     .filter((e, i, todas) => e !== '' && todas.indexOf(e) === i)
   const modo = params.get('modo') === 'alguna' ? 'alguna' : 'todas'
-  return { q: (params.get('q') ?? '').trim(), etiquetas, modo }
+  const orden = params.get('orden')
+  return { q: (params.get('q') ?? '').trim(), etiquetas, modo, orden: esOrdenCatalogo(orden) ? orden : 'recientes' }
 }
 
 /**
@@ -35,6 +49,7 @@ export function escribirFiltrosEnURL(filtros: FiltrosCatalogo): string {
   if (q !== '') params.set('q', q)
   if (filtros.etiquetas.length > 0) params.set('tags', filtros.etiquetas.join(','))
   if (filtros.modo !== 'todas') params.set('modo', filtros.modo)
+  if (filtros.orden !== 'recientes') params.set('orden', filtros.orden)
   return params.toString().replaceAll('%2C', ',')
 }
 
@@ -64,9 +79,17 @@ function coincideEtiquetas(p: ProductoFiltrable, filtros: FiltrosCatalogo): bool
     : etiquetas.some((e) => p.etiquetas.includes(e))
 }
 
-/** Búsqueda por nombre (sin tildes) + etiquetas Y/O. Los agotados van al final, sin cambiar el orden. */
+/**
+ * Búsqueda por nombre (sin tildes) + etiquetas Y/O, ordenado por precio si se pidió (si no, queda
+ * el orden de la base: más nuevos primero). Los agotados van siempre al final.
+ */
 export function aplicarFiltros<T extends ProductoFiltrable>(productos: T[], filtros: FiltrosCatalogo): T[] {
   const resultado = productos.filter((p) => coincideNombre(p, filtros.q) && coincideEtiquetas(p, filtros))
+  if (filtros.orden !== 'recientes') {
+    const signo = filtros.orden === 'precio-asc' ? 1 : -1
+    // `sort` es estable: a igual precio se mantiene el orden de la base.
+    resultado.sort((a, b) => signo * (a.precio - b.precio))
+  }
   return [...resultado.filter((p) => p.stock > 0), ...resultado.filter((p) => p.stock <= 0)]
 }
 

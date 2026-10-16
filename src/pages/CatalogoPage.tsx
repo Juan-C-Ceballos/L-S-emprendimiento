@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import {
   aplicarFiltros,
   escribirFiltrosEnURL,
+  hayFiltros,
   leerFiltrosDeURL,
   pistaVacio,
   quitarEtiquetasDesconocidas,
@@ -39,7 +40,7 @@ export function CatalogoPage() {
     vidriera.estado === 'listo' ? quitarEtiquetasDesconocidas(desdeURL, etiquetasUsadas) : desdeURL
 
   function cambiar(nuevos: Filtros, { reemplazar }: { reemplazar: boolean }) {
-    if (nuevos === SIN_FILTROS) setEtiquetaBuscada('')
+    if (!hayFiltros(nuevos)) setEtiquetaBuscada('')
     // `navigate` y no `setSearchParams`, que codificaría las comas de `tags=aros,dorado`.
     void navigate({ search: escribirFiltrosEnURL(nuevos) }, { replace: reemplazar, preventScrollReset: true })
   }
@@ -111,7 +112,7 @@ export function CatalogoPage() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      cambiar(SIN_FILTROS, { reemplazar: false })
+                      cambiar({ ...SIN_FILTROS, orden: filtros.orden }, { reemplazar: false })
                     }}
                   >
                     Limpiar filtros

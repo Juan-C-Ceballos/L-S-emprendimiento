@@ -85,13 +85,10 @@ export function NavPanel({ visibleEnMovil, pendientes = 0 }: Props) {
         visibleEnMovil ? 'flex' : 'hidden',
       )}
     >
-      <span className="hidden items-baseline gap-2.5 px-3.5 pb-[26px] font-display text-[28px] leading-none font-semibold tracking-[-0.03em] lg:flex">
-        <span>
-          L<span className="mx-px font-normal text-bronce">&amp;</span>S
-        </span>
-        <span className="font-sans text-[11px] font-semibold tracking-[0.14em] text-texto-suave uppercase">
-          Panel
-        </span>
+      {/* Solo en escritorio: logo de la marca arriba de las secciones. */}
+      <span className="hidden flex-col items-center gap-1.5 px-3.5 pb-[22px] lg:flex">
+        <img src="/logo-sello.webp" alt="L&S" width={96} height={96} className="size-24" />
+        <span className="text-[11px] font-semibold tracking-[0.14em] text-texto-suave uppercase">Panel</span>
       </span>
       {SECCIONES.map((seccion) => (
         <NavLink

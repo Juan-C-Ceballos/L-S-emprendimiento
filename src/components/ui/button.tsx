@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-tinta text-white hover:bg-tinta-hover",
         ghost:
-          "border-borde-fuerte bg-transparent text-tinta hover:bg-rosa-suave",
+          "border-borde-fuerte bg-transparent text-tinta hover:bg-champan-suave",
         wa: "bg-wa text-white hover:bg-wa-hover",
         danger:
           "border-peligro-borde-boton bg-transparent text-peligro hover:bg-peligro-fondo",

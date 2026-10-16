@@ -166,6 +166,13 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - Supabase local (Docker) **no se elimina**: lo siguen necesitando `npm run db:test` (pgTAP), probar una migración nueva desde cero antes de `db push` (`npm run db:reset`) y `npm run db:types`. El CI levanta su propia base y no depende de ninguno de los dos.
 - Cuidado: lo que se hace en la app con `.env.local` apuntando a `ls-dev` cambia datos reales de desarrollo (pedidos, stock, productos). Las pruebas automáticas nunca apuntan a la nube.
 
+### D-33 · Logo y paleta bronce/champán (2026-10-15)
+- **Pedido del usuario**: usar el logo del emprendimiento y llevar la paleta a tono con él. Contradice la paleta del prototipo (fuente de verdad visual), así que manda esta decisión.
+- **Logo**: el original está en `docs/marca/logo-original.webp`. `public/logo.webp` (480 px, fondo transparente) es un recorte cuadrado alrededor del marco, con el mismo aire a los cuatro lados (el marco mide 839 × 866 en el original, así que queda apenas más alto que ancho; no se deforma). Se usa en el login en lugar de la marca en texto. Favicon (`favicon-48.png`) y `apple-touch-icon.png` (180 px) usan solo el octógono con el monograma, porque el marco no se distingue a ese tamaño. Los recortes se hicieron con Pillow una sola vez (no hay script en el repo).
+- **Header y barra lateral** siguen con la marca en texto (Bricolage, `&` en bronce): el logo con marco no se lee a 27–32 px de alto.
+- **Paleta**: el acento `vino` pasa a `bronce` `#8C5E22` (el bronce de las letras del logo, `#986828`, apenas oscurecido para llegar a 4,5:1 sobre el fondo) y los rosados pasan a tonos champán; el fondo `crema` pasa de rosado a marfil. Los tokens se renombraron (`vino` → `bronce`, `rosa*` → `champan*`). Tabla en `docs/prototype-analysis.md` §3. Contrastes WCAG: bronce 5,2:1 sobre `crema` y 4,6:1 sobre `champan`; `texto-suave` 5,2:1 y 4,5:1; blanco sobre bronce 5,6:1. Verdes de WhatsApp, rojos de error y pills de estado no cambian.
+- **Tipografías**: no cambian. El logo usa una serif de alto contraste; si se quisiera llevarla al sitio, es una decisión aparte.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

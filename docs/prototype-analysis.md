@@ -41,26 +41,28 @@ Convenciones: páginas en `src/pages/`, componentes en `src/components/`, servic
 ## 3. Tokens de diseño (extraídos del CSS del prototipo)
 
 ### Tipografías
-- **Títulos / marca / números grandes**: `Bricolage Grotesque` 400, 600, 700 (fallback Georgia, serif). Marca "L&S": 27 px (móvil), 32 px (escritorio), 52 px (login), `letter-spacing: -.03em`, el `&` en vino y peso 400.
+- **Títulos / marca / números grandes**: `Bricolage Grotesque` 400, 600, 700 (fallback Georgia, serif). Marca "L&S": 27 px (móvil), 32 px (escritorio), 52 px (login), `letter-spacing: -.03em`, el `&` en bronce y peso 400.
 - **Texto**: `Hanken Grotesk` 400, 500, 600, 700 (fallback system-ui). Base 15 px / 1.45. Inputs 16 px (evita zoom en iOS).
 - Números con `font-variant-numeric: tabular-nums` en precios, totales y contadores.
 
 ### Colores
+> **Paleta actualizada (D-33)**: la tienda adoptó la paleta bronce/champán de su logo (`docs/marca/`, `public/logo.webp`). Los valores de abajo son los vigentes en `src/index.css`; entre paréntesis, el valor original del prototipo. `vino` pasó a llamarse `bronce` y `rosa*` a `champan*`.
+
 | Token sugerido | Valor | Uso |
 |---|---|---|
-| `crema` | `#FBF4F1` | Fondo de la app, header, barra inferior |
-| `tinta` | `#3A2C2C` | Texto principal, botón primario, chip activo |
-| `tinta-hover` | `#56403F` | Hover del botón primario |
-| `vino` | `#9A4E5E` | Acento: links, `&` del logo, contador del carrito, foco (`outline 2px`) |
-| `vino-hover` | `#7A3747` | Hover de links |
-| `rosa` | `#F6E3DD` | Fondo del hero |
-| `rosa-suave` | `#F4E4DF` | Hover de íconos y botones fantasma, tab activa en escritorio |
-| `rosa-seg` | `#F3E2DC` | Fondo del control segmentado |
-| `borde` | `#EFDFD9` | Bordes de header, tarjetas y listas |
-| `borde-fuerte` | `#E0C8C1` | Bordes de inputs, botones fantasma, stepper |
-| `borde-chip` | `#E6CEC7` | Bordes de chips y selects |
-| `divisor` | `#F6E9E5` | Separadores entre filas |
-| `texto-suave` | `#7D6762` | Textos secundarios, contadores, hints |
+| `crema` | `#FAF6F0` (`#FBF4F1`) | Fondo de la app, header, barra inferior |
+| `tinta` | `#3A2E26` (`#3A2C2C`) | Texto principal, botón primario, chip activo |
+| `tinta-hover` | `#56463A` (`#56403F`) | Hover del botón primario |
+| `bronce` | `#8C5E22` (vino `#9A4E5E`) | Acento: links, `&` del logo, contador del carrito, foco (`outline 2px`) |
+| `bronce-hover` | `#6E4917` (`#7A3747`) | Hover de links |
+| `champan` | `#F2E7D8` (rosa `#F6E3DD`) | Fondo del hero |
+| `champan-suave` | `#F1E7DA` (`#F4E4DF`) | Hover de íconos y botones fantasma, tab activa en escritorio |
+| `champan-seg` | `#EEE2D2` (`#F3E2DC`) | Fondo del control segmentado |
+| `borde` | `#ECE2D5` (`#EFDFD9`) | Bordes de header, tarjetas y listas |
+| `borde-fuerte` | `#DCCAB4` (`#E0C8C1`) | Bordes de inputs, botones fantasma, stepper |
+| `borde-chip` | `#E3D3BF` (`#E6CEC7`) | Bordes de chips y selects |
+| `divisor` | `#F3ECE2` (`#F6E9E5`) | Separadores entre filas |
+| `texto-suave` | `#76664F` (`#7D6762`) | Textos secundarios, contadores, hints |
 | `texto-medio` | `#4F4B45` | Descripción del producto |
 | `img-fondo` | `#E4E1DB` | Fondo de imágenes mientras cargan |
 | `wa` / `wa-hover` | `#1E6343` / `#174F35` | Botón "Enviar por WhatsApp", interruptor activo |

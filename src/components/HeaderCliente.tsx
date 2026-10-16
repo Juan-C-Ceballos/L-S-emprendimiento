@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 import { Logo } from '@/components/Logo'
 
 const claseIcono =
-  'flex size-11 items-center justify-center rounded-full text-tinta transition-colors hover:bg-rosa-suave'
+  'flex size-11 items-center justify-center rounded-full text-tinta transition-colors hover:bg-champan-suave'
 
 /** Header del sitio público (prototipo: `.hd`). El contador del carrito llega en la etapa 5. */
 export function HeaderCliente() {

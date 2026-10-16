@@ -44,7 +44,7 @@ Fuentes de verdad: `docs/ls-mvp.html` (funcional) y `prototype/` (visual: pantal
 - Nombres de dominio en español (`producto`, `pedido`, `etiqueta`, `crearPedido`); términos técnicos en inglés cuando son estándar (`hook`, `props`).
 - Formularios: estado controlado + esquema Zod en el mismo módulo o en `src/lib/esquemas.ts`. Mensajes de error copiados del prototipo.
 - Estilos: utilidades de Tailwind con los tokens definidos en `src/index.css` (`@theme`). No hardcodear colores fuera de los tokens.
-- Accesibilidad: objetivos táctiles ≥ 44 px, `aria-label` en botones de ícono, foco visible (`outline` vino), textos de estado con `aria-live`.
+- Accesibilidad: objetivos táctiles ≥ 44 px, `aria-label` en botones de ícono, foco visible (`outline` bronce), textos de estado con `aria-live`.
 - SQL: nombres en español y `snake_case`; funciones con `set search_path = ''` y nombres calificados (`public.products`); cada migración es inmutable una vez mergeada (para cambiar algo, migración nueva).
 - Pruebas junto al código (`*.test.ts(x)`) para frontend; `supabase/tests/*.test.sql` para la base.
 

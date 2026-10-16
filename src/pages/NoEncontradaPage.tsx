@@ -11,7 +11,7 @@ export function NoEncontradaPage() {
       </p>
       <Link
         to="/"
-        className="flex min-h-11 items-center px-1 text-sm font-semibold text-vino underline underline-offset-[3px] hover:text-vino-hover"
+        className="flex min-h-11 items-center px-1 text-sm font-semibold text-bronce underline underline-offset-[3px] hover:text-bronce-hover"
       >
         Volver al catálogo
       </Link>

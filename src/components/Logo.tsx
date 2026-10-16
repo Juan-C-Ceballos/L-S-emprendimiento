@@ -1,22 +1,18 @@
 import { cn } from '@/lib/utils'
 
-type Props = {
-  /** `header`: 27 px (32 px en escritorio). `grande`: 52 px, para el login. */
-  tamano?: 'header' | 'grande'
-  className?: string
-}
-
-/** Marca "L&S" con el `&` en vino (prototipo: `.mark`, `.amp`). */
-export function Logo({ tamano = 'header', className }: Props) {
+/**
+ * Marca "L&S" en texto con el `&` en bronce (prototipo: `.mark`, `.amp`), 27 px (32 px en
+ * escritorio). El logo con marco (`public/logo.webp`) va donde hay lugar, como el login (D-33).
+ */
+export function Logo({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'font-display leading-none font-semibold tracking-[-0.03em]',
-        tamano === 'header' ? 'text-[27px] lg:text-[32px]' : 'text-[52px]',
+        'font-display text-[27px] leading-none font-semibold tracking-[-0.03em] lg:text-[32px]',
         className,
       )}
     >
-      L<span className="mx-px font-normal text-vino">&amp;</span>S
+      L<span className="mx-px font-normal text-bronce">&amp;</span>S
     </span>
   )
 }

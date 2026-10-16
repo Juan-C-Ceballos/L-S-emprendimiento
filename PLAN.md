@@ -4,8 +4,8 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 3 · Panel de productos (sin empezar). La etapa 2 está en `feature/02-auth-panel`, lista para PR contra `develop` (falta CI en verde y squash merge).
-- **Rama:** cuando la etapa 2 esté mergeada, crear `feature/03-panel-productos` desde `develop` (`git checkout develop && git pull && git checkout -b feature/03-panel-productos`).
+- **Etapa en curso:** 3 · Panel de productos (sin empezar). Las etapas 0 a 2 están en `develop`.
+- **Rama:** crear `feature/03-panel-productos` desde `develop` (`git checkout develop && git pull && git checkout -b feature/03-panel-productos`).
 - **Próximo paso:** abrir `docs/plan/etapa-03-panel-productos.md`. La app se prueba a mano contra `ls-dev` (`.env.local` ya apunta ahí, D-32): `npm run dev` y entrar a http://localhost:5173/admin con la cuenta de la administradora. Docker y `npm run db:start` solo hacen falta si la etapa toca la base (migraciones, `db:test`, `db:types`).
 - **Supabase en la nube:** proyecto de **desarrollo** `ls-dev` creado (ref `nhsjichuumyflklqkhxw`, URL `https://nhsjichuumyflklqkhxw.supabase.co`, São Paulo, Postgres 17, organización `L&S-Emprendimiento`, plan gratuito). Migraciones de la etapa 1 aplicadas con `supabase db push`; registro público desactivado; semillas de productos y pedidos cargadas por el usuario. Administradora creada: `1accesorioslis@gmail.com` con rol `admin` (verificado 2026-10-15: es la única cuenta de `auth.users`). **No** correr ahí el bloque final de `supabase/seed.sql` (usuarios de prueba con contraseñas en el repo público). La carpeta local quedó vinculada a ese proyecto (`supabase/.temp/`, ignorado). Producción se crea en la etapa 8 en la misma organización.
 - **Al mergear cada etapa con migraciones nuevas:** `npx supabase db push --dry-run` y después `npx supabase db push` contra dev (lo corre el usuario; pide la contraseña de la base).
@@ -59,6 +59,11 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-15 · Marca · `feature/marca-logo-paleta`
+- Hecho: logo del emprendimiento recortado en cuadrado según su marco (`public/logo.webp`, fondo transparente) y usado en el login; favicon e ícono de iOS con el monograma; paleta bronce/champán en `src/index.css` con tokens renombrados (`vino` → `bronce`, `rosa*` → `champan*`). D-33.
+- Verificado: lint, typecheck, 47 pruebas y build; catálogo y login en 375 px contra `ls-dev`.
+- Pendiente: PR contra `develop` (squash).
 
 ### 2026-10-15 · Etapa 2 · `feature/02-auth-panel`
 - Hecho: usuarios de prueba en `supabase/seed.sql` (`admin@ls.test` con rol admin y `vendedora@ls.test` sin rol). `src/services/auth.ts` (`ingresar`, `salir`, `obtenerSesion`, `escucharSesion`) con errores `credenciales`, `sin_acceso` (cierra la sesión) y `sin_conexion`. `SesionProvider` + `useSesion` (solo en `/admin/*`), `RutaProtegida` con pantalla neutra mientras carga y `?volver=`. `IngresarPage` con Zod, "Ingresando…", Enter y redirección (solo a rutas `/admin`). `PanelLayout` + `HeaderPanel` + `NavPanel` (tabs abajo en móvil solo en las 4 secciones, barra lateral de 220 px en `lg`, prop `pendientes` para el badge) + `BotonSalir`; título, "Volver" y acción del header en el `handle` de cada ruta. README: sección "Administradora".

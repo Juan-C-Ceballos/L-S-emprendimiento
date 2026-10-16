@@ -5,24 +5,24 @@
 /* Sin modo oscuro: la variante `dark:` de shadcn solo aplica bajo `.dark`, que nunca se usa. */
 @custom-variant dark (&:is(.dark *));
 
-/* Tokens de diseño del prototipo (docs/prototype-analysis.md §3). */
+/* Tokens de diseño (docs/prototype-analysis.md §3). Paleta bronce/champán del logo (D-33). */
 @theme {
   --font-sans: "Hanken Grotesk", system-ui, sans-serif;
   --font-display: "Bricolage Grotesque", Georgia, serif;
 
-  --color-crema: #fbf4f1;
-  --color-tinta: #3a2c2c;
-  --color-tinta-hover: #56403f;
-  --color-vino: #9a4e5e;
-  --color-vino-hover: #7a3747;
-  --color-rosa: #f6e3dd;
-  --color-rosa-suave: #f4e4df;
-  --color-rosa-seg: #f3e2dc;
-  --color-borde: #efdfd9;
-  --color-borde-fuerte: #e0c8c1;
-  --color-borde-chip: #e6cec7;
-  --color-divisor: #f6e9e5;
-  --color-texto-suave: #7d6762;
+  --color-crema: #faf6f0;
+  --color-tinta: #3a2e26;
+  --color-tinta-hover: #56463a;
+  --color-bronce: #8c5e22;
+  --color-bronce-hover: #6e4917;
+  --color-champan: #f2e7d8;
+  --color-champan-suave: #f1e7da;
+  --color-champan-seg: #eee2d2;
+  --color-borde: #ece2d5;
+  --color-borde-fuerte: #dccab4;
+  --color-borde-chip: #e3d3bf;
+  --color-divisor: #f3ece2;
+  --color-texto-suave: #76664f;
   --color-texto-medio: #4f4b45;
   --color-texto-tab: #7a766f;
   --color-img-fondo: #e4e1db;
@@ -42,8 +42,8 @@
   --color-fondo-error: #fffbfa;
 
   /* Sombras */
-  --shadow-foco: 0 0 0 3px rgb(92 34 50 / 0.14);
-  --shadow-toast: 0 10px 30px rgb(58 44 44 / 0.25);
+  --shadow-foco: 0 0 0 3px rgb(140 94 34 / 0.16);
+  --shadow-toast: 0 10px 30px rgb(58 46 38 / 0.25);
 
   /* Pills de estado: fondo / texto */
   --color-pill-pendiente: #f6ebd3;
@@ -116,16 +116,16 @@
   --popover-foreground: var(--color-tinta);
   --primary: var(--color-tinta);
   --primary-foreground: #fff;
-  --secondary: var(--color-rosa-suave);
+  --secondary: var(--color-champan-suave);
   --secondary-foreground: var(--color-tinta);
-  --muted: var(--color-rosa-suave);
+  --muted: var(--color-champan-suave);
   --muted-foreground: var(--color-texto-suave);
-  --accent: var(--color-rosa-suave);
+  --accent: var(--color-champan-suave);
   --accent-foreground: var(--color-tinta);
   --destructive: var(--color-peligro);
   --border: var(--color-borde);
   --input: var(--color-borde-fuerte);
-  --ring: var(--color-vino);
+  --ring: var(--color-bronce);
   --radius: 10px;
 }
 
@@ -145,7 +145,7 @@
     -webkit-font-smoothing: antialiased;
   }
   :focus-visible {
-    outline: 2px solid var(--color-vino);
+    outline: 2px solid var(--color-bronce);
     outline-offset: 2px;
   }
   button:not(:disabled),

@@ -1,7 +1,6 @@
 import { useState, type SubmitEvent } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { z } from 'zod'
-import { Logo } from '@/components/Logo'
 import { PantallaCargando } from '@/components/PantallaCargando'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -67,7 +66,13 @@ export function IngresarPage() {
 
   return (
     <main className="mx-auto flex max-w-[440px] flex-col px-6 pt-14 pb-8 lg:pt-20">
-      <Logo tamano="grande" />
+      <img
+        src="/logo.webp"
+        alt="L&S"
+        width={132}
+        height={132}
+        className="size-[132px] self-start"
+      />
       <h1 className="m-0 mt-3.5 text-[11px] font-semibold tracking-[0.16em] text-texto-suave uppercase">
         Panel de la tienda
       </h1>

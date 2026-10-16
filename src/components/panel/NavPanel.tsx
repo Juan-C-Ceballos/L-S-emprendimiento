@@ -87,7 +87,7 @@ export function NavPanel({ visibleEnMovil, pendientes = 0 }: Props) {
     >
       <span className="hidden items-baseline gap-2.5 px-3.5 pb-[26px] font-display text-[28px] leading-none font-semibold tracking-[-0.03em] lg:flex">
         <span>
-          L<span className="mx-px font-normal text-vino">&amp;</span>S
+          L<span className="mx-px font-normal text-bronce">&amp;</span>S
         </span>
         <span className="font-sans text-[11px] font-semibold tracking-[0.14em] text-texto-suave uppercase">
           Panel
@@ -103,14 +103,14 @@ export function NavPanel({ visibleEnMovil, pendientes = 0 }: Props) {
               'relative flex flex-1 flex-col items-center justify-center gap-[3px] text-xs font-semibold text-texto-tab no-underline',
               'lg:min-h-[46px] lg:w-full lg:flex-none lg:flex-row lg:justify-start lg:gap-3 lg:rounded-input lg:px-3.5 lg:text-sm lg:hover:bg-crema',
               isActive &&
-                'text-tinta before:absolute before:inset-x-[30%] before:top-0 before:h-0.5 before:bg-vino lg:bg-rosa-suave lg:before:hidden lg:hover:bg-rosa-suave',
+                'text-tinta before:absolute before:inset-x-[30%] before:top-0 before:h-0.5 before:bg-bronce lg:bg-champan-suave lg:before:hidden lg:hover:bg-champan-suave',
             )
           }
         >
           {seccion.icono}
           {seccion.texto}
           {seccion.ruta === '/admin/pedidos' && pendientes > 0 && (
-            <span className="absolute top-2 left-[calc(50%+8px)] flex h-[17px] min-w-[17px] items-center justify-center rounded-[9px] bg-vino px-1 text-[10px] leading-none font-bold text-white lg:static lg:ml-auto">
+            <span className="absolute top-2 left-[calc(50%+8px)] flex h-[17px] min-w-[17px] items-center justify-center rounded-[9px] bg-bronce px-1 text-[10px] leading-none font-bold text-white lg:static lg:ml-auto">
               {pendientes}
               <span className="sr-only"> pendientes</span>
             </span>

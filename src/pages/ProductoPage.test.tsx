@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ProductoPage } from './ProductoPage'
@@ -50,7 +50,10 @@ describe('ProductoPage', () => {
     expect(screen.getByText('Últimas 2 unidades')).toBeInTheDocument()
     expect(screen.getByText('1 / 3')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ver foto 1 de 3' })).toHaveAttribute('aria-current', 'true')
-    expect(document.title).toBe('Pulsera eslabón fino · L&S')
+    // El título de la pestaña se pone en un efecto: puede llegar un instante después del h1.
+    await waitFor(() => {
+      expect(document.title).toBe('Pulsera eslabón fino · L&S')
+    })
   })
 
   it('agrega al carrito sin pasar del stock y avisa', async () => {

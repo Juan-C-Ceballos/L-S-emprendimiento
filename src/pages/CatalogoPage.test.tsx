@@ -1,9 +1,9 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CatalogoPage } from './CatalogoPage'
 import { listarCatalogo } from '@/services/productos'
+import { renderizarRutas } from '@/test/renderizar'
 import type { ProductoVidriera } from '@/types/dominio'
 
 vi.mock('@/services/productos', () => ({ listarCatalogo: vi.fn() }))
@@ -13,9 +13,7 @@ function producto(nombre: string, etiquetas: string[], stock = 5): ProductoVidri
 }
 
 function renderizar(ruta = '/') {
-  const router = createMemoryRouter([{ path: '/', element: <CatalogoPage /> }], { initialEntries: [ruta] })
-  render(<RouterProvider router={router} />)
-  return router
+  return renderizarRutas([{ path: '/', element: <CatalogoPage /> }], ruta)
 }
 
 /** Nombres de las tarjetas, en orden. */
@@ -28,6 +26,7 @@ function tarjetas(): string[] {
 }
 
 beforeEach(() => {
+  localStorage.clear()
   vi.mocked(listarCatalogo).mockResolvedValue({
     productos: [
       producto('Aros gota martillada', ['aros', 'dorado'], 0),
@@ -129,6 +128,23 @@ describe('CatalogoPage', () => {
     await usuario.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
     expect(router.state.location.search).toBe('')
     expect(screen.getByText('4 piezas en la vidriera')).toBeInTheDocument()
+  })
+
+  it('con carrito, la barra muestra las piezas y el total con los precios de la vidriera', async () => {
+    localStorage.setItem(
+      'ls:carrito:v1',
+      JSON.stringify([{ productoId: '00000000-0000-4000-8000-000000000002', cantidad: 2 }]),
+    )
+    vi.mocked(listarCatalogo).mockResolvedValue({
+      productos: [{ ...producto('Aros perla mini', ['aros']), id: '00000000-0000-4000-8000-000000000002' }],
+      etiquetas: ['aros'],
+    })
+    renderizar()
+    const barra = await screen.findByRole('link', { name: /Ver carrito · 2 piezas/ })
+    await waitFor(() => {
+      expect(barra).toHaveTextContent('$20.000')
+    })
+    expect(barra).toHaveAttribute('href', '/carrito')
   })
 
   it('si falla la carga, ofrece reintentar', async () => {

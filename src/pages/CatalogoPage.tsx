@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { BarraCarrito } from '@/components/BarraCarrito'
 import { EstadoVacio } from '@/components/catalogo/EstadoVacio'
 import { FiltrosCatalogo } from '@/components/catalogo/FiltrosCatalogo'
 import { GrillaCargando, GrillaProductos } from '@/components/catalogo/GrillaProductos'
@@ -15,7 +16,9 @@ import {
   textoResultado,
   type FiltrosCatalogo as Filtros,
 } from '@/lib/filtros'
+import { calcularTotal, textoPiezas } from '@/lib/carritoReglas'
 import { useAsync } from '@/lib/useAsync'
+import { useCarrito } from '@/lib/useCarrito'
 import { TITULO_SITIO, useTituloDocumento } from '@/lib/useTituloDocumento'
 import { listarCatalogo } from '@/services/productos'
 
@@ -27,6 +30,7 @@ export function CatalogoPage() {
   const navigate = useNavigate()
   const [buscando, setBuscando] = useState(false)
   const [etiquetaBuscada, setEtiquetaBuscada] = useState('')
+  const carrito = useCarrito()
 
   const etiquetasUsadas = vidriera.estado === 'listo' ? vidriera.datos.etiquetas : []
   const desdeURL = leerFiltrosDeURL(params)
@@ -42,9 +46,10 @@ export function CatalogoPage() {
 
   const productos = vidriera.estado === 'listo' ? vidriera.datos.productos : []
   const resultado = aplicarFiltros(productos, filtros)
+  const hayCarrito = carrito.piezas > 0
 
   return (
-    <>
+    <div className={hayCarrito ? 'pb-20 lg:pb-0' : undefined}>
       <Hero />
       <div className="mx-auto max-w-[720px] lg:grid lg:max-w-none lg:grid-cols-[288px_minmax(0,1fr)] lg:items-start lg:gap-11 lg:px-10 lg:pt-8 lg:pb-14">
         <FiltrosCatalogo
@@ -120,6 +125,14 @@ export function CatalogoPage() {
           {resultado.length > 0 && <GrillaProductos productos={resultado} />}
         </div>
       </div>
-    </>
+      {hayCarrito && (
+        <BarraCarrito
+          to="/carrito"
+          texto={`Ver carrito · ${textoPiezas(carrito.piezas)}`}
+          // Total con los precios de la vidriera recién cargada (el carrito nunca guarda precios).
+          total={calcularTotal(carrito.lineas, productos)}
+        />
+      )}
+    </div>
   )
 }

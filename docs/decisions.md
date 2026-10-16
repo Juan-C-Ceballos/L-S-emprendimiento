@@ -208,6 +208,17 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **`og.jpg`** se generó con `scripts/generar-og.html` (canvas con el logo, los tokens y las fuentes del sitio). `og:image` queda relativa; la etapa 8 la completa con el dominio.
 - **Estilos compartidos** (`claseBotonIcono`, `claseChip`, `claseChipActiva`, `claseLink`) pasan a `src/components/estilos.ts` (antes en `components/panel/`), porque los usan el catálogo y el panel.
 
+### D-37 · Carrito y pedido (etapa 5)
+- **Carrito**: `services/carrito.ts` lee y escribe `localStorage` (`ls:carrito:v1`, validado con Zod: un id con formato de UUID y cantidad entera ≥ 1; las claves de más, como un precio agregado a mano, se descartan; si está roto se vacía). `CarritoProvider` vive en `LayoutCliente` (solo el sitio público) y escucha `storage` para sincronizar pestañas.
+- **Piezas desactivadas**: anon no puede leer productos inactivos (RLS), así que en el carrito aparecen como "Pieza no disponible" y cuentan como agotadas. Al rechazar, `crear_pedido` devuelve el nombre real, que se usa en el aviso.
+- **Rechazo de la base**: `crearPedido` lanza `PedidoRechazado` (subclase de `ErrorServicio` con `rechazo` tipado). Confirmar muestra enseguida lo que dijo la base y relee los productos; con los datos nuevos, los avisos salen de `detectarProblemas`. Mientras relee se siguen mostrando los datos anteriores (`useProductosDelCarrito`), así el formulario no se borra.
+- **Errores de red** usan el código existente `sin_conexion` (de `desdeErrorSupabase`), no `red` como decía el plan.
+- **Doble envío**: botón deshabilitado con "Confirmando…" y además una ref que frena el segundo clic antes de que React redibuje.
+- **Éxito**: el pedido va a `sessionStorage` (`ls:ultimo-pedido`); sin él, `/pedido/confirmado` vuelve al catálogo. "Volver" en esa pantalla va al catálogo (no al carrito vacío). Si la tienda no cargó su número de WhatsApp, no se muestra el botón y se avisa que la tienda va a escribir al teléfono que dejó el cliente. El aviso en el panel queda para la etapa 7 (Resumen).
+- **`formatearTelefonoTienda`**: agrupa celulares argentinos (`549` + 10 dígitos) con característica de 2 dígitos si empieza con 11 y de 3 si no; las de 4 dígitos se ven con el mismo agrupado (los dígitos son correctos). Otros números: `+` y los dígitos.
+- **Barra del catálogo**: el total usa los precios de la vidriera ya cargada (no hace otra consulta).
+- **Nombre de más de 80 letras**: mensaje nuevo "El nombre es muy largo: dejalo en 80 letras o menos." (la base ya rechazaba más de 80).
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

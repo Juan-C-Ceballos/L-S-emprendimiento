@@ -5,6 +5,7 @@ import type {
   DatosProducto,
   ImagenProducto,
   Producto,
+  ProductoCarrito,
   ProductoCatalogo,
   ProductoVidriera,
   Vidriera,
@@ -157,6 +158,30 @@ export async function obtenerProductoPublico(id: string): Promise<ProductoCatalo
     imagenes: aImagenes(data.product_images),
     etiquetas: nombresOrdenados(data.product_tags),
   }
+}
+
+/**
+ * Precio, stock y miniatura actuales de los productos del carrito. Solo vuelven los activos (RLS):
+ * el que falta se desactivó y el carrito lo trata como agotado.
+ */
+export async function obtenerProductosPorIds(ids: string[]): Promise<ProductoCarrito[]> {
+  if (ids.length === 0) return []
+  const { data, error } = await obtenerSupabase()
+    .from('products')
+    .select('id, nombre, precio, stock, product_images(path_miniatura, orden)')
+    .in('id', ids)
+    .eq('activo', true)
+  if (error !== null) throw desdeErrorSupabase(error, 'No pudimos cargar tu carrito. Probá de nuevo en un rato.')
+  return data.map((fila) => {
+    const portada = [...fila.product_images].sort((a, b) => a.orden - b.orden)[0]
+    return {
+      id: fila.id,
+      nombre: fila.nombre,
+      precio: fila.precio,
+      stock: fila.stock,
+      miniaturaUrl: portada === undefined ? null : urlPublica(portada.path_miniatura),
+    }
+  })
 }
 
 function esRespuestaGuardar(v: unknown): v is { id: string; paths_quitados: string[] } {

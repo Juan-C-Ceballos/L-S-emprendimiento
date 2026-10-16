@@ -8,17 +8,6 @@ describe('leerEnv', () => {
     expect(leerEnv(BASE).ok).toBe(true)
   })
 
-  it('trata el número de WhatsApp vacío como ausente', () => {
-    expect(leerEnv({ ...BASE, VITE_WHATSAPP_NUMBER: '' })).toEqual({
-      ok: true,
-      env: { ...BASE, VITE_WHATSAPP_NUMBER: undefined },
-    })
-  })
-
-  it('rechaza un número de WhatsApp con formato inválido', () => {
-    expect(leerEnv({ ...BASE, VITE_WHATSAPP_NUMBER: '+54 9 11' }).ok).toBe(false)
-  })
-
   it('lista lo que falta', () => {
     const r = leerEnv({})
     expect(r.ok).toBe(false)

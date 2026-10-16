@@ -29,7 +29,7 @@
 - **Filtro "pendientes de más de 7 días"** en Pedidos: filtro en `src/lib/pedidos.ts` + chip nueva. Muy chico.
 - **Colecciones o sets**: tabla `collections` + `collection_products`, con RLS como `products`.
 - **Pagos online y variantes** (talle, color): tablas nuevas (`product_variants`, `payments`) sin tocar las existentes; `order_items` sumaría `variant_id` nullable.
-- **Ajustes editables** (número y plantilla de WhatsApp desde el panel): tabla `settings` (D-01).
+- ~~**Ajustes editables**~~: adelantado al MVP (D-34).
 - **Dominio propio**: comprarlo, configurarlo en Cloudflare, actualizar *Site URL* y *Redirect URLs* de Supabase Auth, `og:image` y redirigir el subdominio viejo.
 - **Paginación** de pedidos y productos en el panel cuando superen ~500 (D-11 y etapa 6).
 - **E2E con Playwright** (D-18) cuando haya más flujos.

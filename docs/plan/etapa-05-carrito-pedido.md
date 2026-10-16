@@ -11,7 +11,7 @@ El cliente arma un carrito con varios productos (guardado en el navegador, **sin
 ## Dependencias
 - Etapa 1 (`crear_pedido` con el contrato `{ok, pedido | errores}` y D-24).
 - Etapa 4 (catálogo, detalle, `SelectorCantidad`, `obtenerProductoPublico`).
-- `VITE_WHATSAPP_NUMBER` en `.env.local` (para desarrollo se puede usar un número de prueba propio; pedir el real al usuario antes de producción).
+- Número y mensaje de WhatsApp cargados en **Ajustes** (tabla `settings`, D-34). Ya no hay variable de entorno para el número.
 
 ## Pantallas del prototipo que implementa
 Referencia: `prototype/src/main.html`, bloques `c.isDetail` (barra de agregar), `c.isCart`, `c.isCheckout`, `c.isSuccess`, y el contador del carrito en el header; lógica en `addToCart()`, `setLine()`, `removeLine()`, `stockIssues()`, `fixCart()`, `confirmOrder()`, `waText()`, `defaultTemplate()`.
@@ -40,7 +40,7 @@ Referencia: `prototype/src/main.html`, bloques `c.isDetail` (barra de agregar), 
    - Al confirmar: valida Zod; si hay problemas de stock locales, toast "Hay piezas sin stock suficiente. Corregí el carrito para seguir." y no llama. Botón deshabilitado + "Confirmando…" mientras espera (evita doble envío).
    - Si la RPC rechaza por stock/inactivo: actualizar la alerta con lo que devolvió la base (sin vaciar el formulario). Si rechaza por `precio_cambiado`: releer productos, mostrar alerta "Cambió el precio de algunas piezas. Revisá el total antes de confirmar." con el total nuevo, y dejar confirmar de nuevo.
    - Si sale bien: guardar `PedidoCreado` en `sessionStorage` (`ls:ultimo-pedido`), **vaciar el carrito** y navegar a `/pedido/confirmado` con `replace: true`.
-7. **`src/lib/whatsapp.ts`** (D-01): `armarMensaje(pedido)` con la plantilla fija del prototipo (`¡Hola! Te escribo por mi pedido {pedido} de L&S.` …, ítems `• {cant} × {nombre} — {subtotal}`), `enlaceWhatsApp(numero, mensaje)` → `https://wa.me/{solo dígitos}?text={encodeURIComponent}`, `formatearTelefonoTienda(digitos)` para mostrar (ej. `+54 9 11 0000-0000`, si no se puede, `+{dígitos}`).
+7. **`src/lib/whatsapp.ts`** (D-34, **ya existe**): `armarMensaje(plantilla, pedido)` arma el texto con la plantilla guardada en `settings` (servicio `obtenerAjustesWhatsApp()` en `src/services/ajustes.ts`); ítems `• {cant} × {nombre} — {subtotal}`. `enlaceWhatsApp(numero, mensaje)` también existe (arma `https://wa.me/{solo dígitos}?text={encodeURIComponent}`). Falta agregar `formatearTelefonoTienda(digitos)` para mostrar (ej. `+54 9 11 0000-0000`, si no se puede, `+{dígitos}`).
 8. **`PedidoConfirmadoPage`**: lee el pedido de `sessionStorage` (si no hay, redirige a `/`). El botón es un `<a href target="_blank" rel="noopener">`: el pedido **ya está guardado** antes de que el cliente lo toque (regla no negociable).
 9. Conectar el detalle (etapa 4) al carrito: stepper y botón reales, notas de "ya tenés N".
 10. **Puntos de extensión** (solo comentarios, sin implementar): en `crearPedido`, dónde iría el token de captcha; en `carrito.ts`, dónde iría un tope por pedido.
@@ -52,7 +52,7 @@ Referencia: `prototype/src/main.html`, bloques `c.isDetail` (barra de agregar), 
 - [ ] El `localStorage` del carrito solo contiene `productoId` y `cantidad` (verificar en DevTools).
 - [ ] No se puede agregar más que el stock disponible; el carrito sobrevive a recargar y se sincroniza entre pestañas.
 - [ ] Pedido válido: aparece en `orders` como `pendiente` con `precio_unitario` y `costo_unitario` de la base; el stock **no** cambia; se ve la pantalla de éxito con `#NNNN`; el carrito queda vacío.
-- [ ] El enlace abre `https://wa.me/<VITE_WHATSAPP_NUMBER>?text=…` con el mensaje correcto (número, ítems, total, nombre).
+- [ ] El enlace abre `https://wa.me/<número de Ajustes>?text=…` con el mensaje correcto (número, ítems, total, nombre).
 - [ ] Stock bajado desde el panel (u otra pestaña) entre agregar y confirmar → la base rechaza, se muestra la alerta y **no** se crea el pedido; "Ajustar al stock disponible" deja confirmar.
 - [ ] Precio cambiado entre abrir Confirmar y confirmar → alerta con total nuevo y no se crea el pedido hasta reconfirmar.
 - [ ] Nombre o teléfono inválidos → errores del prototipo (con el ajuste de D-25), sin llamar a la base.
@@ -69,7 +69,7 @@ Referencia: `prototype/src/main.html`, bloques `c.isDetail` (barra de agregar), 
 ## Riesgos
 - **Pedidos falsos o masivos**: fuera del MVP (captcha, límite por IP y topes en etapa 9). El stock no se bloquea porque se descuenta al vender.
 - **Bloqueador de ventanas emergentes**: por eso WhatsApp se abre con un link que toca el cliente, no automáticamente.
-- **Número de WhatsApp mal configurado**: validar `VITE_WHATSAPP_NUMBER` en `env.ts` (solo dígitos, 10 a 15) y no mostrar el botón si falta.
+- **Número de WhatsApp sin configurar**: `settings.whatsapp_numero` arranca vacío. Si está vacío, no mostrar el botón de WhatsApp (el pedido igual queda guardado) y avisar en el panel.
 
 ## Definición de terminado
 Criterios cumplidos, PR con CI en verde, squash merge a `develop`, `develop` en verde, `PLAN.md` actualizado.

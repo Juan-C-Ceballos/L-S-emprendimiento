@@ -143,6 +143,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"settings": {
+                  Row: {
+                    "id": boolean,"updated_at": string,"whatsapp_mensaje": string,"whatsapp_numero": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: boolean,"updated_at"?: string,"whatsapp_mensaje": string,"whatsapp_numero"?: string
+                  }
+                  Update: {
+                    "id"?: boolean,"updated_at"?: string,"whatsapp_mensaje"?: string,"whatsapp_numero"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"tags": {
                   Row: {
                     "created_at": string,"id": string,"nombre": string

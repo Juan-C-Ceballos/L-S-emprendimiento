@@ -9,6 +9,8 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 ## Contradicciones entre el prototipo y el documento
 
 ### D-01 · Ajustes: número y mensaje de WhatsApp editables
+> **Reemplazada por D-34** (2026-10-15): el número y el mensaje se editan desde Ajustes.
+
 - **Prototipo**: la pantalla Ajustes permite editar el número de WhatsApp y la plantilla del mensaje (con `{pedido}`, `{items}`, `{total}`, `{nombre}`), y los guarda.
 - **Documento y pedido inicial**: el número sale de una variable de entorno. El documento no menciona plantillas editables.
 - **Decisión**: número en `VITE_WHATSAPP_NUMBER` (solo dígitos, con código de país, ej. `549…`). Plantilla **fija en código** (`src/lib/whatsapp.ts`), igual al mensaje por defecto del prototipo. Ajustes muestra el número **en modo lectura** con la nota "Se cambia en la configuración del sitio" y conserva solo la gestión de etiquetas.
@@ -172,6 +174,15 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Header y barra lateral** siguen con la marca en texto (Bricolage, `&` en bronce): el logo con marco no se lee a 27–32 px de alto.
 - **Paleta**: el acento `vino` pasa a `bronce` `#8C5E22` (el bronce de las letras del logo, `#986828`, apenas oscurecido para llegar a 4,5:1 sobre el fondo) y los rosados pasan a tonos champán; el fondo `crema` pasa de rosado a marfil. Los tokens se renombraron (`vino` → `bronce`, `rosa*` → `champan*`). Tabla en `docs/prototype-analysis.md` §3. Contrastes WCAG: bronce 5,2:1 sobre `crema` y 4,6:1 sobre `champan`; `texto-suave` 5,2:1 y 4,5:1; blanco sobre bronce 5,6:1. Verdes de WhatsApp, rojos de error y pills de estado no cambian.
 - **Tipografías**: no cambian. El logo usa una serif de alto contraste; si se quisiera llevarla al sitio, es una decisión aparte.
+
+### D-34 · Número y mensaje de WhatsApp editables desde Ajustes (reemplaza D-01)
+- **Pedido del usuario**: poder cambiar el número al que se contacta y la plantilla del mensaje desde el panel, como en el prototipo.
+- **Tabla `settings`** (migración `ajustes_whatsapp`): una sola fila (`id boolean primary key check (id)`), columnas `whatsapp_numero` (solo dígitos, 10 a 15, o vacío = sin configurar) y `whatsapp_mensaje` (1 a 1000 caracteres, con `{items}` obligatorio). CHECKs en la base además de Zod en el formulario. Columnas tipadas en vez de clave/valor: son dos datos fijos y así la base valida cada uno.
+- **Permisos**: lectura pública (anon y authenticated), porque el sitio necesita número y mensaje para armar el link de WhatsApp y el número igual queda a la vista en `wa.me`. `update` solo de esas dos columnas, solo la administradora (RLS con `es_admin()`). Nadie inserta ni borra: la fila la crea la migración. **Ojo**: Supabase da todos los permisos a las tablas nuevas por defecto, así que la migración hace `revoke all` antes de los `grant` (el test de estructura lo detectó). Toda tabla nueva tiene que hacer lo mismo.
+- **`VITE_WHATSAPP_NUMBER` se elimina** (de `env.ts`, `.env.example` y los planes): el número vive en la base. Al crear `ls-prod` (etapa 8) hay que cargarlo en Ajustes antes de abrir la tienda.
+- **Vista previa** en Ajustes con un pedido de ejemplo fijo (`PEDIDO_EJEMPLO`), no con el último pedido real como el prototipo: no hay servicio de pedidos todavía (etapa 6) y así la pantalla no depende de que existan pedidos.
+- **"Insertar dato"** inserta la clave donde está el cursor (el prototipo la agrega al final).
+- La sección "Etiquetas" de Ajustes sigue siendo de la etapa 7 (D-02).
 
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.

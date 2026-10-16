@@ -184,6 +184,17 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **"Insertar dato"** inserta la clave donde está el cursor (el prototipo la agrega al final).
 - La sección "Etiquetas" de Ajustes sigue siendo de la etapa 7 (D-02).
 
+### D-35 · Panel de productos (etapa 3)
+- **Prueba pgTAP** `08_storage_y_guardar_producto.test.sql` (el plan decía `07_`, que ya usa `07_settings`).
+- **Storage**: además de `insert`, `update` y `delete`, la administradora tiene una política de `select` sobre los objetos del bucket: la API de Storage la necesita para borrar (y para `upsert`). Anon no tiene ninguna, así que no puede listar el bucket (verificado: lista vacía y 403 al subir). Supabase no deja borrar filas de `storage.objects` por SQL (`storage.protect_delete`): el borrado se prueba desde la app.
+- **Fotos sin guardar**: el formulario recuerda las fotos subidas en esa pantalla. Si se sale sin guardar (Cancelar, "Volver", otra pestaña del panel o el botón atrás), se borran al desmontar el formulario; si se quita una foto nueva, se borra en el momento. Las imágenes que ya estaban guardadas solo se borran al guardar, con los `paths_quitados` de la RPC. Cerrar la pestaña del navegador sigue dejando huérfanas (riesgo aceptado en D-16).
+- **`borrarArchivos` ignora las rutas `/seed/…`** (D-27): editar un producto de las semillas y quitarle una imagen no intenta borrar nada de Storage.
+- **Subida**: `cacheControl` de un año (los nombres son UUID nuevos en cada subida, nunca se reemplaza un archivo) y fondo blanco al pasar a JPEG, para que un PNG con transparencia no quede negro.
+- **`BuscadorConEspera`** llama a la versión más recente de `onBuscar` cuando vence la espera: si mientras se tipeaba cambió el filtro, la búsqueda no lo pisa (bug encontrado en el navegador; prueba de regresión en `ProductosPage.test.tsx`).
+- **Botón de guardar** dice "Subiendo fotos…" y queda deshabilitado mientras sube alguna foto.
+- **`ImagenProducto`** suma `path` y `pathMiniatura` (el formulario los manda de vuelta a la RPC). Un producto sin fila de costo muestra "costo sin cargar" en la lista (no debería pasar: la RPC siempre lo guarda).
+- **Tokens nuevos** de colores del prototipo que faltaban: `icono-suave`, `icono-off`, `borde-punteado`, `fila-hover`, `margen-neutro`, `texto-chip-activo`.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

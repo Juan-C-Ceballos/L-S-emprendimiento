@@ -18,6 +18,9 @@ export type ImagenProducto = {
   urlMiniatura: string
   /** 0 = portada. */
   orden: FilaImagen['orden']
+  /** Ruta del detalle dentro del bucket `productos` (o `/seed/…` en las semillas, D-27). */
+  path: FilaImagen['path']
+  pathMiniatura: FilaImagen['path_miniatura']
 }
 
 /** Lo que ve el cliente en el catálogo y en el detalle. Nunca incluye costos. */
@@ -145,4 +148,25 @@ export type AjustesWhatsApp = {
   numero: string
   /** Plantilla con `{pedido}`, `{items}`, `{total}` y `{nombre}`. */
   mensaje: string
+}
+
+/** Etiqueta con la cantidad de productos que la usan (autocompletado del formulario). */
+export type EtiquetaConUso = {
+  nombre: string
+  usos: number
+}
+
+/** Lo que manda el formulario de producto a `guardar_producto` (D-16). */
+export type DatosProducto = {
+  /** Generado en el navegador al crear (`crypto.randomUUID()`), así las fotos se suben antes. */
+  id: string
+  nombre: string
+  descripcion: string
+  precio: number
+  costo: number
+  stock: number
+  activo: boolean
+  etiquetas: string[]
+  /** En orden: la primera es la portada. */
+  imagenes: { path: string; pathMiniatura: string }[]
 }

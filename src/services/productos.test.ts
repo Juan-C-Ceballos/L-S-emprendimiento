@@ -1,11 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { guardarProducto } from './productos'
+import { guardarProducto, listarCatalogo, obtenerProductoPublico } from './productos'
 import { borrarArchivos } from './imagenes'
 import type { DatosProducto } from '@/types/dominio'
 
 const rpc = vi.hoisted(() => vi.fn())
+// Consulta encadenable de supabase-js: cada método la devuelve a ella misma y `await` da `respuesta`.
+const consulta = vi.hoisted(() => {
+  const c = {
+    respuesta: { data: null as unknown, error: null as unknown },
+    llamadas: [] as [string, unknown[]][],
+    registrar(metodo: string, args: unknown[]) {
+      c.llamadas.push([metodo, args])
+      return c
+    },
+    from: (...args: unknown[]) => c.registrar('from', args),
+    select: (...args: unknown[]) => c.registrar('select', args),
+    eq: (...args: unknown[]) => c.registrar('eq', args),
+    order: (...args: unknown[]) => c.registrar('order', args),
+    maybeSingle: () => c.registrar('maybeSingle', []),
+    then: (resolver: (v: unknown) => unknown) => Promise.resolve(c.respuesta).then(resolver),
+  }
+  return c
+})
 
-vi.mock('@/lib/supabase', () => ({ obtenerSupabase: () => ({ rpc }) }))
+vi.mock('@/lib/supabase', () => ({ obtenerSupabase: () => ({ rpc, from: consulta.from }) }))
 vi.mock('./imagenes', () => ({ borrarArchivos: vi.fn(), urlPublica: (p: string) => p }))
 
 const borrarMock = vi.mocked(borrarArchivos)
@@ -26,6 +44,8 @@ const DATOS: DatosProducto = {
 }
 
 beforeEach(() => {
+  consulta.respuesta = { data: null, error: null }
+  consulta.llamadas = []
   rpc.mockReset()
   borrarMock.mockReset()
   borrarMock.mockResolvedValue(undefined)
@@ -70,5 +90,101 @@ describe('guardarProducto', () => {
     await expect(guardarProducto(DATOS)).resolves.toBe(DATOS.id)
     expect(consola).toHaveBeenCalled()
     consola.mockRestore()
+  })
+})
+
+const tag = (id: string, nombre: string, creada = '2026-10-15T00:00:00Z') => ({
+  tags: { id, nombre, created_at: creada },
+})
+
+describe('listarCatalogo', () => {
+  it('portada = menor orden, etiquetas planas en orden de creación y agotado', async () => {
+    consulta.respuesta = {
+      data: [
+        {
+          id: 'p1',
+          nombre: 'Aros gota martillada',
+          precio: 16800,
+          stock: 0,
+          product_images: [
+            { path_miniatura: '/seed/b-min.svg', orden: 1 },
+            { path_miniatura: '/seed/a-min.svg', orden: 0 },
+          ],
+          product_tags: [tag('t-6', 'dorado'), tag('t-1', 'aros')],
+        },
+        {
+          id: 'p2',
+          nombre: 'Anillo nuevo',
+          precio: 9000,
+          stock: 3,
+          product_images: [],
+          product_tags: [tag('t-0', 'zirconia', '2026-10-16T00:00:00Z'), tag('t-1', 'aros')],
+        },
+      ],
+      error: null,
+    }
+
+    await expect(listarCatalogo()).resolves.toEqual({
+      productos: [
+        {
+          id: 'p1',
+          nombre: 'Aros gota martillada',
+          precio: 16800,
+          stock: 0,
+          agotado: true,
+          portadaUrl: '/seed/a-min.svg',
+          etiquetas: ['aros', 'dorado'],
+        },
+        {
+          id: 'p2',
+          nombre: 'Anillo nuevo',
+          precio: 9000,
+          stock: 3,
+          agotado: false,
+          portadaUrl: null,
+          etiquetas: ['aros', 'zirconia'],
+        },
+      ],
+      etiquetas: ['aros', 'dorado', 'zirconia'],
+    })
+    expect(consulta.llamadas).toContainEqual(['eq', ['activo', true]])
+    const select = consulta.llamadas.find(([m]) => m === 'select')?.[1][0]
+    expect(select).not.toMatch(/cost/)
+  })
+
+  it('un error de la base se muestra con el mensaje de la vidriera', async () => {
+    consulta.respuesta = { data: null, error: { code: '500', message: 'x' } }
+    await expect(listarCatalogo()).rejects.toMatchObject({ message: 'No pudimos cargar la vidriera.' })
+  })
+})
+
+describe('obtenerProductoPublico', () => {
+  it('ordena las imágenes y filtra por activo', async () => {
+    consulta.respuesta = {
+      data: {
+        id: 'p1',
+        nombre: 'Collar corazón',
+        descripcion: 'Dije de corazón.',
+        precio: 19800,
+        stock: 7,
+        product_images: [
+          { id: 'i2', path: 'b.jpg', path_miniatura: 'b-min.jpg', orden: 1 },
+          { id: 'i1', path: 'a.jpg', path_miniatura: 'a-min.jpg', orden: 0 },
+        ],
+        product_tags: [tag('t-3', 'collares')],
+      },
+      error: null,
+    }
+    const producto = await obtenerProductoPublico('p1')
+    expect(producto?.imagenes.map((i) => i.url)).toEqual(['a.jpg', 'b.jpg'])
+    expect(producto?.etiquetas).toEqual(['collares'])
+    expect(consulta.llamadas).toContainEqual(['eq', ['activo', true]])
+  })
+
+  it('inexistente, inactivo o id con formato inválido → null', async () => {
+    consulta.respuesta = { data: null, error: null }
+    await expect(obtenerProductoPublico('p9')).resolves.toBeNull()
+    consulta.respuesta = { data: null, error: { code: '22P02', message: 'uuid inválido' } }
+    await expect(obtenerProductoPublico('abc')).resolves.toBeNull()
   })
 })

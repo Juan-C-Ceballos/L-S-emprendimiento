@@ -1,12 +1,10 @@
 import { useState } from 'react'
+import { claseChip } from '@/components/estilos'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { normalizarEtiqueta } from '@/lib/formato'
 import { sugerirEtiquetas } from '@/lib/productos'
 import type { EtiquetaConUso } from '@/types/dominio'
-
-export const claseChip =
-  'inline-flex min-h-10 items-center gap-[7px] rounded-full border border-borde-chip px-[15px] text-sm font-medium transition-colors hover:border-tinta'
 
 type Props = {
   elegidas: string[]

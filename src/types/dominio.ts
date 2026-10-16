@@ -36,6 +36,26 @@ export type ProductoCatalogo = {
   etiquetas: string[]
 }
 
+/** Tarjeta de la grilla del catálogo: solo la miniatura de la portada. */
+export type ProductoVidriera = {
+  id: FilaProducto['id']
+  nombre: FilaProducto['nombre']
+  precio: FilaProducto['precio']
+  stock: FilaProducto['stock']
+  agotado: boolean
+  /** Miniatura (400 px) de la imagen de menor `orden`; `null` si no tiene imágenes. */
+  portadaUrl: string | null
+  /** En el orden de `Vidriera.etiquetas`. */
+  etiquetas: string[]
+}
+
+/** Lo que carga el catálogo una sola vez (D-11). */
+export type Vidriera = {
+  productos: ProductoVidriera[]
+  /** Etiquetas que usa algún producto activo, de la más vieja a la más nueva (D-36). */
+  etiquetas: string[]
+}
+
 /** Producto completo para el panel de la administradora. */
 export type Producto = ProductoCatalogo & {
   activo: FilaProducto['activo']

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { claseBotonIcono } from '@/components/panel/estilos'
+import { claseBotonIcono } from '@/components/estilos'
 
 type Props = {
   titulo: string

@@ -27,6 +27,7 @@
 
 ## 6. Otros ítems del documento
 - **Filtro "pendientes de más de 7 días"** en Pedidos: filtro en `src/lib/pedidos.ts` + chip nueva. Muy chico.
+- **Aviso de WhatsApp sin configurar** en el Resumen: si `settings.whatsapp_numero` está vacío, una tarjeta "Cargá el número de WhatsApp en Ajustes" (los clientes igual pueden pedir, pero no ven el botón; D-37, D-39). Muy chico.
 - **Colecciones o sets**: tabla `collections` + `collection_products`, con RLS como `products`.
 - **Pagos online y variantes** (talle, color): tablas nuevas (`product_variants`, `payments`) sin tocar las existentes; `order_items` sumaría `variant_id` nullable.
 - ~~**Ajustes editables**~~: adelantado al MVP (D-34).

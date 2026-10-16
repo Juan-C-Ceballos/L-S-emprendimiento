@@ -4,8 +4,8 @@ select plan(8);
 
 select tables_are(
   'public',
-  array['products', 'product_images', 'tags', 'product_tags', 'product_costs', 'orders', 'order_items'],
-  'existen las 7 tablas del MVP'
+  array['products', 'product_images', 'tags', 'product_tags', 'product_costs', 'orders', 'order_items', 'settings'],
+  'existen las 8 tablas del MVP'
 );
 
 select is(

@@ -47,7 +47,7 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 | (Opcional) Separar el ruleset: `develop` solo squash, `main` solo merge commit | Antes de la primera release (8) | Opcional |
 | Instalar Docker Desktop y dejarlo corriendo | 1 | Hecho: Docker Desktop 29.7, Supabase local funcionando |
 | Proyecto de Supabase **de desarrollo**: `project ref`, URL, clave anon, contraseña de la base, token personal (`SUPABASE_ACCESS_TOKEN`) | 1 (al mergear) | Hecho (2026-10-15): `ls-dev`, ref `nhsjichuumyflklqkhxw`, migraciones aplicadas y verificadas por la API con la clave pública (anónimo sin acceso a costos ni pedidos, registro desactivado). La clave pública va en `.env.local` y en las variables del hosting, no en el repo; la contraseña y el token quedan solo en la máquina del usuario |
-| Número de WhatsApp de la tienda | 5 | Pendiente |
+| Número de WhatsApp de la tienda | 5 | Lo carga la administradora en Ajustes (D-34) después de aplicar la migración `ajustes_whatsapp` a `ls-dev` |
 | Email de la administradora | 2 (dev) / 8 (prod) | Dev hecho (2026-10-15): `1accesorioslis@gmail.com`, rol `admin`, creada por el usuario. Prod: en la etapa 8 |
 | Proyecto de Supabase **de producción** + cuenta de Cloudflare conectada al repositorio de GitHub | 8 | Pendiente |
 
@@ -59,6 +59,11 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-15 · Ajustes de WhatsApp · `feature/ajustes-whatsapp` (sobre `feature/marca-logo-paleta`)
+- Hecho: migración `ajustes_whatsapp` (tabla `settings` de una fila con RLS: lectura pública, edición solo admin) + `supabase/tests/07_settings.test.sql`; tipos regenerados. `src/lib/whatsapp.ts` (`armarMensaje`, `enlaceWhatsApp`, mensaje original, pedido de ejemplo), `src/lib/esquemas.ts` (Zod con los mensajes del prototipo), `src/services/ajustes.ts`, y `AjustesPage` con número, mensaje, "Insertar dato", "Volver al mensaje original", vista previa, "Descartar" y "Guardar número y mensaje". Se eliminó `VITE_WHATSAPP_NUMBER`. D-34 (reemplaza D-01); planes de las etapas 5, 7, 8 y 9 actualizados.
+- Verificado en local: `db:reset`, `db:test` 111/111, `db:lint`; lint, typecheck, 60 pruebas y build. En el navegador contra Supabase local: guardar el número `+54 9 351 555-1234` lo deja como `5493515551234` y sobrevive a recargar; vista previa y tabs en 375 px.
+- Pendiente: PR contra `develop` **después** del de `feature/marca-logo-paleta` (está apilada encima). Al mergear, aplicar la migración a `ls-dev` (`npx supabase db push --dry-run` y `npx supabase db push`) y cargar el número real en Ajustes.
 
 ### 2026-10-15 · Marca · `feature/marca-logo-paleta`
 - Hecho: logo del emprendimiento recortado en cuadrado según su marco (`public/logo.webp`, fondo transparente) y usado en el login; favicon e ícono de iOS con el monograma; paleta bronce/champán en `src/index.css` con tokens renombrados (`vino` → `bronce`, `rosa*` → `champan*`). D-33.

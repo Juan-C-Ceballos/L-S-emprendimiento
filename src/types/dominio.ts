@@ -138,3 +138,11 @@ export type CambioStock = {
 export type SesionAdmin = {
   email: string
 }
+
+/** Ajustes > WhatsApp de la tienda (tabla `settings`, D-34). */
+export type AjustesWhatsApp = {
+  /** Solo dígitos, con código de país (ej. `5491100000000`). Vacío si todavía no se configuró. */
+  numero: string
+  /** Plantilla con `{pedido}`, `{items}`, `{total}` y `{nombre}`. */
+  mensaje: string
+}

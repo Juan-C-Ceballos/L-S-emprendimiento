@@ -129,7 +129,7 @@ El resto de los textos está en `main.html`; buscar por la cadena visible.
 | Carrito en el estado del componente | `cart` | `localStorage` con `[{productoId, cantidad}]`, sin precios |
 | Validación de stock del carrito contra el estado | `stockIssues()` | Relectura de productos desde la base en Carrito/Confirmar + validación final en `crear_pedido` |
 | Crear pedido con `nextNo` y precios del estado | `confirmOrder()` | RPC `crear_pedido` (security definer): precios y costos reales, número correlativo de la base |
-| Mensaje y enlace de WhatsApp con número editable | `waText()`, `settings.phone` | `src/lib/whatsapp.ts` con plantilla fija y `VITE_WHATSAPP_NUMBER` |
+| Mensaje y enlace de WhatsApp con número editable | `waText()`, `settings.phone` | `src/lib/whatsapp.ts` + tabla `settings` editable en Ajustes (D-34) |
 | Marcar vendido / cancelar mutando arrays | `sell()`, `cancelOrder()` | RPC `marcar_vendido` y `cancelar_pedido` (una transacción, con bloqueo de filas) |
 | Guardar producto mutando arrays | `saveProduct()` | Subida de imágenes a Storage + RPC `guardar_producto` (producto, costo, etiquetas e imágenes en una transacción) |
 | Ajustes de número y plantilla | `saveSettings()` | **No se implementa** (D-01). Número por variable de entorno, plantilla en código |

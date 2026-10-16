@@ -3,7 +3,7 @@
 > Leé antes `CLAUDE.md`. Este archivo alcanza para ejecutar la etapa.
 
 ## Objetivo
-La pantalla de inicio del panel muestra lo que hay que atender hoy: pedidos pendientes (cantidad y monto), stock bajo, y ventas y ganancia del mes. Ajustes permite gestionar las etiquetas globalmente (crear, renombrar con unión, eliminar) y muestra el número de WhatsApp configurado (solo lectura, D-01).
+La pantalla de inicio del panel muestra lo que hay que atender hoy: pedidos pendientes (cantidad y monto), stock bajo, y ventas y ganancia del mes. Ajustes permite gestionar las etiquetas globalmente (crear, renombrar con unión, eliminar) (el número y el mensaje de WhatsApp ya se editan ahí desde D-34).
 
 ## Rama
 `feature/07-resumen-ajustes` desde `develop`.
@@ -20,7 +20,7 @@ Referencia: `prototype/src/main.html`, bloques `a.isHome` y `a.isSettings`; lóg
   - "Para atender" (3 pendientes más recientes, filas como en Pedidos) + "Ver pedidos"; vacío "Todo al día".
   - "Para reponer" (activos con stock ≤ 3, ordenados por stock ascendente, con miniatura y pill) + "Ver productos"; vacío "Todos los productos activos tienen más de 3 unidades." Tocar uno abre su edición (`/admin/productos/:id?desde=resumen`).
 - **Ajustes** `/admin/ajustes`:
-  - Sección "WhatsApp de la tienda" **en modo lectura**: el número formateado y el texto "Se cambia en la configuración del sitio (variable `VITE_WHATSAPP_NUMBER`)." y la vista previa del mensaje con el último pedido (o uno de ejemplo). No hay edición de plantilla (D-01).
+  - Secciones "WhatsApp de la tienda" y "Mensaje de WhatsApp": **ya implementadas** (D-34, `AjustesPage`). Esta etapa solo reemplaza el placeholder de "Etiquetas".
   - Sección "Etiquetas": "Renombrá o eliminá etiquetas: el cambio se aplica a todos los productos que la usan.", "Nueva etiqueta" + "Agregar" (errores "Escribí el nombre de la etiqueta.", "«x» ya existe."; toast "Creaste «x». Asignala desde cada producto."), lista ordenada alfabéticamente con "N productos", lápiz (renombrar inline, Enter guarda, Escape cancela, hint "Ya existe «x»: al guardar se unen las dos."), tacho (confirmación "¿Eliminar «x»?" con "Se va a quitar de N productos. Los productos no se borran." o "Ningún producto la usa.", "No" / "Sí, eliminar"). Toasts del prototipo.
 
 ## Tareas
@@ -47,7 +47,7 @@ Referencia: `prototype/src/main.html`, bloques `a.isHome` y `a.isSettings`; lóg
 - [ ] Cada stat lleva a la lista filtrada correspondiente.
 - [ ] Renombrar "acero" a "dorado" une las etiquetas: los productos que tenían ambas quedan con una sola y el catálogo público refleja el cambio.
 - [ ] Eliminar una etiqueta la quita de todos los productos sin borrar productos.
-- [ ] Ajustes muestra el número de WhatsApp configurado y no permite editarlo.
+- [ ] Ajustes sigue permitiendo editar número y mensaje de WhatsApp (D-34) además de las etiquetas.
 - [ ] Lint, typecheck, tests, build y pgTAP en verde.
 
 ## Pruebas requeridas

@@ -11,13 +11,7 @@ const esquemaEnv = z.object({
     .string({ error: 'falta la clave pública (anon) del proyecto' })
     .trim()
     .min(1, { error: 'falta la clave pública (anon) del proyecto' }),
-  // Opcional hasta la etapa 5 (pedido por WhatsApp).
-  VITE_WHATSAPP_NUMBER: z
-    .string()
-    .trim()
-    .regex(/^\d{8,15}$/, { error: 'solo dígitos, con código de país (ej. 549XXXXXXXXXX)' })
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
+  // El número de WhatsApp no va acá: se edita en Ajustes y vive en la tabla settings (D-34).
 })
 
 export type Env = z.infer<typeof esquemaEnv>

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatearFechaCorta,
+  formatearFechaResumen,
   formatearNumeroPedido,
   formatearPrecio,
+  nombreMes,
   normalizarEtiqueta,
   normalizarTexto,
 } from './formato'
@@ -42,5 +44,15 @@ describe('normalizarTexto', () => {
 describe('normalizarEtiqueta', () => {
   it('pasa a minúsculas y compacta espacios', () => {
     expect(normalizarEtiqueta('  Acero   Quirúrgico ')).toBe('acero quirúrgico')
+  })
+})
+
+describe('fechas del Resumen', () => {
+  it('nombre del mes y fecha larga en hora de Buenos Aires', () => {
+    expect(nombreMes('2026-10')).toBe('octubre')
+    expect(nombreMes('2026-01')).toBe('enero')
+    expect(formatearFechaResumen(new Date('2026-10-15T15:00:00Z'))).toBe('Jueves 15 de octubre')
+    // 1/11 a las 01:30 UTC todavía es 31/10 en Argentina.
+    expect(formatearFechaResumen(new Date('2026-11-01T01:30:00Z'))).toBe('Sábado 31 de octubre')
   })
 })

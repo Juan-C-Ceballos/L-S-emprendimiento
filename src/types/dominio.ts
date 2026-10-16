@@ -233,3 +233,22 @@ export type DatosProducto = {
   /** En orden: la primera es la portada. */
   imagenes: { path: string; pathMiniatura: string }[]
 }
+
+/** Etiqueta con su id, para gestionarla desde Ajustes. */
+export type EtiquetaAdmin = EtiquetaConUso & {
+  id: string
+}
+
+/** Qué hizo `renombrar_etiqueta`: si el nombre ya existía, las dos se unieron en `id`. */
+export type ResultadoRenombrar = {
+  resultado: 'renombrada' | 'unida' | 'sin_cambios'
+  id: string
+}
+
+/** Números del Resumen del panel (`resumen_panel`). */
+export type ResumenPanel = {
+  pendientes: { cantidad: number; monto: number }
+  stockBajo: { cantidad: number; agotados: number }
+  /** Mes calendario en hora de Buenos Aires; `mes` es `AAAA-MM`. */
+  ventasMes: { mes: string; cantidad: number; total: number; ganancia: number }
+}

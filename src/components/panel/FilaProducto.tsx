@@ -4,8 +4,16 @@ import { formatearPrecio } from '@/lib/formato'
 import { cn } from '@/lib/utils'
 import type { Producto } from '@/types/dominio'
 
+type Props = {
+  producto: Producto
+  /** De dónde se abre la edición (`?desde=resumen` hace que "Volver" regrese al Resumen). */
+  desde?: string
+  /** `resumen`: solo nombre, precio y stock (prototipo: "Para reponer"). */
+  variante?: 'lista' | 'resumen'
+}
+
 /** Fila de la lista de productos del panel (prototipo: `.row`, `prow`). */
-export function FilaProducto({ producto, desde }: { producto: Producto; desde?: string }) {
+export function FilaProducto({ producto, desde, variante = 'lista' }: Props) {
   const portada = producto.imagenes[0]
   const destino = `/admin/productos/${producto.id}${desde === undefined ? '' : `?desde=${desde}`}`
   return (
@@ -31,13 +39,19 @@ export function FilaProducto({ producto, desde }: { producto: Producto; desde?: 
       </span>
       <span className={cn('flex min-w-0 flex-1 flex-col gap-px', !producto.activo && 'opacity-50')}>
         <span className="truncate text-[15px] font-semibold">{producto.nombre}</span>
-        <span className="text-[12.5px] text-texto-suave tabular-nums">
-          {formatearPrecio(producto.precio)} · costo{' '}
-          {producto.costo === null ? 'sin cargar' : formatearPrecio(producto.costo)}
-        </span>
-        <span className="text-[12.5px] text-texto-suave">
-          {producto.etiquetas.length > 0 ? producto.etiquetas.join(' · ') : 'Sin etiquetas'}
-        </span>
+        {variante === 'resumen' ? (
+          <span className="text-[12.5px] text-texto-suave tabular-nums">{formatearPrecio(producto.precio)}</span>
+        ) : (
+          <>
+            <span className="text-[12.5px] text-texto-suave tabular-nums">
+              {formatearPrecio(producto.precio)} · costo{' '}
+              {producto.costo === null ? 'sin cargar' : formatearPrecio(producto.costo)}
+            </span>
+            <span className="text-[12.5px] text-texto-suave">
+              {producto.etiquetas.length > 0 ? producto.etiquetas.join(' · ') : 'Sin etiquetas'}
+            </span>
+          </>
+        )}
       </span>
       <span className="flex flex-none flex-col items-end gap-[5px]">
         <PillStock stock={producto.stock} />

@@ -1,4 +1,5 @@
 import { useRef, useState, type SubmitEvent } from 'react'
+import { GestionEtiquetas } from '@/components/panel/GestionEtiquetas'
 import { useToast } from '@/components/useToast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -44,10 +45,7 @@ export function AjustesPage() {
       )}
       {ajustes.estado === 'listo' && <FormWhatsApp guardados={ajustes.datos} />}
 
-      <section className={`${claseSeccion} border-b-0`}>
-        <h2 className={claseTituloSeccion}>Etiquetas</h2>
-        <p className={claseHint}>La gestión de etiquetas se completa en la etapa 7.</p>
-      </section>
+      <GestionEtiquetas />
     </div>
   )
 }

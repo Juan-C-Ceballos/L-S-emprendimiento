@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { BuscadorConEspera } from '@/components/BuscadorConEspera'
-import { claseChip } from '@/components/panel/EditorEtiquetas'
+import { claseChip, claseChipActiva } from '@/components/estilos'
 import { FilaProducto } from '@/components/panel/FilaProducto'
 import { Button } from '@/components/ui/button'
 import { useAsync } from '@/lib/useAsync'
@@ -74,7 +74,7 @@ export function ProductosPage() {
               className={cn(
                 claseChip,
                 'min-h-11 flex-none',
-                filtro === f.valor && 'border-tinta bg-tinta text-white hover:border-tinta',
+                filtro === f.valor && claseChipActiva,
               )}
               onClick={() => {
                 actualizar({ filtro: f.valor })

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { claseBotonIcono } from '@/components/panel/estilos'
+import { claseBotonIcono } from '@/components/estilos'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 

@@ -195,6 +195,19 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **`ImagenProducto`** suma `path` y `pathMiniatura` (el formulario los manda de vuelta a la RPC). Un producto sin fila de costo muestra "costo sin cargar" en la lista (no debería pasar: la RPC siempre lo guarda).
 - **Tokens nuevos** de colores del prototipo que faltaban: `icono-suave`, `icono-off`, `borde-punteado`, `fila-hover`, `margen-neutro`, `texto-chip-activo`.
 
+### D-36 · Catálogo público (etapa 4)
+- **`listarCatalogo()` devuelve `Vidriera`** (`{ productos, etiquetas }`) y no una lista: las chips necesitan el orden global de las etiquetas. La tarjeta es `ProductoVidriera` (`portadaUrl`, `agotado`); el detalle reutiliza `ProductoCatalogo`.
+- **Orden**: productos de más nuevo a más viejo (`created_at desc`, después `id`); etiquetas (chips y detalle) de la más vieja a la más nueva (`created_at`, después `id`). Con las semillas, que comparten `created_at`, el desempate por `id` reproduce el orden del prototipo. Los agotados van al final igual (`aplicarFiltros`).
+- **Comas literales en la URL** (`?tags=aros,dorado`): la página navega con `navigate({ search })` porque `setSearchParams` las codifica como `%2C`. Una etiqueta con coma en el nombre se partiría en dos al leer la URL (el panel no las prohíbe; caso raro, se acepta).
+- **Etiquetas desconocidas en la URL** (link viejo o mal escrito) se ignoran al filtrar, pero no se reescribe la URL.
+- **"Agregar al carrito" deshabilitado** hasta la etapa 5; el stepper ya funciona con tope en el stock. Agotado: botón deshabilitado "Agotado", como el prototipo.
+- **Accesibilidad**: chips disponibles con `aria-label` "aros, 4 piezas" (sin eso el nombre accesible quedaba "aros4"); etiquetas del detalle de 34 px como el prototipo, con un `::before` que lleva la zona táctil a 44 px; el buscador de etiquetas usa 16 px (no 15) para evitar el zoom de iOS.
+- **Header "Volver"**: vuelve a la entrada anterior del historial (el catálogo recupera filtros y scroll con `ScrollRestoration`); si se entró directo por un link, va a `/`.
+- **Título de la pestaña** con `useTituloDocumento` (efecto). No se usa `<title>` de React 19 porque competiría con el de `index.html`.
+- **Vidriera vacía** (sin productos activos): "Todavía no hay piezas" (no está en el prototipo). Error de carga: "No pudimos cargar la vidriera." + "Reintentar".
+- **`og.jpg`** se generó con `scripts/generar-og.html` (canvas con el logo, los tokens y las fuentes del sitio). `og:image` queda relativa; la etapa 8 la completa con el dominio.
+- **Estilos compartidos** (`claseBotonIcono`, `claseChip`, `claseChipActiva`, `claseLink`) pasan a `src/components/estilos.ts` (antes en `components/panel/`), porque los usan el catálogo y el panel.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

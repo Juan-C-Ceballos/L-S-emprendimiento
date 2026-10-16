@@ -1,0 +1,82 @@
+<!doctype html>
+<!--
+  Genera public/og.jpg (1200 × 630), la vista previa del link del catálogo (D-21).
+  Uso: con `npm run dev` corriendo, abrí http://localhost:5173/scripts/generar-og.html y tocá
+  "Descargar og.jpg". Después copiá el archivo a public/og.jpg.
+-->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Generar og.jpg</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600&family=Hanken+Grotesk:wght@500;600&display=swap"
+    />
+    <style>
+      body { margin: 24px; background: #ddd; font-family: system-ui, sans-serif; }
+      canvas { display: block; max-width: 100%; box-shadow: 0 2px 12px rgb(0 0 0 / 0.2); }
+      a { display: inline-block; margin-top: 16px; font-size: 16px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="og" width="1200" height="630"></canvas>
+    <a id="descargar" download="og.jpg">Descargar og.jpg</a>
+    <script type="module">
+      // Colores de los tokens de src/index.css (D-33).
+      const CREMA = '#faf6f0'
+      const CHAMPAN = '#f2e7d8'
+      const TINTA = '#3a2e26'
+      const BRONCE = '#8c5e22'
+      const SUAVE = '#76664f'
+
+      await document.fonts.load('600 80px "Bricolage Grotesque"')
+      await document.fonts.load('400 80px "Bricolage Grotesque"')
+      await document.fonts.load('600 20px "Hanken Grotesk"')
+      await document.fonts.load('500 30px "Hanken Grotesk"')
+
+      const logo = new Image()
+      logo.src = '/logo.webp'
+      await logo.decode()
+
+      const c = document.getElementById('og')
+      const ctx = c.getContext('2d')
+
+      // Fondo: crema con un panel champán a la izquierda para el logo.
+      ctx.fillStyle = CREMA
+      ctx.fillRect(0, 0, 1200, 630)
+      ctx.fillStyle = CHAMPAN
+      ctx.fillRect(0, 0, 470, 630)
+
+      // Logo cuadrado centrado en el panel.
+      const lado = 340
+      ctx.drawImage(logo, (470 - lado) / 2, (630 - lado) / 2, lado, lado)
+
+      // Texto.
+      const x = 540
+      ctx.textBaseline = 'alphabetic'
+      ctx.fillStyle = BRONCE
+      ctx.font = '600 20px "Hanken Grotesk"'
+      ctx.letterSpacing = '3.2px'
+      ctx.fillText('VIDRIERA', x, 196)
+
+      ctx.letterSpacing = '-1.6px'
+      ctx.fillStyle = TINTA
+      ctx.font = '600 66px "Bricolage Grotesque"'
+      ctx.fillText('Accesorios', x, 282)
+      ctx.fillText('para usar todos', x, 352)
+      ctx.fillText('los días.', x, 422)
+
+      ctx.letterSpacing = '0px'
+      ctx.fillStyle = SUAVE
+      ctx.font = '500 26px "Hanken Grotesk"'
+      ctx.fillText('Cadenas, pulseras, collares, aros y anillos.', x, 486)
+      ctx.fillStyle = BRONCE
+      ctx.font = '600 26px "Hanken Grotesk"'
+      ctx.fillText('Pedí por WhatsApp.', x, 524)
+
+      const url = c.toDataURL('image/jpeg', 0.88)
+      document.getElementById('descargar').href = url
+      window.ogDataUrl = url
+    </script>
+  </body>
+</html>

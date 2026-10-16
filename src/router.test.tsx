@@ -16,6 +16,12 @@ vi.mock('@/services/auth', () => ({
   salir: vi.fn(),
 }))
 
+vi.mock('@/services/productos', async (original) => ({
+  ...(await original<typeof import('@/services/productos')>()),
+  listarCatalogo: () => Promise.resolve({ productos: [], etiquetas: [] }),
+  obtenerProductoPublico: () => Promise.resolve(null),
+}))
+
 function renderizarEn(ruta: string) {
   const router = createMemoryRouter(rutas, { initialEntries: [ruta] })
   render(
@@ -41,7 +47,6 @@ describe('router', () => {
   })
 
   it.each([
-    ['/producto/abc', 'Producto'],
     ['/carrito', 'Tu carrito'],
     ['/confirmar', 'Confirmar pedido'],
     ['/pedido/confirmado', 'Pedido confirmado'],
@@ -55,6 +60,15 @@ describe('router', () => {
   ])('%s muestra «%s»', (ruta, titulo) => {
     renderizarEn(ruta)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(titulo)
+  })
+
+  it('un producto que no se ve muestra el aviso, «Ver catálogo» y «Volver»', async () => {
+    renderizarEn('/producto/abc')
+    expect(
+      await screen.findByRole('heading', { name: 'Esta pieza ya no está disponible' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ver catálogo' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('button', { name: 'Volver' })).toBeInTheDocument()
   })
 
   it('sin sesión, una ruta del panel lleva al login con volver', () => {

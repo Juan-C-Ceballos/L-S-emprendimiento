@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { claseBotonIcono } from '@/components/panel/estilos'
+import { claseBotonIcono } from '@/components/estilos'
 import { useToast } from '@/components/useToast'
 import { salir } from '@/services/auth'
 import { ErrorServicio, MENSAJE_GENERICO } from '@/services/errores'

@@ -1,6 +1,6 @@
 import { Link, Outlet, useMatches } from 'react-router'
 import { BotonSalir } from '@/components/panel/BotonSalir'
-import { claseBotonIcono } from '@/components/panel/estilos'
+import { claseBotonIcono } from '@/components/estilos'
 import { HeaderPanel } from '@/components/panel/HeaderPanel'
 import { NavPanel } from '@/components/panel/NavPanel'
 import { esRutaPanel } from '@/components/panel/rutasPanel'

@@ -186,6 +186,9 @@ isOneToOne: false
 "es_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"guardar_producto":
+{ Args: { "p": Json }; Returns: Json
+                           },
 "marcar_vendido":
 { Args: { "p_pedido_id": string }; Returns: Json
                            }

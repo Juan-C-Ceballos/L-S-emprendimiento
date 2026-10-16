@@ -25,3 +25,33 @@ export const esquemaAjustesWhatsApp = z.object({
 })
 
 export type AjustesWhatsAppForm = z.input<typeof esquemaAjustesWhatsApp>
+
+/** "12.500" → 12500; vacío → null. Los inputs de números aceptan solo dígitos. */
+function entero(texto: string): number | null {
+  const digitos = texto.replace(/\D/g, '')
+  return digitos === '' ? null : Number.parseInt(digitos, 10)
+}
+
+/** Formulario de producto. Mensajes copiados del prototipo (`saveProduct`). */
+export const esquemaProducto = z.object({
+  nombre: z.string().trim().min(1, { error: 'Poné un nombre: es lo que ve el cliente en la vidriera.' }),
+  descripcion: z.string().trim(),
+  precio: z
+    .string()
+    .transform(entero)
+    .refine((n) => n !== null && n > 0, { error: 'Ingresá un precio mayor a $0, solo con números.' })
+    .transform((n) => n ?? 0),
+  costo: z
+    .string()
+    .transform(entero)
+    .refine((n) => n !== null, { error: 'Ingresá el costo (puede ser 0). Solo lo ves vos.' }),
+  stock: z
+    .string()
+    .transform(entero)
+    .refine((n) => n !== null, { error: 'Ingresá cuántas unidades tenés (0 si está agotado).' }),
+  cantidadImagenes: z
+    .number()
+    .min(1, { error: 'Agregá al menos una imagen: la primera va a ser la portada.' }),
+})
+
+export type CampoProducto = keyof z.input<typeof esquemaProducto>

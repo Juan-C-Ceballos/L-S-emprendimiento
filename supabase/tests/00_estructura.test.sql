@@ -46,7 +46,7 @@ select results_eq(
      join pg_namespace n on n.oid = p.pronamespace
      where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute')
      order by 1 $$,
-  $$ values ('cancelar_pedido'), ('crear_pedido'), ('es_admin'), ('marcar_vendido') $$,
+  $$ values ('cancelar_pedido'), ('crear_pedido'), ('es_admin'), ('guardar_producto'), ('marcar_vendido') $$,
   'authenticated solo ejecuta las funciones de la API'
 );
 

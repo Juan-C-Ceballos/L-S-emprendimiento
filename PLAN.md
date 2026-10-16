@@ -4,9 +4,9 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 3 · Panel de productos (sin empezar). Las etapas 0 a 2 están en `develop`.
-- **Rama:** crear `feature/03-panel-productos` desde `develop` (`git checkout develop && git pull && git checkout -b feature/03-panel-productos`).
-- **Próximo paso:** abrir `docs/plan/etapa-03-panel-productos.md`. La app se prueba a mano contra `ls-dev` (`.env.local` ya apunta ahí, D-32): `npm run dev` y entrar a http://localhost:5173/admin con la cuenta de la administradora. Docker y `npm run db:start` solo hacen falta si la etapa toca la base (migraciones, `db:test`, `db:types`).
+- **Etapa en curso:** 4 · Catálogo público (sin empezar). La etapa 3 está en `feature/03-panel-productos`, lista para PR contra `develop`; al mergearla hay que aplicar su migración a `ls-dev` (`npx supabase db push --dry-run` y `npx supabase db push`).
+- **Rama:** con la etapa 3 mergeada, crear `feature/04-catalogo-publico` desde `develop`.
+- **Próximo paso:** abrir `docs/plan/etapa-04-catalogo-publico.md`. La app se prueba a mano contra `ls-dev` (`.env.local`, D-32). Para lo que toca la base o para probar contra el Supabase local (por ejemplo, subir fotos sin tocar la nube): Docker, `npm run db:start` y el servidor `dev-supabase-local` de `.claude/launch.json` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`).
 - **Supabase en la nube:** proyecto de **desarrollo** `ls-dev` creado (ref `nhsjichuumyflklqkhxw`, URL `https://nhsjichuumyflklqkhxw.supabase.co`, São Paulo, Postgres 17, organización `L&S-Emprendimiento`, plan gratuito). Migraciones de la etapa 1 aplicadas con `supabase db push`; registro público desactivado; semillas de productos y pedidos cargadas por el usuario. Administradora creada: `1accesorioslis@gmail.com` con rol `admin` (verificado 2026-10-15: es la única cuenta de `auth.users`). **No** correr ahí el bloque final de `supabase/seed.sql` (usuarios de prueba con contraseñas en el repo público). La carpeta local quedó vinculada a ese proyecto (`supabase/.temp/`, ignorado). Producción se crea en la etapa 8 en la misma organización.
 - **Al mergear cada etapa con migraciones nuevas:** `npx supabase db push --dry-run` y después `npx supabase db push` contra dev (lo corre el usuario; pide la contraseña de la base).
 - **Ojo en Windows:** la carpeta del proyecto no puede tener `&` en la ruta (rompe `npx` y los scripts de npm). Ya se renombró a `L-S` y los scripts volvieron a la forma estándar (D-29).
@@ -20,7 +20,7 @@
   Migraciones, RLS, `product_costs`, `crear_pedido`, `marcar_vendido`, `cancelar_pedido`, semillas, pgTAP, tipos generados, job de CI de base.
 - [x] **2 · Autenticación y panel** — [`etapa-02-auth-panel.md`](docs/plan/etapa-02-auth-panel.md) · `feature/02-auth-panel`
   Login, guardia de rutas, layout del panel, registro público desactivado.
-- [ ] **3 · Panel de productos** — [`etapa-03-panel-productos.md`](docs/plan/etapa-03-panel-productos.md) · `feature/03-panel-productos`
+- [x] **3 · Panel de productos** — [`etapa-03-panel-productos.md`](docs/plan/etapa-03-panel-productos.md) · `feature/03-panel-productos`
   Lista, alta, edición, activar/desactivar, costo y margen, etiquetas con autocompletado, imágenes comprimidas en el navegador, Storage.
 - [ ] **4 · Catálogo público** — [`etapa-04-catalogo-publico.md`](docs/plan/etapa-04-catalogo-publico.md) · `feature/04-catalogo-publico`
   Grilla, filtros todas/alguna con estado en la URL y contadores, búsqueda, detalle con galería, agotados, vista previa del link.
@@ -59,6 +59,11 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-16 · Etapa 3 · `feature/03-panel-productos`
+- Hecho: migración `storage_y_guardar_producto` (bucket público `productos`, solo JPEG hasta 2 MB, políticas solo admin; RPC `guardar_producto` en una transacción con validaciones, etiquetas normalizadas, imágenes sincronizadas y `paths_quitados`) + `08_storage_y_guardar_producto.test.sql`; tipos regenerados. `src/lib/{imagenes,productos,constantes}.ts`, esquema Zod del producto, `src/services/{imagenes,productos,etiquetas}.ts`. `ProductosPage` (búsqueda con espera, chips con contadores, filtro y búsqueda en la URL, vacíos del prototipo) y `ProductoFormPage` (precio/costo/margen en vivo, stock, imágenes con subida, portada, orden y quitar, etiquetas con autocompletado y "Crear «x»", interruptor activo, barra Cancelar/Guardar, `?desde=resumen`). Componentes `BuscadorConEspera`, `FilaProducto`, `PillStock`, `MargenGanancia`, `EditorImagenes`, `EditorEtiquetas`, `InterruptorActivo`. D-35.
+- Verificado en local: `db:reset`, `db:test` 138/138, `db:lint`; lint, typecheck, 89 pruebas y build. En el navegador contra Supabase local: alta con 2 fotos (4 JPEG en Storage, 1600 y 400 px de lado largo, horizontal y vertical), portada y etiqueta nueva guardadas en orden; quitar una imagen borra la fila y sus 2 archivos; cancelar después de subir borra la foto; anon recibe 403 al subir y no puede listar el bucket; lista y formulario en 375 px. Bug encontrado y arreglado: buscar justo después de cambiar el filtro lo perdía.
+- Pendiente: PR contra `develop` y squash; después, `db push` de la migración a `ls-dev`. Probar con fotos reales de celular (las de prueba eran imágenes lisas: el peso típico de 100–300 KB no se pudo medir).
 
 ### 2026-10-15 · Ajustes de WhatsApp · `feature/ajustes-whatsapp`
 - Hecho: migración `ajustes_whatsapp` (tabla `settings` de una fila con RLS: lectura pública, edición solo admin) + `supabase/tests/07_settings.test.sql`; tipos regenerados. `src/lib/whatsapp.ts` (`armarMensaje`, `enlaceWhatsApp`, mensaje original, pedido de ejemplo), `src/lib/esquemas.ts` (Zod con los mensajes del prototipo), `src/services/ajustes.ts`, y `AjustesPage` con número, mensaje, "Insertar dato", "Volver al mensaje original", vista previa, "Descartar" y "Guardar número y mensaje". Se eliminó `VITE_WHATSAPP_NUMBER`. D-34 (reemplaza D-01); planes de las etapas 5, 7, 8 y 9 actualizados.

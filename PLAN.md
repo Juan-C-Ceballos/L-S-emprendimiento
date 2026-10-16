@@ -60,15 +60,15 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - PR: …
 -->
 
-### 2026-10-15 · Ajustes de WhatsApp · `feature/ajustes-whatsapp` (sobre `feature/marca-logo-paleta`)
+### 2026-10-15 · Ajustes de WhatsApp · `feature/ajustes-whatsapp`
 - Hecho: migración `ajustes_whatsapp` (tabla `settings` de una fila con RLS: lectura pública, edición solo admin) + `supabase/tests/07_settings.test.sql`; tipos regenerados. `src/lib/whatsapp.ts` (`armarMensaje`, `enlaceWhatsApp`, mensaje original, pedido de ejemplo), `src/lib/esquemas.ts` (Zod con los mensajes del prototipo), `src/services/ajustes.ts`, y `AjustesPage` con número, mensaje, "Insertar dato", "Volver al mensaje original", vista previa, "Descartar" y "Guardar número y mensaje". Se eliminó `VITE_WHATSAPP_NUMBER`. D-34 (reemplaza D-01); planes de las etapas 5, 7, 8 y 9 actualizados.
 - Verificado en local: `db:reset`, `db:test` 111/111, `db:lint`; lint, typecheck, 60 pruebas y build. En el navegador contra Supabase local: guardar el número `+54 9 351 555-1234` lo deja como `5493515551234` y sobrevive a recargar; vista previa y tabs en 375 px.
-- Pendiente: PR contra `develop` **después** del de `feature/marca-logo-paleta` (está apilada encima). Al mergear, aplicar la migración a `ls-dev` (`npx supabase db push --dry-run` y `npx supabase db push`) y cargar el número real en Ajustes.
+- Pendiente: PR #7 contra `develop` (squash). Al mergear, aplicar la migración a `ls-dev` (`npx supabase db push --dry-run` y `npx supabase db push`) y cargar el número real en Ajustes.
 
 ### 2026-10-15 · Marca · `feature/marca-logo-paleta`
 - Hecho: logo del emprendimiento recortado en cuadrado según su marco (`public/logo.webp`, fondo transparente) y usado en el login; favicon e ícono de iOS con el monograma; paleta bronce/champán en `src/index.css` con tokens renombrados (`vino` → `bronce`, `rosa*` → `champan*`). D-33.
 - Verificado: lint, typecheck, 47 pruebas y build; catálogo y login en 375 px contra `ls-dev`.
-- Pendiente: PR contra `develop` (squash).
+- PR #6, mergeado con squash.
 
 ### 2026-10-15 · Etapa 2 · `feature/02-auth-panel`
 - Hecho: usuarios de prueba en `supabase/seed.sql` (`admin@ls.test` con rol admin y `vendedora@ls.test` sin rol). `src/services/auth.ts` (`ingresar`, `salir`, `obtenerSesion`, `escucharSesion`) con errores `credenciales`, `sin_acceso` (cierra la sesión) y `sin_conexion`. `SesionProvider` + `useSesion` (solo en `/admin/*`), `RutaProtegida` con pantalla neutra mientras carga y `?volver=`. `IngresarPage` con Zod, "Ingresando…", Enter y redirección (solo a rutas `/admin`). `PanelLayout` + `HeaderPanel` + `NavPanel` (tabs abajo en móvil solo en las 4 secciones, barra lateral de 220 px en `lg`, prop `pendientes` para el badge) + `BotonSalir`; título, "Volver" y acción del header en el `handle` de cada ruta. README: sección "Administradora".

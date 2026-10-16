@@ -219,6 +219,14 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Barra del catálogo**: el total usa los precios de la vidriera ya cargada (no hace otra consulta).
 - **Nombre de más de 80 letras**: mensaje nuevo "El nombre es muy largo: dejalo en 80 letras o menos." (la base ya rechazaba más de 80).
 
+### D-38 · Panel de pedidos (etapa 6)
+- **Búsqueda y filtro en el navegador**: `listarPedidosAdmin` trae los últimos 500 pedidos (más nuevos primero) y `lib/pedidos.ts` filtra por estado y busca (cliente sin tildes, o número por prefijo: `7`, `0007` y `#0007` encuentran el 7). Los cuatro contadores salen de la misma lista. Punto de extensión: con más de 500, paginar y mover el filtro a la base (con `unaccent`).
+- **Escribir por WhatsApp** (agregado al prototipo): el teléfono del detalle es un link `tel:` y al lado va "Escribir por WhatsApp" a `wa.me`. Como el cliente escribe su número sin código de país, se sacan los ceros de adelante y, si no empieza con 54, se antepone 549 (celular argentino). Un número escrito con el "15" local no queda bien; es raro y la administradora igual tiene el `tel:`.
+- **Badge de pendientes**: `PanelLayout` cuenta los pendientes (`contarPendientes`, solo el conteo) al entrar al panel y comparte `refrescarPendientes` con las pantallas por el contexto del `<Outlet>` (`useRefrescarPendientes`); el detalle lo llama después de vender o cancelar.
+- **Después de una acción** se relee el pedido de la base (no se modifica a mano) y se sigue mostrando el anterior mientras carga, para que el aviso verde no parpadee. Si la RPC falla (`estado_invalido`, `stock_insuficiente`), se muestra el error en un toast y también se relee.
+- **Botones mientras procesa**: "Marcando como vendido…" / "Cancelando…" y ambos deshabilitados (el prototipo no lo tenía; evita el doble clic).
+- **Ítems del detalle** ordenados por nombre (como los `cambios` que devuelven las funciones de la base). El nombre es el actual del producto: `order_items` no guarda el nombre.
+
 ## Pendientes de verificar (no bloquean)
 - **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
 - **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.

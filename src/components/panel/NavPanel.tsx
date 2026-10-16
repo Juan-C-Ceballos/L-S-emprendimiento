@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 type Props = {
   /** En móvil, las tabs se ocultan en formularios y detalle; en escritorio la barra se ve siempre. */
   visibleEnMovil: boolean
-  /** Pedidos pendientes para el badge de Pedidos (se conecta en la etapa 6). */
+  /** Pedidos pendientes para el badge de Pedidos. */
   pendientes?: number
 }
 

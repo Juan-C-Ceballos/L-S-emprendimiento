@@ -4,13 +4,19 @@ import { claseBotonIcono } from '@/components/estilos'
 import { HeaderPanel } from '@/components/panel/HeaderPanel'
 import { NavPanel } from '@/components/panel/NavPanel'
 import { esRutaPanel } from '@/components/panel/rutasPanel'
+import type { ContextoPanel } from '@/components/panel/usePanel'
+import { useAsync } from '@/lib/useAsync'
 import { cn } from '@/lib/utils'
+import { contarPendientes } from '@/services/pedidos'
 
 /** Estructura de `/admin/*`: header con el título de la ruta, tabs o barra lateral, y contenido. */
 export function PanelLayout() {
   const actual = useMatches().at(-1)
   const ruta = actual !== undefined && esRutaPanel(actual.handle) ? actual.handle : undefined
   const tabs = ruta?.tabs ?? false
+  // Se cuenta al entrar al panel y cada vez que una pantalla vende o cancela un pedido.
+  const pendientes = useAsync(contarPendientes)
+  const contexto: ContextoPanel = { refrescarPendientes: pendientes.recargar }
 
   return (
     <div className={cn('min-h-dvh lg:pb-0 lg:pl-[220px]', tabs && 'pb-[68px]')}>
@@ -44,9 +50,12 @@ export function PanelLayout() {
         }
       />
       <main>
-        <Outlet />
+        <Outlet context={contexto} />
       </main>
-      <NavPanel visibleEnMovil={tabs} />
+      <NavPanel
+        visibleEnMovil={tabs}
+        pendientes={pendientes.estado === 'listo' ? pendientes.datos : undefined}
+      />
     </div>
   )
 }

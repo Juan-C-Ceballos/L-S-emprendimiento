@@ -97,7 +97,7 @@ export function textoUnidades(n: number): string {
 /** Texto de la confirmación inline de "Cancelar pedido". */
 export function textoConfirmacionCancelar(estado: EstadoPedido, unidades: number): string {
   return estado === 'vendido'
-    ? `Ya estaba vendido: se van a reponer ${textoUnidades(unidades)} al stock. Después no se puede volver a vender.`
+    ? `Ya estaba vendido: se ${unidades === 1 ? 'va' : 'van'} a reponer ${textoUnidades(unidades)} al stock. Después no se puede volver a vender.`
     : 'Todavía no se vendió, así que el stock no cambia. Un pedido cancelado no se puede volver a vender.'
 }
 

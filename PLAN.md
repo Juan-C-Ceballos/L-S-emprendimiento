@@ -60,6 +60,10 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - PR: …
 -->
 
+### 2026-10-16 · Arreglo · `fix/texto-reponer-singular`
+- Hecho: la confirmación de cancelar un pedido vendido decía "se van a reponer 1 unidad"; ahora dice "se va a reponer 1 unidad" (y sigue en plural con varias). Prueba nueva en `src/lib/pedidos.test.ts`. Lo encontró la prueba E2E previa a producción.
+- Pendiente: PR contra `develop` (squash).
+
 ### 2026-10-16 · Ajustes antes de producción · `feature/mejoras-catalogo-panel`
 - Hecho (pedidos de la dueña): logo centrado en el login; sello del logo (`public/logo-sello.webp`, sin el marco cuadrado) en el header del cliente y en la barra lateral del panel; en el teléfono, 8 etiquetas y "Ver todas (N)" / "Ver menos"; orden del catálogo por "Más nuevos", "Menor precio" y "Mayor precio" (en la URL, agotados siempre al final); "Nuevo producto" y la confirmación de cancelar pedido centrados. D-40.
 - Verificado: lint, typecheck, 195 pruebas y build. En el navegador: catálogo contra `ls-dev` en 390 px (sello en el header, 8 etiquetas + "Ver todas (11)" → 11 y "Ver menos", "Menor precio" ordena $8.900 → $26.900 con los agotados al final) y en 1280 px (todas las etiquetas, sin botón; "Mayor precio"); panel contra el Supabase local en 1280 px (login centrado, logo en la barra lateral, "Nuevo producto" a 392 px de cada lado, confirmación de cancelar centrada, sin confirmar).

@@ -2,7 +2,7 @@
 
 Correrlo **completo** sobre el deploy de vista previa de `develop` (que apunta al Supabase de desarrollo) antes de abrir el PR de release. Copiar la lista en la descripción del PR y tildarla.
 
-> Vista previa: `https://develop.<proyecto>.pages.dev` (Supabase `ls-dev`). Producción: `https://<proyecto>.pages.dev` (Supabase `ls-prod`). Reemplazá `<proyecto>` por el nombre real del proyecto de Pages (anotado en `PLAN.md`). Runbook en el README.
+> Vista previa: `https://develop.ls-accesorios.pages.dev` (Supabase `ls-dev`). Producción: `https://ls-accesorios.pages.dev` (Supabase `ls-prod`, ref `tcpbmenfkakzlhyidxli`). Runbook en el README.
 
 ## Antes de empezar
 - [ ] `develop` tiene el CI en verde en el último commit.

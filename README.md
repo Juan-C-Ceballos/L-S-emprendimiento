@@ -135,13 +135,13 @@ La primera puesta en marcha, paso a paso, está en [`docs/produccion-paso-a-paso
 | | Producción | Vista previa |
 |---|---|---|
 | Rama | `main` | `develop` |
-| Sitio | `https://<proyecto>.pages.dev` | `https://develop.<proyecto>.pages.dev` |
-| Supabase | `ls-prod` | `ls-dev` (ref `nhsjichuumyflklqkhxw`) |
+| Sitio | `https://ls-accesorios.pages.dev` | `https://develop.ls-accesorios.pages.dev` |
+| Supabase | `ls-prod` (ref `tcpbmenfkakzlhyidxli`) | `ls-dev` (ref `nhsjichuumyflklqkhxw`) |
 | Variables en Cloudflare Pages | *Production* | *Preview* |
 
-`<proyecto>` es el nombre del proyecto de Pages (sugerido: `ls-accesorios`). Las URL reales se anotan en `PLAN.md` al terminar la etapa 8.
+El proyecto de Pages se llama `ls-accesorios`.
 
-Variables de Pages (*Settings → Variables and Secrets*), en los dos entornos: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (la clave pública del proyecto que corresponda) y `NODE_VERSION=22`. Solo en *Production*: `VITE_SITE_URL=https://<proyecto>.pages.dev` (hace absoluta la imagen de la vista previa del link). Las `VITE_*` se leen **al compilar**: si cambia una, hay que volver a desplegar (*Deployments → ⋯ → Retry deployment*).
+Variables de Pages (*Settings → Variables and Secrets*), en los dos entornos: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (la clave pública del proyecto que corresponda) y `NODE_VERSION=22`. Solo en *Production*: `VITE_SITE_URL=https://ls-accesorios.pages.dev` (hace absoluta la imagen de la vista previa del link). Las `VITE_*` se leen **al compilar**: si cambia una, hay que volver a desplegar (*Deployments → ⋯ → Retry deployment*).
 
 ### Cómo se despliega
 
@@ -151,10 +151,10 @@ Variables de Pages (*Settings → Variables and Secrets*), en los dos entornos: 
 
 ### Aplicar migraciones a producción
 
-Después de mergear una release que trae migraciones nuevas. La carpeta queda vinculada a `ls-dev`; producción se alcanza con `--db-url`, así un `db push` suelto nunca la toca. La cadena se copia de Supabase: proyecto `ls-prod` → botón **Connect** → **Session pooler** (la conexión directa es solo IPv6), reemplazando `[YOUR-PASSWORD]` por la contraseña de la base.
+Después de mergear una release que trae migraciones nuevas. La carpeta queda vinculada a `ls-dev`; producción se alcanza con `--db-url`, así un `db push` suelto nunca la toca. La cadena se copia de Supabase: proyecto `ls-prod` → botón **Connect** → pestaña **Direct** → **Session pooler** (la conexión directa es solo IPv6), reemplazando `[YOUR-PASSWORD]` por la contraseña de la base.
 
 ```powershell
-$env:DB_PROD = "postgresql://postgres.<ref-prod>:<contraseña>@<host-del-pooler>:5432/postgres"
+$env:DB_PROD = "postgresql://postgres.tcpbmenfkakzlhyidxli:<contraseña>@aws-1-sa-east-1.pooler.supabase.com:5432/postgres"
 npx supabase db push --db-url $env:DB_PROD --dry-run   # lista lo que va a aplicar
 npx supabase db push --db-url $env:DB_PROD
 Remove-Item Env:DB_PROD

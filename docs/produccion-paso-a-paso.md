@@ -36,7 +36,7 @@ Vas a anotar algunos datos. **Los marcados 🔒 son secretos**: van solo a tu ge
 
 ### 2.2 Aplicar las migraciones (crea tablas, permisos, funciones y el bucket de fotos)
 
-1. En `ls-prod`, tocá **Connect** (arriba) → pestaña de cadenas de conexión → **Session pooler** → copiá la cadena `postgresql://postgres.<ref>:[YOUR-PASSWORD]@…pooler.supabase.com:5432/postgres`.
+1. En `ls-prod`, tocá **Connect** (arriba) → pestaña **Direct** (*Connection string*; no la de *Framework*, que propone instalar paquetes y no hace falta) → en el método de conexión elegí **Session pooler** (formato URI) → copiá la cadena `postgresql://postgres.<ref>:[YOUR-PASSWORD]@aws-…-sa-east-1.pooler.supabase.com:5432/postgres` y reemplazá `[YOUR-PASSWORD]`, corchetes incluidos.
 2. En PowerShell, en la carpeta del proyecto (con `develop` actualizado: `git checkout develop; git pull`):
 
    ```powershell
@@ -72,18 +72,18 @@ Con el email que vaya a usar la dueña en producción (puede ser `1accesorioslis
 ## 3. Publicar el sitio en Cloudflare Pages
 
 1. Creá una cuenta en [dash.cloudflare.com](https://dash.cloudflare.com) (gratis) si no tenés.
-2. **Workers & Pages → Create → Pages → Import an existing Git repository** (si te ofrece crear un *Worker*, buscá la pestaña o el link de **Pages**: tiene que ser Pages, ver D-41).
+2. **Workers & Pages → Create application**. El dashboard abre primero el flujo de **Workers** (pide *Deploy command* `npx wrangler deploy`): **no es ese**. Buscá el link **"Looking to deploy Pages? Get started"** (abajo, en letra chica) o la pestaña **Pages**, y elegí **Import an existing Git repository**. Tiene que ser Pages: es el que tiene variables de build separadas para producción y vista previa (D-41). Pages no está obsoleto, aunque Cloudflare empuje Workers para lo nuevo.
 3. Conectá GitHub y elegí el repositorio `Juan-C-Ceballos/L-S-emprendimiento`.
 4. Configuración:
    - **Project name**: `ls-accesorios` (será `https://ls-accesorios.pages.dev`; si está tomado, elegí otro y usalo en todos los pasos siguientes).
    - **Production branch**: `main`.
    - **Framework preset**: `React (Vite)` · **Build command**: `npm run build` · **Build output directory**: `dist` · **Root directory**: vacío.
-   - **Environment variables**: por ahora cargá las de **producción** (abajo). Las de vista previa se cargan después en Settings.
-5. **Save and Deploy**. El primer deploy compila `main`, que todavía no tiene la app: **es normal que falle** o que quede vacío. Producción se publica de verdad en el paso 6.
+   - **Environment variables**: cargá las de **producción** (columna Production de la tabla de abajo). Ojo: en esta pantalla se cargan **para Production y Preview a la vez**; las de Preview se corrigen en el paso 3.1, antes de cualquier otro merge.
+5. **Save and Deploy**. El primer deploy compila `main`, que todavía no tiene la app: **falla con `Could not read package.json`, y es normal**. Producción se publica de verdad en el paso 6.
 
 ### 3.1 Variables (Settings → Variables and Secrets)
 
-Cargalas como *Text* (no hace falta *Secret*: son públicas) en cada entorno:
+La tabla de *Variables and secrets* muestra un entorno a la vez. Para cambiarlo, usá el selector **Choose Environment: Production ▾** que está **arriba de todo de Settings** (no en la tabla). Cargalas como *Text* (no hace falta *Secret*: son públicas):
 
 | Variable | Production | Preview |
 |---|---|---|
@@ -96,9 +96,9 @@ Cargalas como *Text* (no hace falta *Secret*: son públicas) en cada entorno:
 
 ### 3.2 Vistas previas solo para `develop`
 
-**Settings → Builds → Branch control** (o *Builds & deployments → Configure Preview deployments*): **Custom branches** → *Include*: `develop`. Guardá.
+**Settings → Builds → Branch control**: *Production branch* `main` con los deploys automáticos activados; *Preview branch* **Custom branches**; en *Include* tiene que quedar **solo** el chip `develop` (sacá el `*` que viene puesto: significa "todas las ramas"); *Exclude* vacío. Guardá.
 
-Después: **Deployments → Create deployment** (o hacé cualquier merge a `develop`) para que se publique la vista previa en `https://develop.ls-accesorios.pages.dev`.
+Un proyecto conectado a GitHub **no tiene botón para desplegar una rama a mano**: la vista previa de `develop` se publica con el próximo merge a `develop`, en `https://develop.ls-accesorios.pages.dev`.
 
 ## 4. Direcciones de Auth en Supabase
 

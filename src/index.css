@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Sin modo oscuro: la variante `dark:` de shadcn solo aplica bajo `.dark`, que nunca se usa. */
+@custom-variant dark (&:is(.dark *));
+
+/* Tokens de diseño (docs/prototype-analysis.md §3). Paleta bronce/champán del logo (D-33). */
+@theme {
+  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", Georgia, serif;
+
+  --color-crema: #faf6f0;
+  --color-tinta: #3a2e26;
+  --color-tinta-hover: #56463a;
+  --color-bronce: #8c5e22;
+  --color-bronce-hover: #6e4917;
+  --color-champan: #f2e7d8;
+  --color-champan-suave: #f1e7da;
+  --color-champan-seg: #eee2d2;
+  --color-borde: #ece2d5;
+  --color-borde-fuerte: #dccab4;
+  --color-borde-chip: #e3d3bf;
+  --color-divisor: #f3ece2;
+  --color-texto-suave: #76664f;
+  --color-texto-medio: #4f4b45;
+  --color-texto-tab: #7a766f;
+  --color-icono-suave: #4a4741;
+  --color-icono-off: #d0cbc3;
+  --color-borde-punteado: #a9a39a;
+  --color-fila-hover: #faf9f7;
+  --color-margen-neutro: #efede9;
+  --color-texto-chip-activo: #bdb7ae;
+  --color-img-fondo: #e4e1db;
+  --color-deshabilitado: #d9d5ce;
+  --color-wa: #1e6343;
+  --color-wa-hover: #174f35;
+  --color-peligro: #9e2a1f;
+  --color-peligro-hover: #7f2017;
+  --color-peligro-fondo: #fbedea;
+  --color-peligro-borde: #f0c9c2;
+  --color-peligro-borde-boton: #e3b9b3;
+  --color-peligro-texto: #6e1a12;
+  --color-ok-fondo: #e8f2eb;
+  --color-ok-borde: #c3dccb;
+  --color-ok-texto: #1f4a33;
+  --color-aviso: #7a4f0a;
+  --color-fondo-error: #fffbfa;
+
+  /* Sombras */
+  --shadow-foco: 0 0 0 3px rgb(140 94 34 / 0.16);
+  --shadow-toast: 0 10px 30px rgb(58 46 38 / 0.25);
+
+  /* Pills de estado: fondo / texto */
+  --color-pill-pendiente: #f6ebd3;
+  --color-pill-pendiente-texto: #6a4c0a;
+  --color-pill-vendido: #e1eee5;
+  --color-pill-vendido-texto: #245038;
+  --color-pill-cancelado: #eceae6;
+  --color-pill-cancelado-texto: #57534d;
+  --color-pill-agotado: #fbedea;
+  --color-pill-agotado-texto: #8a2219;
+  --color-pill-ok: #f0efec;
+  --color-pill-ok-texto: #4a4741;
+
+  /* Radios */
+  --radius-imagen: 3px;
+  --radius-input: 10px;
+  --radius-alerta: 12px;
+  --radius-tarjeta: 14px;
+
+  /* Toast: animación de entrada */
+  --animate-toast-entrada: toast-entrada 0.18s ease-out;
+  @keyframes toast-entrada {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Variables de shadcn apuntando a los tokens de L&S. */
+@theme inline {
+  --font-heading: var(--font-display);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: var(--color-crema);
+  --foreground: var(--color-tinta);
+  --card: #fff;
+  --card-foreground: var(--color-tinta);
+  --popover: #fff;
+  --popover-foreground: var(--color-tinta);
+  --primary: var(--color-tinta);
+  --primary-foreground: #fff;
+  --secondary: var(--color-champan-suave);
+  --secondary-foreground: var(--color-tinta);
+  --muted: var(--color-champan-suave);
+  --muted-foreground: var(--color-texto-suave);
+  --accent: var(--color-champan-suave);
+  --accent-foreground: var(--color-tinta);
+  --destructive: var(--color-peligro);
+  --border: var(--color-borde);
+  --input: var(--color-borde-fuerte);
+  --ring: var(--color-bronce);
+  --radius: 10px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    margin: 0;
+    background: var(--color-crema);
+    color: var(--color-tinta);
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-bronce);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

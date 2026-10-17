@@ -9,6 +9,8 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 ## Contradicciones entre el prototipo y el documento
 
 ### D-01 · Ajustes: número y mensaje de WhatsApp editables
+> **Reemplazada por D-34** (2026-10-15): el número y el mensaje se editan desde Ajustes.
+
 - **Prototipo**: la pantalla Ajustes permite editar el número de WhatsApp y la plantilla del mensaje (con `{pedido}`, `{items}`, `{total}`, `{nombre}`), y los guarda.
 - **Documento y pedido inicial**: el número sale de una variable de entorno. El documento no menciona plantillas editables.
 - **Decisión**: número en `VITE_WHATSAPP_NUMBER` (solo dígitos, con código de país, ej. `549…`). Plantilla **fija en código** (`src/lib/whatsapp.ts`), igual al mensaje por defecto del prototipo. Ajustes muestra el número **en modo lectura** con la nota "Se cambia en la configuración del sitio" y conserva solo la gestión de etiquetas.
@@ -42,6 +44,7 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Decisión**: en el MVP el navegador llama directo a la RPC. El punto de extensión es `src/services/pedidos.ts → crearPedido()`, la única función que conoce el transporte. Cuando se sumen captcha y límite por IP, se cambia esa función para llamar a una función de Cloudflare y se revoca `execute` de `crear_pedido` para `anon`.
 
 ### D-08 · Frecuencia del chequeo contra la pausa
+> **Actualizada por D-41** (2026-10-16): el cron corre todos los días.
 - **Documento**: dice "cada pocos días, por ejemplo cada tres" y en la tabla de opciones "chequeo programado semanal".
 - **Decisión**: cada 3 días (Supabase pausa tras 7 días sin actividad; semanal deja demasiado poco margen). Se confirma en la etapa 8 con la documentación vigente.
 
@@ -125,7 +128,137 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 ### D-27 · Imágenes de las semillas
 - Las semillas de desarrollo usan SVG estáticos en `public/seed/` (generados una vez a partir del componente `Ph` del prototipo), con `path` relativo al sitio en lugar de Storage. `src/services/imagenes.ts` resuelve: si `path` empieza con `/seed/`, se usa tal cual; si no, se arma la URL pública de Storage. En producción no hay semillas.
 
+### D-28 · Versiones del scaffold (etapa 0)
+- La plantilla `react-ts` de `create-vite` vigente trae Vite 8, TypeScript 6.0 y **oxlint** en lugar de ESLint, y ya no genera `src/vite-env.d.ts` (usa `"types": ["vite/client"]` en `tsconfig.app.json`). Se mantiene **ESLint** como pide el plan (`typescript-eslint` `strictTypeChecked` + `no-restricted-imports`), con flat config escrita a mano; no se agrega oxlint. No se usa `stylisticTypeChecked` (el plan pide solo `strictTypeChecked`).
+- `shadcn init` (v4) pide elegir base y preset: se eligió **Radix** + **Nova** (el preset por defecto). Diferencias con lo descripto en el plan:
+  - `src/lib/utils.ts` reexporta `cn` del paquete `cn` (de shadcn, reemplazo de `clsx` + `tailwind-merge`) y los componentes de `ui/` lo importan directo. Se acepta: viene con shadcn.
+  - El preset agregaba la fuente Geist con `@fontsource-variable/geist`: **se quitó** (D-09: fuentes por `<link>` a Google Fonts).
+  - `shadcn` y `tw-animate-css` quedan como `devDependencies`: solo se usan al compilar el CSS (`@import "shadcn/tailwind.css"`).
+  - Se borró el bloque `.dark` (no hay modo oscuro) y se dejó `@custom-variant dark (&:is(.dark *))` para que las clases `dark:` de shadcn nunca se activen por la preferencia del sistema.
+- Vitest sin `globals`: las pruebas importan `describe`/`it`/`expect` de `vitest` y `src/test/setup.ts` llama a `cleanup()` en `afterEach`.
+- `HeaderCliente`: el carrito es un `Link` a `/carrito` (navega, no ejecuta una acción), con `aria-label="Carrito vacío"`.
+
+### D-29 · Carpeta del proyecto sin `&` en la ruta (actualizada 2026-10-15)
+- Al principio la carpeta se llamaba `L&S`. En Windows, los atajos `.cmd` de `node_modules/.bin` se rompen con el `&` en la ruta (`"S\node_modules\.bin\" no se reconoce como un comando…`), así que `npm run lint`, `npx <herramienta local>` y compañía fallaban. Como parche, los scripts llamaban a `node node_modules/<paquete>/<bin>`.
+- **Resolución:** la carpeta se renombró a `L-S`. Los scripts de `package.json` volvieron a la forma estándar (`vite`, `tsc -b`, `eslint .`, `vitest run`) y `npx <herramienta>` funciona (verificado con `vite` y `eslint`). Los scripts `db:*` de la etapa 1 usan la forma estándar (`supabase …`).
+- Regla: no usar `&` (ni otros caracteres especiales de `cmd`) en la ruta del proyecto. Si alguien lo clona en una carpeta así, renombrarla.
+
+### D-30 · Detalles de la base de datos (etapa 1)
+- **Políticas con `(select public.es_admin())`**: envolver la función en un `select` hace que Postgres la evalúe una vez por consulta y no una por fila (recomendación de Supabase para RLS). El resultado es el mismo.
+- **Cantidad por línea en `crear_pedido`**: además de entero > 0, se acepta como máximo 6 dígitos. No es un tope de negocio (esos quedan fuera del MVP); evita que una cantidad enorme rompa la conversión a `integer` con un error genérico en vez de `datos_invalidos`.
+- **Una sola lectura en `crear_pedido`**: precios, stock y costos se leen una vez y los chequeos y lo insertado usan esos mismos datos, así no pueden diferir dentro de la llamada.
+- **Detalle de los errores de `marcar_vendido`**: `stock_insuficiente` lleva en `detail` un JSON con `[{producto_id, nombre, disponible, pedido}]`, y `estado_invalido` lleva el estado actual. El servicio de la etapa 6 los lee desde el error de PostgREST.
+- **Semillas**: el pedido #2 (cancelado) no tiene fecha de cancelación en el prototipo; se usa "hace 12 días a las 10:00". Las fechas de las semillas nunca quedan en el futuro (si todavía no son las 9:12, el #6 queda con la hora actual).
+- **Numeración en las pruebas**: las secuencias no vuelven atrás con `rollback`, así que las pruebas no esperan un `numero` exacto: chequean que sea mayor que el de las semillas y correlativo (huecos aceptados en D-14).
+- **CLI de Supabase 2.121**: los tipos generados salen sin formatear. No se formatean porque el CI compara la salida cruda del CLI. El servicio de correo local ahora se llama `mailpit` (antes `inbucket`) y se excluye con `-x`.
+- **`src/types/dominio.ts`** incluye, además de los tipos de dominio, `RespuestaCrearPedidoRpc`: la forma exacta (snake_case) del jsonb de `crear_pedido`, para que el servicio de la etapa 5 la valide y la convierta.
+
+### D-31 · Autenticación y panel (etapa 2)
+- **`[auth.email] enable_signup` tiene que quedar en `true`** en `supabase/config.toml`. En el CLI esa opción prende o apaga el proveedor de email entero (con `false`, `signInWithPassword` responde `email_provider_disabled` y nadie puede ingresar). El registro público queda cortado por `[auth] enable_signup = false` (verificado: `/auth/v1/signup` responde `signup_disabled`). En los proyectos remotos el equivalente es el interruptor "Allow new users to sign up" (README, "Administradora").
+- **Sin red en el login**: se reusa el código `sin_conexion` y `MENSAJE_SIN_CONEXION` de `errores.ts` en lugar del `red` / "No pudimos conectarnos…" del archivo de la etapa, para que todos los servicios usen el mismo código y el mismo texto.
+- **`useSesion` en su propio archivo** (`src/lib/useSesion.ts`, con el contexto y el tipo), y `SesionProvider` en `src/lib/sesion.tsx`: igual que `Toast.tsx` / `useToast.ts`, para que Fast Refresh funcione (un archivo de componentes no exporta hooks).
+- **`SesionProvider` envuelve solo las rutas `/admin/*`** (en `src/router.tsx`): el catálogo no escucha la sesión.
+- **Título, "Volver", acción del header y tabs por ruta** van en el `handle` de cada ruta del panel (`RutaPanel`, `src/components/panel/rutasPanel.ts`); `PanelLayout` los lee con `useMatches()`. Las páginas del panel ya no tienen su propio `h1`: el título es el `h1` del header, como en el prototipo.
+- **`volver` del login**: solo se acepta una ruta que empiece con `/admin` (evita redirigir a otro sitio con `?volver=//…`); si no, va a `/admin`.
+- **Validación del login**: los errores de Zod se muestran debajo de cada campo (como el resto de los formularios del prototipo); el error del servicio va abajo con `role="alert"`. Se borra al volver a escribir, como en el prototipo.
+- **Usuarios de prueba** en `supabase/seed.sql` con UUID `00000000-0000-4000-c000-00000000000N`. Los campos de token de `auth.users` van en `''` (GoTrue falla al leer `NULL`). Formato verificado con GoTrue v2.197 / CLI 2.121.
+- **Token nuevo** `--color-texto-tab: #7a766f` (texto de las tabs inactivas del prototipo).
+
+### D-32 · La app se prueba a mano contra `ls-dev`
+- El usuario prefiere probar la app contra el Supabase de desarrollo en la nube en vez del local: para eso existe `ls-dev`, que ya tiene las semillas de productos y la cuenta real de la administradora. `.env.local` apunta ahí.
+- Supabase local (Docker) **no se elimina**: lo siguen necesitando `npm run db:test` (pgTAP), probar una migración nueva desde cero antes de `db push` (`npm run db:reset`) y `npm run db:types`. El CI levanta su propia base y no depende de ninguno de los dos.
+- Cuidado: lo que se hace en la app con `.env.local` apuntando a `ls-dev` cambia datos reales de desarrollo (pedidos, stock, productos). Las pruebas automáticas nunca apuntan a la nube.
+
+### D-33 · Logo y paleta bronce/champán (2026-10-15)
+- **Pedido del usuario**: usar el logo del emprendimiento y llevar la paleta a tono con él. Contradice la paleta del prototipo (fuente de verdad visual), así que manda esta decisión.
+- **Logo**: el original está en `docs/marca/logo-original.webp`. `public/logo.webp` (480 px, fondo transparente) es un recorte cuadrado alrededor del marco, con el mismo aire a los cuatro lados (el marco mide 839 × 866 en el original, así que queda apenas más alto que ancho; no se deforma). Se usa en el login en lugar de la marca en texto. Favicon (`favicon-48.png`) y `apple-touch-icon.png` (180 px) usan solo el octógono con el monograma, porque el marco no se distingue a ese tamaño. Los recortes se hicieron con Pillow una sola vez (no hay script en el repo).
+- **Header y barra lateral** siguen con la marca en texto (Bricolage, `&` en bronce): el logo con marco no se lee a 27–32 px de alto.
+- **Paleta**: el acento `vino` pasa a `bronce` `#8C5E22` (el bronce de las letras del logo, `#986828`, apenas oscurecido para llegar a 4,5:1 sobre el fondo) y los rosados pasan a tonos champán; el fondo `crema` pasa de rosado a marfil. Los tokens se renombraron (`vino` → `bronce`, `rosa*` → `champan*`). Tabla en `docs/prototype-analysis.md` §3. Contrastes WCAG: bronce 5,2:1 sobre `crema` y 4,6:1 sobre `champan`; `texto-suave` 5,2:1 y 4,5:1; blanco sobre bronce 5,6:1. Verdes de WhatsApp, rojos de error y pills de estado no cambian.
+- **Tipografías**: no cambian. El logo usa una serif de alto contraste; si se quisiera llevarla al sitio, es una decisión aparte.
+
+### D-34 · Número y mensaje de WhatsApp editables desde Ajustes (reemplaza D-01)
+- **Pedido del usuario**: poder cambiar el número al que se contacta y la plantilla del mensaje desde el panel, como en el prototipo.
+- **Tabla `settings`** (migración `ajustes_whatsapp`): una sola fila (`id boolean primary key check (id)`), columnas `whatsapp_numero` (solo dígitos, 10 a 15, o vacío = sin configurar) y `whatsapp_mensaje` (1 a 1000 caracteres, con `{items}` obligatorio). CHECKs en la base además de Zod en el formulario. Columnas tipadas en vez de clave/valor: son dos datos fijos y así la base valida cada uno.
+- **Permisos**: lectura pública (anon y authenticated), porque el sitio necesita número y mensaje para armar el link de WhatsApp y el número igual queda a la vista en `wa.me`. `update` solo de esas dos columnas, solo la administradora (RLS con `es_admin()`). Nadie inserta ni borra: la fila la crea la migración. **Ojo**: Supabase da todos los permisos a las tablas nuevas por defecto, así que la migración hace `revoke all` antes de los `grant` (el test de estructura lo detectó). Toda tabla nueva tiene que hacer lo mismo.
+- **`VITE_WHATSAPP_NUMBER` se elimina** (de `env.ts`, `.env.example` y los planes): el número vive en la base. Al crear `ls-prod` (etapa 8) hay que cargarlo en Ajustes antes de abrir la tienda.
+- **Vista previa** en Ajustes con un pedido de ejemplo fijo (`PEDIDO_EJEMPLO`), no con el último pedido real como el prototipo: no hay servicio de pedidos todavía (etapa 6) y así la pantalla no depende de que existan pedidos.
+- **"Insertar dato"** inserta la clave donde está el cursor (el prototipo la agrega al final).
+- La sección "Etiquetas" de Ajustes sigue siendo de la etapa 7 (D-02).
+
+### D-35 · Panel de productos (etapa 3)
+- **Prueba pgTAP** `08_storage_y_guardar_producto.test.sql` (el plan decía `07_`, que ya usa `07_settings`).
+- **Storage**: además de `insert`, `update` y `delete`, la administradora tiene una política de `select` sobre los objetos del bucket: la API de Storage la necesita para borrar (y para `upsert`). Anon no tiene ninguna, así que no puede listar el bucket (verificado: lista vacía y 403 al subir). Supabase no deja borrar filas de `storage.objects` por SQL (`storage.protect_delete`): el borrado se prueba desde la app.
+- **Fotos sin guardar**: el formulario recuerda las fotos subidas en esa pantalla. Si se sale sin guardar (Cancelar, "Volver", otra pestaña del panel o el botón atrás), se borran al desmontar el formulario; si se quita una foto nueva, se borra en el momento. Las imágenes que ya estaban guardadas solo se borran al guardar, con los `paths_quitados` de la RPC. Cerrar la pestaña del navegador sigue dejando huérfanas (riesgo aceptado en D-16).
+- **`borrarArchivos` ignora las rutas `/seed/…`** (D-27): editar un producto de las semillas y quitarle una imagen no intenta borrar nada de Storage.
+- **Subida**: `cacheControl` de un año (los nombres son UUID nuevos en cada subida, nunca se reemplaza un archivo) y fondo blanco al pasar a JPEG, para que un PNG con transparencia no quede negro.
+- **`BuscadorConEspera`** llama a la versión más recente de `onBuscar` cuando vence la espera: si mientras se tipeaba cambió el filtro, la búsqueda no lo pisa (bug encontrado en el navegador; prueba de regresión en `ProductosPage.test.tsx`).
+- **Botón de guardar** dice "Subiendo fotos…" y queda deshabilitado mientras sube alguna foto.
+- **`ImagenProducto`** suma `path` y `pathMiniatura` (el formulario los manda de vuelta a la RPC). Un producto sin fila de costo muestra "costo sin cargar" en la lista (no debería pasar: la RPC siempre lo guarda).
+- **Tokens nuevos** de colores del prototipo que faltaban: `icono-suave`, `icono-off`, `borde-punteado`, `fila-hover`, `margen-neutro`, `texto-chip-activo`.
+
+### D-36 · Catálogo público (etapa 4)
+- **`listarCatalogo()` devuelve `Vidriera`** (`{ productos, etiquetas }`) y no una lista: las chips necesitan el orden global de las etiquetas. La tarjeta es `ProductoVidriera` (`portadaUrl`, `agotado`); el detalle reutiliza `ProductoCatalogo`.
+- **Orden**: productos de más nuevo a más viejo (`created_at desc`, después `id`); etiquetas (chips y detalle) de la más vieja a la más nueva (`created_at`, después `id`). Con las semillas, que comparten `created_at`, el desempate por `id` reproduce el orden del prototipo. Los agotados van al final igual (`aplicarFiltros`).
+- **Comas literales en la URL** (`?tags=aros,dorado`): la página navega con `navigate({ search })` porque `setSearchParams` las codifica como `%2C`. Una etiqueta con coma en el nombre se partiría en dos al leer la URL (el panel no las prohíbe; caso raro, se acepta).
+- **Etiquetas desconocidas en la URL** (link viejo o mal escrito) se ignoran al filtrar, pero no se reescribe la URL.
+- **"Agregar al carrito" deshabilitado** hasta la etapa 5; el stepper ya funciona con tope en el stock. Agotado: botón deshabilitado "Agotado", como el prototipo.
+- **Accesibilidad**: chips disponibles con `aria-label` "aros, 4 piezas" (sin eso el nombre accesible quedaba "aros4"); etiquetas del detalle de 34 px como el prototipo, con un `::before` que lleva la zona táctil a 44 px; el buscador de etiquetas usa 16 px (no 15) para evitar el zoom de iOS.
+- **Header "Volver"**: vuelve a la entrada anterior del historial (el catálogo recupera filtros y scroll con `ScrollRestoration`); si se entró directo por un link, va a `/`.
+- **Título de la pestaña** con `useTituloDocumento` (efecto). No se usa `<title>` de React 19 porque competiría con el de `index.html`.
+- **Vidriera vacía** (sin productos activos): "Todavía no hay piezas" (no está en el prototipo). Error de carga: "No pudimos cargar la vidriera." + "Reintentar".
+- **`og.jpg`** se generó con `scripts/generar-og.html` (canvas con el logo, los tokens y las fuentes del sitio). `og:image` queda relativa; la etapa 8 la completa con el dominio.
+- **Estilos compartidos** (`claseBotonIcono`, `claseChip`, `claseChipActiva`, `claseLink`) pasan a `src/components/estilos.ts` (antes en `components/panel/`), porque los usan el catálogo y el panel.
+
+### D-37 · Carrito y pedido (etapa 5)
+- **Carrito**: `services/carrito.ts` lee y escribe `localStorage` (`ls:carrito:v1`, validado con Zod: un id con formato de UUID y cantidad entera ≥ 1; las claves de más, como un precio agregado a mano, se descartan; si está roto se vacía). `CarritoProvider` vive en `LayoutCliente` (solo el sitio público) y escucha `storage` para sincronizar pestañas.
+- **Piezas desactivadas**: anon no puede leer productos inactivos (RLS), así que en el carrito aparecen como "Pieza no disponible" y cuentan como agotadas. Al rechazar, `crear_pedido` devuelve el nombre real, que se usa en el aviso.
+- **Rechazo de la base**: `crearPedido` lanza `PedidoRechazado` (subclase de `ErrorServicio` con `rechazo` tipado). Confirmar muestra enseguida lo que dijo la base y relee los productos; con los datos nuevos, los avisos salen de `detectarProblemas`. Mientras relee se siguen mostrando los datos anteriores (`useProductosDelCarrito`), así el formulario no se borra.
+- **Errores de red** usan el código existente `sin_conexion` (de `desdeErrorSupabase`), no `red` como decía el plan.
+- **Doble envío**: botón deshabilitado con "Confirmando…" y además una ref que frena el segundo clic antes de que React redibuje.
+- **Éxito**: el pedido va a `sessionStorage` (`ls:ultimo-pedido`); sin él, `/pedido/confirmado` vuelve al catálogo. "Volver" en esa pantalla va al catálogo (no al carrito vacío). Si la tienda no cargó su número de WhatsApp, no se muestra el botón y se avisa que la tienda va a escribir al teléfono que dejó el cliente. El aviso en el panel queda para la etapa 7 (Resumen).
+- **`formatearTelefonoTienda`**: agrupa celulares argentinos (`549` + 10 dígitos) con característica de 2 dígitos si empieza con 11 y de 3 si no; las de 4 dígitos se ven con el mismo agrupado (los dígitos son correctos). Otros números: `+` y los dígitos.
+- **Barra del catálogo**: el total usa los precios de la vidriera ya cargada (no hace otra consulta).
+- **Nombre de más de 80 letras**: mensaje nuevo "El nombre es muy largo: dejalo en 80 letras o menos." (la base ya rechazaba más de 80).
+
+### D-38 · Panel de pedidos (etapa 6)
+- **Búsqueda y filtro en el navegador**: `listarPedidosAdmin` trae los últimos 500 pedidos (más nuevos primero) y `lib/pedidos.ts` filtra por estado y busca (cliente sin tildes, o número por prefijo: `7`, `0007` y `#0007` encuentran el 7). Los cuatro contadores salen de la misma lista. Punto de extensión: con más de 500, paginar y mover el filtro a la base (con `unaccent`).
+- **Escribir por WhatsApp** (agregado al prototipo): el teléfono del detalle es un link `tel:` y al lado va "Escribir por WhatsApp" a `wa.me`. Como el cliente escribe su número sin código de país, se sacan los ceros de adelante y, si no empieza con 54, se antepone 549 (celular argentino). Un número escrito con el "15" local no queda bien; es raro y la administradora igual tiene el `tel:`.
+- **Badge de pendientes**: `PanelLayout` cuenta los pendientes (`contarPendientes`, solo el conteo) al entrar al panel y comparte `refrescarPendientes` con las pantallas por el contexto del `<Outlet>` (`useRefrescarPendientes`); el detalle lo llama después de vender o cancelar.
+- **Después de una acción** se relee el pedido de la base (no se modifica a mano) y se sigue mostrando el anterior mientras carga, para que el aviso verde no parpadee. Si la RPC falla (`estado_invalido`, `stock_insuficiente`), se muestra el error en un toast y también se relee.
+- **Botones mientras procesa**: "Marcando como vendido…" / "Cancelando…" y ambos deshabilitados (el prototipo no lo tenía; evita el doble clic).
+- **Ítems del detalle** ordenados por nombre (como los `cambios` que devuelven las funciones de la base). El nombre es el actual del producto: `order_items` no guarda el nombre.
+
+### D-39 · Resumen y gestión de etiquetas (etapa 7)
+- **`resumen_panel(p_ahora timestamptz default null)`**: el parámetro opcional existe solo para probar en pgTAP el cambio de mes con fechas fijas (una venta del 31/1 a las 22 h de Argentina es de enero aunque en UTC ya sea 1/2). La app lo llama sin parámetro (usa `now()`).
+- **Prueba pgTAP `09_resumen_y_etiquetas`** (el plan decía `08_`, que ya usa la de Storage). Se sumaron `renombrar_etiqueta` y `resumen_panel` a la lista de funciones permitidas de `00_estructura`.
+- **Eliminar etiqueta** no usa una función: es un `delete` en `tags` (RLS solo admin) y `product_tags` tiene `on delete cascade`. Si no se borra ninguna fila (sin permiso u otra pestaña ya la borró), el servicio avisa.
+- **"Para reponer"** reusa `listarProductosAdmin` y "Para atender" reusa `listarPedidosAdmin`; el Resumen hace las tres consultas en paralelo (`obtenerDatosResumen`). Filas compactas como el prototipo: `FilaPedido` y `FilaProducto` tienen `variante="resumen"`.
+- **Cantidad de productos por etiqueta** en Ajustes cuenta activos e inactivos (como el prototipo); el catálogo cuenta solo activos.
+- **`useAsync` devuelve `previos`** (los últimos datos que llegaron), para seguir mostrando la lista de etiquetas mientras se relee después de un cambio.
+- **Placeholders borrados**: `SeccionPendiente` y `TituloPagina` ya no se usan (todas las pantallas están hechas).
+- **Aviso en el panel si falta el número de WhatsApp** (pendiente de D-37): no se agregó al Resumen; queda para después del MVP junto con otros avisos (etapa 9).
+
+### D-40 · Ajustes pedidos antes de producción (2026-10-16)
+- **Logo**: el login centra el logo con marco y también el título y la bajada (con solo el logo centrado quedaba descolgado). El header del cliente y la barra lateral del panel usan `public/logo-sello.webp`: el mismo logo sin el marco cuadrado exterior, recortado de `logo.webp` y achicado a 192 px (25 KB), porque con el marco el monograma se veía muy chico a 52 px. Reemplaza a la marca en texto del prototipo en el header (pedido de la dueña).
+- **Etiquetas en el teléfono**: se ven las primeras 8 (`LIMITE_CHIPS_MOVIL`) y "Ver todas (N)" / "Ver menos". Se ocultan con CSS (`hidden lg:inline-flex`), así en escritorio se ven todas sin lógica de pantalla. Mientras se busca una etiqueta se muestran todas las que coinciden y el botón no aparece.
+- **Orden del catálogo**: "Más nuevos" (por defecto), "Menor precio", "Mayor precio", en la URL como `orden=precio-asc|precio-desc`. Los agotados siguen al final en cualquier orden. El orden no es un filtro: "Limpiar filtros" lo conserva y no cuenta para "N de M piezas".
+- **Centrados**: "Nuevo producto" en la lista de productos y la confirmación inline de cancelar pedido (título, texto y botones).
+- `SelectPildora`: select nativo genérico del catálogo; lo usan el modo de etiquetas y el orden.
+
+### D-41 · Puesta en producción (etapa 8, documentación verificada el 2026-10-16)
+- **Sitio en Cloudflare Pages, no en Workers con recursos estáticos.** Las variables `VITE_*` se leen **al compilar**, y producción (`main`) y vista previa (`develop`) necesitan valores distintos. Pages tiene variables separadas para *Production* y *Preview*, disponibles en el build ([variables de Pages](https://developers.cloudflare.com/pages/functions/bindings/#environment-variables)). Workers Builds separa los ajustes de *runtime* de las vistas previas, pero no documenta variables de build por rama: habría que leer `WORKERS_CI_BRANCH` en un script ([configuración de Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/), [migrar de Pages](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)). Pages tampoco figura como obsoleto. Si algún día se migra, `_headers` sigue funcionando igual y el fallback de SPA pasa a `assets.not_found_handling = "single-page-application"`.
+- **Ramas en Pages**: producción = `main`; vistas previas en modo *Custom* incluyendo solo `develop` ([controles de build por rama](https://developers.cloudflare.com/pages/configuration/branch-build-controls/)). La vista previa de `develop` queda fija en `https://develop.<proyecto>.pages.dev`.
+- **Sin `public/_redirects`**: sin un `404.html` en la raíz, Pages asume que es una SPA y sirve la raíz para cualquier ruta que no sea un archivo ([cómo sirve Pages](https://developers.cloudflare.com/pages/configuration/serving-pages/)). La regla `/* /index.html 200` sobra. Las rutas desconocidas las muestra la app (`NoEncontradaPage`). **No agregar un `404.html` en `public/`**: apagaría ese comportamiento.
+- **`public/_headers`**: `nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY`, `Permissions-Policy` mínima y caché de un año para `/assets/*` (los nombres llevan hash). La CSP queda para la etapa 9.
+- **Node en el build**: la imagen v3 de Pages trae Node 22 y respeta `.nvmrc` ([imagen de build](https://developers.cloudflare.com/pages/configuration/build-image/)). Igual se carga `NODE_VERSION=22` en las variables, como pide el plan.
+- **`og:image` absoluta**: un plugin chico en `vite.config.ts` le antepone `VITE_SITE_URL` al compilar. Se carga solo en *Production* de Pages; en local, en CI y en la vista previa queda `/og.jpg`.
+- **Cron anti-pausa todos los días (actualiza D-08)**: Supabase pausa los proyectos gratuitos con "poca actividad en 7 días" y dice que alcanzan "unas pocas consultas de usuarios a la base por día" ([pausa de proyectos](https://supabase.com/docs/guides/platform/free-project-pausing)). Un cron diario (`0 12 * * *`, 9 h de Argentina) sigue mejor esa guía que uno cada 3 días y no cuesta nada: el plan gratis de Workers da 5 Cron Triggers por cuenta y 10 ms de CPU por ejecución ([límites](https://developers.cloudflare.com/workers/platform/limits/)). Cloudflare corre los crons en UTC y guarda los últimos 100 eventos ([Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/)).
+- **Qué cuenta como actividad**: el Worker hace `select id from tags limit 1` por la API REST con la clave anon. Es una consulta real a Postgres (PostgREST), no un ping. Supabase no define el umbral exacto: si igual llega el mail de aviso de pausa, cambiar a una RPC de solo lectura o sumar una segunda consulta, y anotarlo acá. Se puede reanudar un proyecto pausado desde el panel (*Resume project*).
+- **Worker en `workers/keepalive/`**: TypeScript sin dependencias en runtime. `wrangler` 4.145.0 fijo como devDependency **de esa carpeta** (no del sitio): solo sirve para desplegarlo y probarlo a mano. Los tipos de fetch salen de la lib `DOM` y no de `@cloudflare/workers-types`, para no sumar otra dependencia. Sin URL pública (`workers_dev: false`). Si falta un secreto o Supabase no responde 2xx, el handler lanza y el evento queda como error. Prueba con Vitest desde la raíz (`npm test` la incluye) y `tsc -b` lo chequea por la referencia en `tsconfig.json`. Probado con `wrangler dev --test-scheduled` contra el Supabase local: `keepalive ok: 200`. Apunta **solo a producción**: `ls-dev` puede pausarse.
+- **Respaldos: opción B (manual, mensual).** El repositorio es público y los respaldos tienen nombres y teléfonos de clientes, así que la opción A (artifact de GitHub Actions) queda descartada (ya estaba anotado en `docs/github-setup.md`). Runbook en el README.
+- **Migraciones a producción**: manuales, en cada release, después del merge a `main`, con `npx supabase db push --db-url <cadena del Session pooler de ls-prod>` (primero con `--dry-run`). Se usa `--db-url` en vez de `supabase link` (lo que sugería el plan) para que la carpeta siga vinculada a `ls-dev` y un `db push` sin parámetros nunca toque producción. El *Session pooler* porque la conexión directa es solo IPv6. La cadena se carga en una variable de la terminal y no se guarda en ningún archivo. `db push` no corre `seed.sql`.
+- **Contraseña de la base de `ls-prod`**: solo letras y números (larga), para no tener que codificar caracteres especiales dentro de la cadena de conexión.
+
 ## Pendientes de verificar (no bloquean)
-- **Etapa 8**: disponibilidad y límites de Cron Triggers en el plan gratuito de Cloudflare, y si conviene Pages o Workers con recursos estáticos para el sitio (Pages no ejecuta crons por sí solo; el cron va en un Worker aparte). Confirmar con la documentación oficial vigente y anotar el resultado acá.
-- **Etapa 8**: que Supabase cuente como actividad una consulta a la API REST con la clave anon.
+- **Producción**: que el cron diario alcance para que Supabase no pause `ls-prod` (ver D-41). Revisar después de la primera semana sin movimiento.
 - **GitHub**: la protección de ramas en repositorios **privados** requiere GitHub Pro/Team. Ver `docs/github-setup.md`.

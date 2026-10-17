@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="800" height="1000" role="img" aria-label="Anillo">
+<rect width="200" height="250" fill="#E9E0CF"/>
+<circle cx="52" cy="84" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="#9C7426" opacity="0.10"></ellipse>
+<g transform="rotate(-14 100 125)" fill="none" stroke="#9C7426" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="100" cy="142" r="38"></circle><circle cx="100" cy="142" r="31" stroke-width="1.2" opacity="0.6"></circle><rect x="84" y="90" width="32" height="20" rx="6"></rect><path d="M90 96h20" stroke-width="1" opacity="0.5"></path></g>
+</svg>

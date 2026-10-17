@@ -1,0 +1,231 @@
+import { obtenerSupabase } from '@/lib/supabase'
+import { borrarArchivos, urlPublica } from '@/services/imagenes'
+import { desdeErrorSupabase, ErrorServicio } from '@/services/errores'
+import type {
+  DatosProducto,
+  ImagenProducto,
+  Producto,
+  ProductoCarrito,
+  ProductoCatalogo,
+  ProductoVidriera,
+  Vidriera,
+} from '@/types/dominio'
+
+const COLUMNAS_ADMIN =
+  'id, nombre, descripcion, precio, stock, activo, created_at, updated_at, product_costs(costo), product_images(id, path, path_miniatura, orden), product_tags(tags(nombre))'
+
+const MENSAJE_LISTAR = 'No pudimos cargar los productos. Probá de nuevo en un rato.'
+const MENSAJE_GUARDAR = 'No pudimos guardar el producto. Probá de nuevo en un rato.'
+
+type FilaImagen = { id: string; path: string; path_miniatura: string; orden: number }
+
+/** Imágenes ordenadas por `orden` (la primera es la portada) con sus URL públicas. */
+function aImagenes(filas: FilaImagen[]): ImagenProducto[] {
+  return [...filas]
+    .sort((a, b) => a.orden - b.orden)
+    .map((img) => ({
+      id: img.id,
+      orden: img.orden,
+      path: img.path,
+      pathMiniatura: img.path_miniatura,
+      url: urlPublica(img.path),
+      urlMiniatura: urlPublica(img.path_miniatura),
+    }))
+}
+
+function consultaAdmin() {
+  return obtenerSupabase().from('products').select(COLUMNAS_ADMIN)
+}
+
+type FilaAdmin = NonNullable<Awaited<ReturnType<typeof consultaAdmin>>['data']>[number]
+
+function aProducto(fila: FilaAdmin): Producto {
+  const imagenes = aImagenes(fila.product_images)
+  const etiquetas = fila.product_tags
+    .map((pt) => pt.tags.nombre)
+    .sort((a, b) => a.localeCompare(b, 'es'))
+  return {
+    id: fila.id,
+    nombre: fila.nombre,
+    descripcion: fila.descripcion,
+    precio: fila.precio,
+    stock: fila.stock,
+    activo: fila.activo,
+    costo: fila.product_costs?.costo ?? null,
+    imagenes,
+    etiquetas,
+    creadoEn: fila.created_at,
+    actualizadoEn: fila.updated_at,
+  }
+}
+
+/** Todos los productos (activos e inactivos) con costo, etiquetas e imágenes, por nombre. */
+export async function listarProductosAdmin(): Promise<Producto[]> {
+  const { data, error } = await consultaAdmin().order('nombre')
+  if (error !== null) throw desdeErrorSupabase(error, MENSAJE_LISTAR)
+  return data.map(aProducto)
+}
+
+/** Un producto para editar, o `null` si no existe. */
+export async function obtenerProductoAdmin(id: string): Promise<Producto | null> {
+  const { data, error } = await consultaAdmin().eq('id', id).maybeSingle()
+  if (error !== null) {
+    // Un id con formato inválido en la URL es lo mismo que uno que no existe.
+    if (error.code === '22P02') return null
+    throw desdeErrorSupabase(error, 'No pudimos cargar el producto. Probá de nuevo en un rato.')
+  }
+  return data === null ? null : aProducto(data)
+}
+
+// ---------------------------------------------------------------------------
+// Catálogo público (anónimo). Nunca se piden costos: viven en `product_costs` (RLS solo admin).
+// ---------------------------------------------------------------------------
+
+type EtiquetaFila = { id: string; nombre: string; created_at: string }
+
+/** Etiquetas de la más vieja a la más nueva; empates (las semillas) por id (D-36). */
+function compararEtiquetas(a: EtiquetaFila, b: EtiquetaFila): number {
+  return a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
+}
+
+function nombresOrdenados(filas: { tags: EtiquetaFila }[]): string[] {
+  return filas
+    .map((pt) => pt.tags)
+    .sort(compararEtiquetas)
+    .map((t) => t.nombre)
+}
+
+function consultaCatalogo() {
+  return obtenerSupabase()
+    .from('products')
+    .select(
+      'id, nombre, precio, stock, product_images(path_miniatura, orden), product_tags(tags(id, nombre, created_at))',
+    )
+    .eq('activo', true)
+    .order('created_at', { ascending: false })
+    .order('id')
+}
+
+/**
+ * Productos activos con la miniatura de la portada y sus etiquetas, en una sola consulta (D-11).
+ * Los más nuevos primero; el orden de los agotados lo decide `aplicarFiltros`.
+ */
+export async function listarCatalogo(): Promise<Vidriera> {
+  const { data, error } = await consultaCatalogo()
+  if (error !== null) throw desdeErrorSupabase(error, 'No pudimos cargar la vidriera.')
+
+  const etiquetas = new Map<string, EtiquetaFila>()
+  const productos = data.map((fila): ProductoVidriera => {
+    for (const pt of fila.product_tags) etiquetas.set(pt.tags.nombre, pt.tags)
+    const portada = fila.product_images.reduce<(typeof fila.product_images)[number] | undefined>(
+      (menor, img) => (menor === undefined || img.orden < menor.orden ? img : menor),
+      undefined,
+    )
+    return {
+      id: fila.id,
+      nombre: fila.nombre,
+      precio: fila.precio,
+      stock: fila.stock,
+      agotado: fila.stock <= 0,
+      portadaUrl: portada === undefined ? null : urlPublica(portada.path_miniatura),
+      etiquetas: nombresOrdenados(fila.product_tags),
+    }
+  })
+  return { productos, etiquetas: [...etiquetas.values()].sort(compararEtiquetas).map((t) => t.nombre) }
+}
+
+/** Detalle público: producto activo con todas sus imágenes y etiquetas, o `null` si no se ve. */
+export async function obtenerProductoPublico(id: string): Promise<ProductoCatalogo | null> {
+  const { data, error } = await obtenerSupabase()
+    .from('products')
+    .select(
+      'id, nombre, descripcion, precio, stock, product_images(id, path, path_miniatura, orden), product_tags(tags(id, nombre, created_at))',
+    )
+    .eq('id', id)
+    .eq('activo', true)
+    .maybeSingle()
+  if (error !== null) {
+    if (error.code === '22P02') return null
+    throw desdeErrorSupabase(error, 'No pudimos cargar esta pieza. Probá de nuevo en un rato.')
+  }
+  if (data === null) return null
+  return {
+    id: data.id,
+    nombre: data.nombre,
+    descripcion: data.descripcion,
+    precio: data.precio,
+    stock: data.stock,
+    imagenes: aImagenes(data.product_images),
+    etiquetas: nombresOrdenados(data.product_tags),
+  }
+}
+
+/**
+ * Precio, stock y miniatura actuales de los productos del carrito. Solo vuelven los activos (RLS):
+ * el que falta se desactivó y el carrito lo trata como agotado.
+ */
+export async function obtenerProductosPorIds(ids: string[]): Promise<ProductoCarrito[]> {
+  if (ids.length === 0) return []
+  const { data, error } = await obtenerSupabase()
+    .from('products')
+    .select('id, nombre, precio, stock, product_images(path_miniatura, orden)')
+    .in('id', ids)
+    .eq('activo', true)
+  if (error !== null) throw desdeErrorSupabase(error, 'No pudimos cargar tu carrito. Probá de nuevo en un rato.')
+  return data.map((fila) => {
+    const portada = [...fila.product_images].sort((a, b) => a.orden - b.orden)[0]
+    return {
+      id: fila.id,
+      nombre: fila.nombre,
+      precio: fila.precio,
+      stock: fila.stock,
+      miniaturaUrl: portada === undefined ? null : urlPublica(portada.path_miniatura),
+    }
+  })
+}
+
+function esRespuestaGuardar(v: unknown): v is { id: string; paths_quitados: string[] } {
+  if (typeof v !== 'object' || v === null) return false
+  const r = v as Record<string, unknown>
+  return (
+    typeof r.id === 'string' &&
+    Array.isArray(r.paths_quitados) &&
+    r.paths_quitados.every((p) => typeof p === 'string')
+  )
+}
+
+/**
+ * Crea o edita el producto en una sola transacción (RPC `guardar_producto`, D-16) y después
+ * borra de Storage las imágenes que se sacaron. Si ese borrado falla, el guardado igual vale.
+ */
+export async function guardarProducto(datos: DatosProducto): Promise<string> {
+  const { data, error } = await obtenerSupabase().rpc('guardar_producto', {
+    p: {
+      id: datos.id,
+      nombre: datos.nombre,
+      descripcion: datos.descripcion,
+      precio: datos.precio,
+      costo: datos.costo,
+      stock: datos.stock,
+      activo: datos.activo,
+      etiquetas: datos.etiquetas,
+      imagenes: datos.imagenes.map((i) => ({ path: i.path, path_miniatura: i.pathMiniatura })),
+    },
+  })
+  if (error !== null) {
+    if (error.code === '42501') {
+      throw new ErrorServicio('sin_acceso', 'Tu sesión no tiene permiso para guardar productos.', error)
+    }
+    throw desdeErrorSupabase(error, MENSAJE_GUARDAR)
+  }
+  if (!esRespuestaGuardar(data)) throw new ErrorServicio('respuesta', MENSAJE_GUARDAR, data)
+
+  if (data.paths_quitados.length > 0) {
+    try {
+      await borrarArchivos(data.paths_quitados)
+    } catch (e) {
+      console.error('El producto se guardó, pero no se pudieron borrar imágenes viejas:', e)
+    }
+  }
+  return data.id
+}

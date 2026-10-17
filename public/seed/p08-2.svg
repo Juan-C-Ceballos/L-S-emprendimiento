@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="800" height="1000" role="img" aria-label="Collar con dije">
+<rect width="200" height="250" fill="#E4E1DB"/>
+<circle cx="140" cy="196" r="82" fill="#ffffff" opacity="0.32"></circle><ellipse cx="100" cy="214" rx="58" ry="6" fill="#737B84" opacity="0.10"></ellipse>
+<g transform="translate(100 125) scale(1.5) translate(-100 -118)" fill="none" stroke="#737B84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M36 36C46 116 80 148 100 150C120 148 154 116 164 36" stroke-dasharray="3 3"></path><circle cx="100" cy="155" r="4.5"></circle><path d="M100 196C78 180 78 162 90 162C96 162 100 168 100 172C100 168 104 162 110 162C122 162 122 180 100 196Z" stroke-width="2.5"></path></g>
+</svg>

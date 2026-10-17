@@ -30,7 +30,7 @@ Ninguna nueva. Se verifica todo el prototipo en producción con el checklist.
 3. **Sitio en Cloudflare** (Pages, si se confirmó en la tarea 1):
    - Build command `npm run build`, output `dist`, `NODE_VERSION=22`.
    - Rama de producción `main`; vistas previas habilitadas solo para `develop` (y opcionalmente PRs).
-   - Variables **Production**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` del proyecto de producción, `VITE_WHATSAPP_NUMBER`. Variables **Preview**: las del proyecto de desarrollo.
+   - Variables **Production**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` del proyecto de producción. Variables **Preview**: las del proyecto de desarrollo.
    - SPA: `public/_redirects` con `/* /index.html 200` (o el mecanismo equivalente vigente; si se usa Workers con assets, `not_found_handling = "single-page-application"`).
    - Headers de seguridad en `public/_headers`: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, `Permissions-Policy` mínima, y `Cache-Control: public, max-age=31536000, immutable` para `/assets/*`. Una CSP queda como mejora (anotar).
    - Completar `og:image` con URL absoluta de producción (pendiente de la etapa 4).

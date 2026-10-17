@@ -29,10 +29,10 @@ Fuentes de verdad: `docs/ls-mvp.html` (funcional) y `prototype/` (visual: pantal
 - **Stock**: se descuenta al marcar vendido, no al crear. `marcar_vendido` y `cancelar_pedido` son funciones SQL atómicas. Cancelar un vendido repone stock. Un cancelado no vuelve a venderse.
 - **Los productos nunca se borran**: se desactivan.
 - **Etiquetas** libres, muchos a muchos (`product_tags`). Filtro del catálogo con modo `todas` (Y, por defecto) o `alguna` (O), estado en la URL: `/?q=&tags=a,b&modo=todas`.
-- **El pedido se guarda en la base antes de abrir WhatsApp** (`wa.me` con mensaje prearmado y número de pedido). Número en `VITE_WHATSAPP_NUMBER`.
+- **El pedido se guarda en la base antes de abrir WhatsApp** (`wa.me` con mensaje prearmado y número de pedido). Número y plantilla del mensaje en la tabla `settings`, editables en Ajustes (D-34).
 - **Fotos** achicadas en el navegador antes de subir: detalle 1600 px de lado largo, calidad 0,85; miniatura 400 px; JPEG. La original no se guarda.
 - **Secretos**: la clave `service_role` jamás aparece en el frontend ni en el repositorio. Secretos en `.env.local` (ignorado) y en las variables del hosting. `.env.example` solo con nombres.
-- Contra la pausa de Supabase gratis: Cron Trigger de Cloudflare con una consulta liviana cada 3 días (etapa 8).
+- Contra la pausa de Supabase gratis: Cron Trigger de Cloudflare con una consulta liviana todos los días (etapa 8, D-41).
 
 ## Convenciones de código
 - TypeScript estricto: sin `any` (usá `unknown` y estrechá), sin `@ts-ignore`. Tipos de la base en `src/types/database.ts` (generados, no se editan a mano); tipos de dominio en `src/types/`.
@@ -44,7 +44,7 @@ Fuentes de verdad: `docs/ls-mvp.html` (funcional) y `prototype/` (visual: pantal
 - Nombres de dominio en español (`producto`, `pedido`, `etiqueta`, `crearPedido`); términos técnicos en inglés cuando son estándar (`hook`, `props`).
 - Formularios: estado controlado + esquema Zod en el mismo módulo o en `src/lib/esquemas.ts`. Mensajes de error copiados del prototipo.
 - Estilos: utilidades de Tailwind con los tokens definidos en `src/index.css` (`@theme`). No hardcodear colores fuera de los tokens.
-- Accesibilidad: objetivos táctiles ≥ 44 px, `aria-label` en botones de ícono, foco visible (`outline` vino), textos de estado con `aria-live`.
+- Accesibilidad: objetivos táctiles ≥ 44 px, `aria-label` en botones de ícono, foco visible (`outline` bronce), textos de estado con `aria-live`.
 - SQL: nombres en español y `snake_case`; funciones con `set search_path = ''` y nombres calificados (`public.products`); cada migración es inmutable una vez mergeada (para cambiar algo, migración nueva).
 - Pruebas junto al código (`*.test.ts(x)`) para frontend; `supabase/tests/*.test.sql` para la base.
 

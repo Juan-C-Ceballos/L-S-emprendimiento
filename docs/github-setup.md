@@ -2,6 +2,21 @@
 
 En la sesión de preparación **no había `gh` CLI instalado**, así que estos pasos quedan para hacer a mano (o con `gh` cuando esté instalado y autenticado). Una vez hechos, marcá las casillas y anotá la fecha.
 
+## Estado verificado (2026-10-15, después de mergear la etapa 1, con la API pública de GitHub)
+
+El repositorio se borró y se volvió a crear para eliminar del historial un dato sensible del prototipo. Configuración actual:
+
+- [x] Repositorio **público**. Ramas remotas: `main` y `develop` (las `feature/…` se borran al mergear).
+- [x] Rama por defecto: `develop`.
+- [x] Ruleset `proteger-main-develop` (id 25198032) **activo** sobre `main` y `develop`: impide borrar las ramas, bloquea force push, exige PR (0 aprobaciones, conversaciones resueltas).
+- [x] Checks requeridos: `frontend` (desde la etapa 0) y `base-de-datos` (desde la etapa 1).
+- [x] *Require branches to be up to date before merging*: activado (`strict: true`).
+- [x] Métodos de merge del ruleset: **`squash` y `merge`** (rebase desactivado). Como el ruleset es uno solo para las dos ramas, GitHub no distingue cuál va con cuál: **la regla se sigue a mano** al mergear (botón "Squash and merge" hacia `develop`; "Create a merge commit" en las releases `develop` → `main`). Si una release se squashea, `main` y `develop` divergen y cada release siguiente arrastra conflictos.
+- [ ] Mejora opcional: dividir en dos rulesets con las mismas reglas, uno sobre `develop` con *solo squash* y otro sobre `main` con *solo merge* (Settings → Rules → Rulesets: duplicar `proteger-main-develop`, dejar cada uno con una sola rama y ajustar *Allowed merge methods*). Así GitHub lo hace cumplir solo.
+- [?] Tipos de merge del repositorio (sección 2) y lista de bypass: la API pública no los muestra; revisarlos a mano.
+- Secretos de Actions: **ninguno**. Los respaldos se hacen a mano (D-41, opción B) porque el repositorio es público; Cloudflare Pages se conecta con su propia app de GitHub.
+- Historial: el PR #1 (etapa 0) entró a `develop` con *merge commit* (antes de restringir los métodos); el PR #2 (etapa 1), con squash. No hace falta corregir nada.
+
 ## 1. Crear el repositorio y subir las ramas
 
 1. Repositorio creado por el usuario: **https://github.com/Juan-C-Ceballos/L-S-emprendimiento** (verificar en Settings si es público o privado; ver la nota de la sección 3).
@@ -27,7 +42,7 @@ git push -u origin feature/00-fundacion
 - [ ] Allow rebase merging → **desactivado**.
 - [x] Automatically delete head branches.
 
-GitHub no permite fijar el tipo de merge por rama. La regla (squash hacia `develop`, merge commit hacia `main`) se sigue a mano y está en la plantilla de PR.
+En la configuración del repositorio no se puede fijar el tipo de merge por rama, pero sí con **un ruleset por rama** (*Allowed merge methods*): `develop` solo squash y `main` solo merge commit. Ver "Estado verificado" arriba. La regla también está en la plantilla de PR.
 
 ## 3. Protección de ramas (`main` y `develop`)
 

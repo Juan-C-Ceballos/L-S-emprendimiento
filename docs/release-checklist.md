@@ -2,12 +2,16 @@
 
 Correrlo **completo** sobre el deploy de vista previa de `develop` (que apunta al Supabase de desarrollo) antes de abrir el PR de release. Copiar la lista en la descripción del PR y tildarla.
 
-> Primera versión creada en la preparación del repositorio. La etapa 8 la completa con las URL reales y los pasos de producción.
+> Vista previa: `https://develop.<proyecto>.pages.dev` (Supabase `ls-dev`). Producción: `https://<proyecto>.pages.dev` (Supabase `ls-prod`). Reemplazá `<proyecto>` por el nombre real del proyecto de Pages (anotado en `PLAN.md`). Runbook en el README.
 
 ## Antes de empezar
 - [ ] `develop` tiene el CI en verde en el último commit.
 - [ ] Todas las migraciones nuevas desde la última release están en `supabase/migrations/` y pasaron `npm run db:test`.
 - [ ] `PLAN.md` refleja lo que entra en esta release.
+- [ ] El último deploy de `develop` en Cloudflare Pages terminó bien.
+- [ ] En la vista previa, la pestaña Red del navegador muestra pedidos a `nhsjichuumyflklqkhxw.supabase.co` (`ls-dev`), no a producción.
+- [ ] Recargar directo en `/producto/<id>` y en `/admin/pedidos` no da 404.
+- [ ] `grep -r service_role dist/` después de `npm run build` no encuentra nada.
 
 ## Humo · cliente anónimo (celular, ~390 px)
 - [ ] El catálogo carga, muestra solo productos activos y los agotados al final con el badge "Agotado".
@@ -35,7 +39,10 @@ Correrlo **completo** sobre el deploy de vista previa de `develop` (que apunta a
 - [ ] Ajustes: crear, renombrar (y unir) y eliminar etiquetas.
 
 ## Producción (después del merge a `main`)
-- [ ] `npx supabase db push` contra el proyecto de producción (ver runbook en el README) **antes** o junto con el deploy.
+- [ ] Si la release trae migraciones: `npx supabase db push --db-url $env:DB_PROD --dry-run` y después sin `--dry-run` (README → "Aplicar migraciones a producción"), **antes** de probar el sitio.
 - [ ] El deploy de `main` terminó bien y el sitio de producción carga.
-- [ ] Un pedido de prueba en producción y luego cancelarlo.
-- [ ] El Cron Trigger anti-pausa figura con su última ejecución correcta.
+- [ ] La pestaña Red muestra pedidos al Supabase de **producción** (`ls-prod`), no a `ls-dev`.
+- [ ] Recargar directo en `/admin/pedidos` no da 404 y los headers de `_headers` están (por ejemplo `X-Frame-Options: DENY` en la respuesta del documento).
+- [ ] `og:image` del HTML de producción es una URL absoluta (ver código fuente de la página).
+- [ ] Un pedido de prueba en producción (nombre "Prueba release", teléfono ficticio) y luego cancelarlo desde el panel.
+- [ ] El Worker `ls-keepalive` figura con su última ejecución correcta (*Trigger Events → View events*).

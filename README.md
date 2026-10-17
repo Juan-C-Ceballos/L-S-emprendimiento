@@ -17,6 +17,7 @@ Sin pagos online: el cobro se coordina por chat.
 | [`docs/prototype-analysis.md`](docs/prototype-analysis.md) | Pantallas, rutas, componentes, servicios y tokens |
 | [`docs/github-setup.md`](docs/github-setup.md) | Configuración del repositorio en GitHub |
 | [`docs/release-checklist.md`](docs/release-checklist.md) | Checklist de humo antes de pasar a producción |
+| [`docs/produccion-paso-a-paso.md`](docs/produccion-paso-a-paso.md) | Primera puesta en producción (Supabase, Cloudflare, anti-pausa) |
 
 ## Stack
 
@@ -127,4 +128,96 @@ git push -u origin feature/04-catalogo-publico   # y abrir el PR contra develop
 
 ## Runbook de producción
 
-Se completa en la etapa 8 (despliegue, alta de la administradora, chequeo contra la pausa, respaldos, cómo aplicar migraciones a producción).
+La primera puesta en marcha, paso a paso, está en [`docs/produccion-paso-a-paso.md`](docs/produccion-paso-a-paso.md). Esto es lo de todos los días. Decisiones y fuentes: D-41 en `docs/decisions.md`.
+
+### Entornos
+
+| | Producción | Vista previa |
+|---|---|---|
+| Rama | `main` | `develop` |
+| Sitio | `https://<proyecto>.pages.dev` | `https://develop.<proyecto>.pages.dev` |
+| Supabase | `ls-prod` | `ls-dev` (ref `nhsjichuumyflklqkhxw`) |
+| Variables en Cloudflare Pages | *Production* | *Preview* |
+
+`<proyecto>` es el nombre del proyecto de Pages (sugerido: `ls-accesorios`). Las URL reales se anotan en `PLAN.md` al terminar la etapa 8.
+
+Variables de Pages (*Settings → Variables and Secrets*), en los dos entornos: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (la clave pública del proyecto que corresponda) y `NODE_VERSION=22`. Solo en *Production*: `VITE_SITE_URL=https://<proyecto>.pages.dev` (hace absoluta la imagen de la vista previa del link). Las `VITE_*` se leen **al compilar**: si cambia una, hay que volver a desplegar (*Deployments → ⋯ → Retry deployment*).
+
+### Cómo se despliega
+
+- Cada push a `develop` (un PR mergeado) despliega la vista previa. Cada merge a `main` despliega producción. No hay que hacer nada a mano en Cloudflare.
+- Una release es un PR `develop` → `main` con **merge commit**, después de correr [`docs/release-checklist.md`](docs/release-checklist.md) sobre la vista previa.
+- Volver atrás: en Pages, *Deployments*, elegir el deploy anterior de producción → *Rollback to this deployment*. Ojo: no deshace migraciones de la base.
+
+### Aplicar migraciones a producción
+
+Después de mergear una release que trae migraciones nuevas. La carpeta queda vinculada a `ls-dev`; producción se alcanza con `--db-url`, así un `db push` suelto nunca la toca. La cadena se copia de Supabase: proyecto `ls-prod` → botón **Connect** → **Session pooler** (la conexión directa es solo IPv6), reemplazando `[YOUR-PASSWORD]` por la contraseña de la base.
+
+```powershell
+$env:DB_PROD = "postgresql://postgres.<ref-prod>:<contraseña>@<host-del-pooler>:5432/postgres"
+npx supabase db push --db-url $env:DB_PROD --dry-run   # lista lo que va a aplicar
+npx supabase db push --db-url $env:DB_PROD
+Remove-Item Env:DB_PROD
+```
+
+Las migraciones se aplican **antes** de probar la versión nueva en producción: el sitio nuevo puede llamar a funciones que todavía no existen.
+
+### Administradora
+
+- Alta (una sola vez) y olvido de contraseña: sección [Administradora](#administradora), en el proyecto `ls-prod`.
+- Cambiar el número o el mensaje de WhatsApp: desde el panel, **Ajustes**. Se guarda en la base y vale al instante, sin desplegar (D-34).
+
+### Anti-pausa de Supabase
+
+Supabase pausa los proyectos gratis después de una semana con poca actividad. El Worker `ls-keepalive` (`workers/keepalive/`) consulta `ls-prod` **todos los días a las 9 h de Argentina** (12:00 UTC).
+
+- Ver si corrió: Cloudflare → *Workers & Pages* → `ls-keepalive` → *Settings* → *Trigger Events* → **View events** (últimas 100 ejecuciones), o la pestaña *Logs*. Una ejecución correcta registra `keepalive ok: 200`.
+- Volver a desplegarlo (si se cambia el código o el horario en `wrangler.jsonc`):
+  ```powershell
+  cd workers/keepalive
+  npm install
+  npx wrangler deploy
+  ```
+- Si llega el mail de Supabase avisando la pausa: entrar a `ls-prod` en el panel de Supabase (eso cuenta como actividad) y revisar los eventos del Worker. Si ya se pausó: proyecto → **Resume project**.
+- `ls-dev` no tiene anti-pausa: si se pausa, se reanuda igual desde el panel.
+
+### Respaldos (manual, una vez por mes)
+
+El plan gratis no da respaldos descargables, y el repositorio es público, así que el respaldo **no** se guarda en GitHub (tiene nombres y teléfonos de clientes). Se hace a mano con Docker Desktop abierto:
+
+```powershell
+$env:DB_PROD = "<cadena del Session pooler de ls-prod>"
+$fecha = Get-Date -Format yyyy-MM-dd
+npx supabase db dump --db-url $env:DB_PROD -f "respaldo-$fecha-esquema.sql"
+npx supabase db dump --db-url $env:DB_PROD --data-only --use-copy -f "respaldo-$fecha-datos.sql"
+npx supabase db dump --db-url $env:DB_PROD --role-only -f "respaldo-$fecha-roles.sql"
+Remove-Item Env:DB_PROD
+```
+
+- Correrlo **fuera** de la carpeta del repo (o dentro de `backups/`, que está en `.gitignore`) y subir los tres archivos a una carpeta privada de la nube (Drive, etc.).
+- Fotos: están en Storage (bucket `productos`). Se ven en Supabase → *Storage* y se pueden descargar desde ahí. La administradora además conserva los originales.
+- Restaurar sobre un proyecto **nuevo y vacío**: aplicarle las migraciones (`npx supabase db push --db-url <cadena-del-nuevo>`) y después cargar los datos con `psql` (viene con Postgres; también se puede pegar el archivo en el *SQL Editor* si es chico):
+  ```powershell
+  psql "<cadena-del-nuevo>" -f respaldo-AAAA-MM-DD-datos.sql
+  ```
+  Después: crear de nuevo a la administradora (las cuentas de `auth` también vienen en el respaldo de datos; si se restauran, solo verificar el rol), subir las fotos al bucket `productos` con las mismas rutas y apuntar las variables de Pages al proyecto nuevo.
+
+### Rotar la clave pública (anon / publishable)
+
+Si hiciera falta (por ejemplo, abuso): Supabase → *Project Settings → API Keys*, crear una clave *publishable* nueva o regenerar la anon, cargarla en `VITE_SUPABASE_ANON_KEY` de Pages (*Production*) y en el secreto del Worker (`cd workers/keepalive; npx wrangler secret put SUPABASE_ANON_KEY`), volver a desplegar el sitio y recién ahí desactivar la vieja.
+
+### Si se sospecha abuso de pedidos falsos
+
+Cortar los pedidos nuevos sin bajar el sitio, desde el *SQL Editor* de `ls-prod`:
+
+```sql
+revoke execute on function public.crear_pedido(jsonb, text, text, bigint) from anon;
+```
+
+El catálogo sigue funcionando y confirmar un pedido muestra un error. Los pedidos falsos se cancelan desde el panel. Para volver a abrir:
+
+```sql
+grant execute on function public.crear_pedido(jsonb, text, text, bigint) to anon;
+```
+
+La protección de fondo (captcha, límite por IP) está prevista para después del MVP (etapa 9).

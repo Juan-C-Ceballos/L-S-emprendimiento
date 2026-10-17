@@ -14,6 +14,7 @@ El repositorio se borró y se volvió a crear para eliminar del historial un dat
 - [x] Métodos de merge del ruleset: **`squash` y `merge`** (rebase desactivado). Como el ruleset es uno solo para las dos ramas, GitHub no distingue cuál va con cuál: **la regla se sigue a mano** al mergear (botón "Squash and merge" hacia `develop`; "Create a merge commit" en las releases `develop` → `main`). Si una release se squashea, `main` y `develop` divergen y cada release siguiente arrastra conflictos.
 - [ ] Mejora opcional: dividir en dos rulesets con las mismas reglas, uno sobre `develop` con *solo squash* y otro sobre `main` con *solo merge* (Settings → Rules → Rulesets: duplicar `proteger-main-develop`, dejar cada uno con una sola rama y ajustar *Allowed merge methods*). Así GitHub lo hace cumplir solo.
 - [?] Tipos de merge del repositorio (sección 2) y lista de bypass: la API pública no los muestra; revisarlos a mano.
+- Secretos de Actions: **ninguno**. Los respaldos se hacen a mano (D-41, opción B) porque el repositorio es público; Cloudflare Pages se conecta con su propia app de GitHub.
 - Historial: el PR #1 (etapa 0) entró a `develop` con *merge commit* (antes de restringir los métodos); el PR #2 (etapa 1), con squash. No hace falta corregir nada.
 
 ## 1. Crear el repositorio y subir las ramas

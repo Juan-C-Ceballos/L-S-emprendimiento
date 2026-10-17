@@ -92,6 +92,9 @@ describe('detalle', () => {
     expect(textoConfirmacionCancelar('vendido', 3)).toBe(
       'Ya estaba vendido: se van a reponer 3 unidades al stock. Después no se puede volver a vender.',
     )
+    expect(textoConfirmacionCancelar('vendido', 1)).toBe(
+      'Ya estaba vendido: se va a reponer 1 unidad al stock. Después no se puede volver a vender.',
+    )
     expect(textoConfirmacionCancelar('pendiente', 1)).toBe(
       'Todavía no se vendió, así que el stock no cambia. Un pedido cancelado no se puede volver a vender.',
     )

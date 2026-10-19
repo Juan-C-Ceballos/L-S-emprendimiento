@@ -294,6 +294,11 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
   - Ojo: **marcar todas no es lo mismo que no marcar ninguna**. Con todas marcadas, una etiqueta creada después no aparece hasta elegirla. Sin ninguna marcada, se ven todas, incluidas las nuevas. La descripción del modal dice lo segundo.
 - **Verificado** contra el Supabase local en 375 × 812 y 375 × 560: el modal abre, bloquea el scroll del fondo y "Marcar todas" deja 10 de 10. En la pantalla baja la lista scrollea y "Guardar" sigue visible. No se pudo ver terminar la animación de cierre de 100 ms porque el panel del navegador no dibujaba cuadros (reloj de animaciones en 0); el cierre y la vuelta del foco están cubiertos por `ResumenPage.test.tsx`.
 
+### D-45 · Sincronizar `develop` con `main` antes de cada release (2026-10-19)
+- **Problema**: cada release entra a `main` con un *merge commit* (como corresponde), pero ese commit queda solo en `main`. Como el ruleset exige *Require branches to be up to date* (`strict: true`), la PR de la release siguiente (`develop` → `main`) aparece desactualizada y GitHub no deja mergearla. Pasó por primera vez en la release del MVP 2: `develop` estaba 1 commit atrás de `main` (el merge del PR #18). El botón "Update branch" de la PR tampoco sirve: empujaría directo a `develop`, que exige PR.
+- **Solución**: antes de abrir la PR de release, si `git log origin/develop..origin/main` muestra algo, se abre una rama `chore/sync-main-en-develop` desde `develop`, se hace `git merge origin/main` (no cambia archivos, solo trae el commit) y se mergea a `develop` con **"Create a merge commit"**. **No con squash**: el squash descarta el commit de `main` y el problema sigue. Es la única excepción a "squash hacia `develop`".
+- Agregado a `docs/release-checklist.md` ("Antes de empezar") y a `docs/github-setup.md`.
+
 ## Pendientes de verificar (no bloquean)
 - **Producción**: que el cron diario alcance para que Supabase no pause `ls-prod` (ver D-41). Revisar después de la primera semana sin movimiento.
 - **GitHub**: la protección de ramas en repositorios **privados** requiere GitHub Pro/Team. Ver `docs/github-setup.md`.

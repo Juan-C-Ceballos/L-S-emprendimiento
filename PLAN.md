@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Etapa en curso:** MVP 2. Las etapas 10 (PR #19) y 11 (PR #20) están en `develop` y en la vista previa. Ajuste pedido después: el selector de etiquetas del Resumen pasa a un modal con "Marcar todas" (`feature/selector-etiquetas-modal`, D-44). La migración `stock_por_etiqueta` está en `ls-dev`; a `ls-prod` va en la próxima release con `db push --db-url`, **apenas Cloudflare publique `main`** (sin ella, el Resumen de producción da error). Pendiente de decisión: agregar al carrito desde la grilla.
+- **Etapa en curso:** release del MVP 2 (`develop` → `main`). Entran la etapa 10 (#19), la 11 (#20) y el modal de etiquetas (#21). Pasos: (1) PR `chore/sync-main-en-develop` → `develop` con **merge commit** (D-45); (2) PR de release `develop` → `main` con **merge commit**; (3) **apenas Cloudflare publique `main`**, `npx supabase db push --db-url $env:DB_PROD --dry-run` y sin `--dry-run` para la migración `stock_por_etiqueta` (sin ella, el Resumen de producción da error); (4) la sección "Producción" del checklist. Pendiente de decisión: agregar al carrito desde la grilla.
 - **Etapa 8:** la primera release ya está en `main` (PR #18, merge commit de `develop`; verificado con git el 2026-10-19: `main` y `develop` tienen el mismo contenido). **A confirmar con el usuario** qué quedó hecho de la guía `docs/produccion-paso-a-paso.md`: paso 4 (URL de Auth), checklist de release (5), Worker anti-pausa (7) y abrir la tienda (8). Cuando esté confirmado, verificar producción contra `ls-prod`, completar `<proyecto>` en el README y el checklist, y tildar la etapa 8.
 - **Producción:** Supabase `ls-prod` (ref `tcpbmenfkakzlhyidxli`, URL `https://tcpbmenfkakzlhyidxli.supabase.co`, São Paulo, organización `L&S-Emprendimiento`). Cloudflare Pages `ls-accesorios`: producción `https://ls-accesorios.pages.dev` (rama `main`), vista previa `https://develop.ls-accesorios.pages.dev` (rama `develop`).
 - **Cómo probar:** el catálogo, contra `ls-dev` con el servidor `dev-local` de `.claude/launch.json` (puerto 5175, usa `.env.local`). El panel, contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
@@ -70,6 +70,30 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-19 · Release del MVP 2 · `chore/sync-main-en-develop`
+- Hecho: `develop` estaba 1 commit atrás de `main` (el merge de la release #18) y el ruleset `strict` bloquearía la PR de release. Esta rama trae ese commit sin cambiar archivos; se mergea con merge commit (D-45, sumado al checklist de release y a `docs/github-setup.md`).
+- Checklist de release corrido sobre `develop` en `c546824`:
+  - CI en verde (`frontend`, `base-de-datos`, Cloudflare Pages);
+  - lint, typecheck, build y `db:test` 184/184 en local; `service_role` no aparece en `dist/`;
+  - `npm test`: 213/213 en 6 corridas, pero en 1 de 7 fallaron 2 pruebas que no se pudieron identificar (intermitentes, el CI pasó).
+  - **Vista previa:**
+    - pide a `ls-dev` (`nhsjichuumyflklqkhxw`) y no a producción;
+    - `/producto/<id>` y `/admin/pedidos` dan 200 al recargar, con los headers de `_headers`;
+    - trae el modal nuevo.
+  - **Cliente anónimo en la vista previa (375 px):**
+    - 15 piezas con los agotados al final;
+    - `?tags=aros` da 4, `aros,pulseras` da 0 y con `modo=alguna` 8, y el filtro sobrevive a recargar;
+    - `?q=perla` da 3;
+    - el detalle muestra la nota de agotado y las etiquetas que llevan al catálogo;
+    - con 1,5 s de demora, volver deja la grilla en 2160 px sin esqueletos;
+    - agregar al carrito guarda solo producto y cantidad y sobrevive a recargar;
+    - el inactivo da "Esta pieza ya no está disponible".
+  - **Seguridad anónima contra `ls-dev`:** `product_costs`, `orders`, `order_items` y `etiquetas_seguidas` dan 42501; insertar en `orders` falla; los inactivos no se listan; subir a Storage da 403; `resumen_panel` da 42501.
+- No verificado en esta release:
+  - el humo de la administradora en la vista previa (necesita la cuenta real de `ls-dev`): lo cubren las pruebas y la verificación contra el Supabase local de las etapas 10, 11 y el modal;
+  - confirmar un pedido real en `ls-dev` y el caso de stock con dos pestañas: ya se probaron en la etapa 5 y en la E2E de la etapa 8.
+- Pendiente: los pasos de "Estado actual".
 
 ### 2026-10-19 · Ajuste de la etapa 11 · `feature/selector-etiquetas-modal`
 - Hecho: "Elegir etiquetas" abre un modal (`Dialog` de shadcn sobre Radix, recortado y con los tokens de L&S) con "N de M marcadas", "Marcar todas" y "Desmarcar todas". El botón es el disparador del modal, así que el foco vuelve a él al cerrar. D-44.

@@ -248,7 +248,6 @@ export type ResultadoRenombrar = {
 /** Números del Resumen del panel (`resumen_panel`). */
 export type ResumenPanel = {
   pendientes: { cantidad: number; monto: number }
-  stockBajo: { cantidad: number; agotados: number }
   /** Mes calendario en hora de Buenos Aires; `mes` es `AAAA-MM`. */
   ventasMes: { mes: string; cantidad: number; total: number; ganancia: number }
 }

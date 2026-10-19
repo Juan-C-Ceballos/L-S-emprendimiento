@@ -21,23 +21,25 @@ import { calcularTotal, textoPiezas } from '@/lib/carritoReglas'
 import { useAsync } from '@/lib/useAsync'
 import { useCarrito } from '@/lib/useCarrito'
 import { TITULO_SITIO, useTituloDocumento } from '@/lib/useTituloDocumento'
-import { listarCatalogo } from '@/services/productos'
+import { listarCatalogo, ultimaVidriera } from '@/services/productos'
 
 /** Catálogo público (prototipo: `c.isCatalog`). Los filtros viven en la URL (D-11). */
 export function CatalogoPage() {
   useTituloDocumento(TITULO_SITIO)
   const vidriera = useAsync(listarCatalogo)
+  // Al volver de un producto se pinta la última vidriera mientras llega la nueva: así la página
+  // ya tiene su alto y `ScrollRestoration` puede devolver el scroll (D-42).
+  const datos = vidriera.estado === 'listo' ? vidriera.datos : ultimaVidriera()
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const [buscando, setBuscando] = useState(false)
   const [etiquetaBuscada, setEtiquetaBuscada] = useState('')
   const carrito = useCarrito()
 
-  const etiquetasUsadas = vidriera.estado === 'listo' ? vidriera.datos.etiquetas : []
+  const etiquetasUsadas = datos?.etiquetas ?? []
   const desdeURL = leerFiltrosDeURL(params)
   // Hasta que carga no se sabe qué etiquetas existen: se muestran las de la URL tal cual.
-  const filtros =
-    vidriera.estado === 'listo' ? quitarEtiquetasDesconocidas(desdeURL, etiquetasUsadas) : desdeURL
+  const filtros = datos !== undefined ? quitarEtiquetasDesconocidas(desdeURL, etiquetasUsadas) : desdeURL
 
   function cambiar(nuevos: Filtros, { reemplazar }: { reemplazar: boolean }) {
     if (!hayFiltros(nuevos)) setEtiquetaBuscada('')
@@ -45,7 +47,7 @@ export function CatalogoPage() {
     void navigate({ search: escribirFiltrosEnURL(nuevos) }, { replace: reemplazar, preventScrollReset: true })
   }
 
-  const productos = vidriera.estado === 'listo' ? vidriera.datos.productos : []
+  const productos = datos?.productos ?? []
   const resultado = aplicarFiltros(productos, filtros)
   const hayCarrito = carrito.piezas > 0
 
@@ -62,16 +64,16 @@ export function CatalogoPage() {
           buscada={etiquetaBuscada}
           onBuscada={setEtiquetaBuscada}
           textoResultado={
-            vidriera.estado === 'listo'
+            datos !== undefined
               ? textoResultado(resultado.length, productos.length, filtros, buscando)
               : 'Cargando la vidriera…'
           }
           className="lg:sticky lg:top-24 lg:p-0"
         />
         <div className="min-w-0">
-          {vidriera.estado === 'cargando' && <GrillaCargando />}
+          {vidriera.estado === 'cargando' && datos === undefined && <GrillaCargando />}
 
-          {vidriera.estado === 'error' && (
+          {vidriera.estado === 'error' && datos === undefined && (
             <EstadoVacio
               titulo="No pudimos cargar la vidriera."
               texto="Revisá tu conexión y probá de nuevo."
@@ -84,7 +86,7 @@ export function CatalogoPage() {
             />
           )}
 
-          {vidriera.estado === 'listo' && productos.length === 0 && (
+          {datos !== undefined && productos.length === 0 && (
             <EstadoVacio
               titulo="Todavía no hay piezas"
               texto="Estamos preparando la vidriera. Volvé a mirar en unos días."
@@ -92,7 +94,7 @@ export function CatalogoPage() {
             />
           )}
 
-          {vidriera.estado === 'listo' && productos.length > 0 && resultado.length === 0 && (
+          {productos.length > 0 && resultado.length === 0 && (
             <EstadoVacio
               titulo="No encontramos piezas"
               texto={pistaVacio(filtros)}
@@ -130,7 +132,7 @@ export function CatalogoPage() {
         <BarraCarrito
           to="/carrito"
           texto={`Ver carrito · ${textoPiezas(carrito.piezas)}`}
-          // Total con los precios de la vidriera recién cargada (el carrito nunca guarda precios).
+          // Total con los precios de la vidriera (el carrito nunca guarda precios).
           total={calcularTotal(carrito.lineas, productos)}
         />
       )}

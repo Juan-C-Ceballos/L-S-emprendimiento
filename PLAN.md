@@ -4,10 +4,10 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 8 · Puesta en producción. Código y documentación en `develop` (PR #16). El usuario sigue `docs/produccion-paso-a-paso.md`: hechos los pasos 1 a 3 (`ls-prod` con migraciones y administradora; Pages `ls-accesorios` con variables por entorno y vista previa solo de `develop`). Faltan: vista previa de `develop` publicada y verificada (sale con el próximo merge a `develop`), paso 4 (URL de Auth), checklist de release (5), release `develop` → `main` (6), Worker anti-pausa (7) y abrir la tienda (8).
-- **Rama:** `develop` (la etapa 8 ya entró con el PR #16; los ajustes de la guía van en `fix/guia-produccion`).
+- **Etapa en curso:** release del MVP 2 (`develop` → `main`). Entran la etapa 10 (#19), la 11 (#20) y el modal de etiquetas (#21). Pasos: (1) PR `chore/sync-main-en-develop` → `develop` con **merge commit** (D-45); (2) PR de release `develop` → `main` con **merge commit**; (3) **apenas Cloudflare publique `main`**, `npx supabase db push --db-url $env:DB_PROD --dry-run` y sin `--dry-run` para la migración `stock_por_etiqueta` (sin ella, el Resumen de producción da error); (4) la sección "Producción" del checklist. Pendiente de decisión: agregar al carrito desde la grilla.
+- **Etapa 8:** la primera release ya está en `main` (PR #18, merge commit de `develop`; verificado con git el 2026-10-19: `main` y `develop` tienen el mismo contenido). **A confirmar con el usuario** qué quedó hecho de la guía `docs/produccion-paso-a-paso.md`: paso 4 (URL de Auth), checklist de release (5), Worker anti-pausa (7) y abrir la tienda (8). Cuando esté confirmado, verificar producción contra `ls-prod`, completar `<proyecto>` en el README y el checklist, y tildar la etapa 8.
 - **Producción:** Supabase `ls-prod` (ref `tcpbmenfkakzlhyidxli`, URL `https://tcpbmenfkakzlhyidxli.supabase.co`, São Paulo, organización `L&S-Emprendimiento`). Cloudflare Pages `ls-accesorios`: producción `https://ls-accesorios.pages.dev` (rama `main`), vista previa `https://develop.ls-accesorios.pages.dev` (rama `develop`).
-- **Próximo paso (sesión de Claude):** cuando se publique la vista previa de `develop`, verificar que apunte a `ls-dev`, los headers y que recargar en rutas internas no dé 404; después de la release, lo mismo en producción contra `ls-prod`; completar `<proyecto>` en el README y el checklist, tildar la etapa 8. El panel se prueba contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` de `.claude/launch.json` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
+- **Cómo probar:** el catálogo, contra `ls-dev` con el servidor `dev-local` de `.claude/launch.json` (puerto 5175, usa `.env.local`). El panel, contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
 - **Supabase en la nube:** proyecto de **desarrollo** `ls-dev` creado (ref `nhsjichuumyflklqkhxw`, URL `https://nhsjichuumyflklqkhxw.supabase.co`, São Paulo, Postgres 17, organización `L&S-Emprendimiento`, plan gratuito). Las 5 migraciones aplicadas con `supabase db push` (verificado el 2026-10-16 por la API: `guardar_producto`, `marcar_vendido`, `renombrar_etiqueta` y `resumen_panel` existen y anon recibe `permission denied`); registro público desactivado; semillas de productos y pedidos cargadas por el usuario. Administradora creada: `1accesorioslis@gmail.com` con rol `admin` (verificado 2026-10-15: es la única cuenta de `auth.users`). **No** correr ahí el bloque final de `supabase/seed.sql` (usuarios de prueba con contraseñas en el repo público). La carpeta local quedó vinculada a ese proyecto (`supabase/.temp/`, ignorado). Producción se crea en la etapa 8 en la misma organización.
 - **Al mergear cada etapa con migraciones nuevas:** `npx supabase db push --dry-run` y después `npx supabase db push` contra dev (lo corre el usuario; pide la contraseña de la base).
 - **Ojo en Windows:** la carpeta del proyecto no puede tener `&` en la ruta (rompe `npx` y los scripts de npm). Ya se renombró a `L-S` y los scripts volvieron a la forma estándar (D-29).
@@ -36,7 +36,15 @@
 - [ ] **9 · Posterior al MVP** (solo documentación) — [`etapa-09-post-mvp.md`](docs/plan/etapa-09-post-mvp.md)
   Topes, captcha, límite por IP, vistas previas por producto, reportes, PWA.
 
-Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo necesita la 1 (puede adelantarse a la 2 y la 3 si hiciera falta), y la 6 y la 7 solo necesitan la 2. Se recomienda el orden numérico.
+### MVP 2 (pedidos del uso real, desde 2026-10-19)
+
+- [x] **10 · Scroll del catálogo** — [`etapa-10-scroll-catalogo.md`](docs/plan/etapa-10-scroll-catalogo.md) · `feature/10-scroll-catalogo`
+  Al volver de un producto, la grilla queda donde estaba (vidriera en memoria, D-42).
+- [x] **11 · Stock por etiqueta** — [`etapa-11-stock-por-etiqueta.md`](docs/plan/etapa-11-stock-por-etiqueta.md) · `feature/11-stock-por-etiqueta`
+  Sección "Por etiqueta" en el Resumen: unidades que quedan y vendidas (mes y total), con las etiquetas que elige la administradora.
+- **A decidir:** agregar al carrito desde la grilla (propuesta de diseño). Se vuelve a evaluar después de probar la etapa 10 (D-42).
+
+Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 son independientes entre sí. La 4 solo necesita la 1 (puede adelantarse a la 2 y la 3 si hiciera falta), y la 6 y la 7 solo necesitan la 2. Se recomienda el orden numérico.
 
 ## Qué necesito del usuario (y cuándo)
 
@@ -62,6 +70,61 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-19 · Release del MVP 2 · `chore/sync-main-en-develop`
+- Hecho: `develop` estaba 1 commit atrás de `main` (el merge de la release #18) y el ruleset `strict` bloquearía la PR de release. Esta rama trae ese commit sin cambiar archivos; se mergea con merge commit (D-45, sumado al checklist de release y a `docs/github-setup.md`).
+- Checklist de release corrido sobre `develop` en `c546824`:
+  - CI en verde (`frontend`, `base-de-datos`, Cloudflare Pages);
+  - lint, typecheck, build y `db:test` 184/184 en local; `service_role` no aparece en `dist/`;
+  - `npm test`: 213/213 en 6 corridas, pero en 1 de 7 fallaron 2 pruebas que no se pudieron identificar (intermitentes, el CI pasó).
+  - **Vista previa:**
+    - pide a `ls-dev` (`nhsjichuumyflklqkhxw`) y no a producción;
+    - `/producto/<id>` y `/admin/pedidos` dan 200 al recargar, con los headers de `_headers`;
+    - trae el modal nuevo.
+  - **Cliente anónimo en la vista previa (375 px):**
+    - 15 piezas con los agotados al final;
+    - `?tags=aros` da 4, `aros,pulseras` da 0 y con `modo=alguna` 8, y el filtro sobrevive a recargar;
+    - `?q=perla` da 3;
+    - el detalle muestra la nota de agotado y las etiquetas que llevan al catálogo;
+    - con 1,5 s de demora, volver deja la grilla en 2160 px sin esqueletos;
+    - agregar al carrito guarda solo producto y cantidad y sobrevive a recargar;
+    - el inactivo da "Esta pieza ya no está disponible".
+  - **Seguridad anónima contra `ls-dev`:** `product_costs`, `orders`, `order_items` y `etiquetas_seguidas` dan 42501; insertar en `orders` falla; los inactivos no se listan; subir a Storage da 403; `resumen_panel` da 42501.
+- No verificado en esta release:
+  - el humo de la administradora en la vista previa (necesita la cuenta real de `ls-dev`): lo cubren las pruebas y la verificación contra el Supabase local de las etapas 10, 11 y el modal;
+  - confirmar un pedido real en `ls-dev` y el caso de stock con dos pestañas: ya se probaron en la etapa 5 y en la E2E de la etapa 8.
+- Pendiente: los pasos de "Estado actual".
+
+### 2026-10-19 · Ajuste de la etapa 11 · `feature/selector-etiquetas-modal`
+- Hecho: "Elegir etiquetas" abre un modal (`Dialog` de shadcn sobre Radix, recortado y con los tokens de L&S) con "N de M marcadas", "Marcar todas" y "Desmarcar todas". El botón es el disparador del modal, así que el foco vuelve a él al cerrar. D-44.
+- Verificado: lint, typecheck, 213 pruebas y build. En el navegador contra el Supabase local (375 × 812 y 375 × 560): abre, bloquea el scroll del fondo, "Marcar todas" deja 10 de 10, y en la pantalla baja la lista scrollea con "Guardar" visible. El cierre no se vio terminar porque el panel no dibujaba cuadros; lo cubren las pruebas.
+- Pendiente: PR contra `develop` y squash con CI en verde.
+
+### 2026-10-19 · Etapa 11 · `feature/11-stock-por-etiqueta`
+- Hecho:
+  - Migración `stock_por_etiqueta`: tabla `etiquetas_seguidas` (solo admin, RLS en la misma migración), `resumen_etiquetas(p_ahora)`, `guardar_etiquetas_seguidas(p_ids)` y `renombrar_etiqueta` reemplazada (al unir, hereda "seguida").
+  - `10_stock_por_etiqueta.test.sql` (22 pruebas) y `00_estructura` al día; tipos regenerados.
+  - Servicios `obtenerStockPorEtiqueta` y `guardarEtiquetasSeguidas`; `etiquetasAMostrar` en `src/lib/resumen.ts`.
+  - Sección "Por etiqueta" del Resumen (`PorEtiqueta`) con el selector en el lugar (`SelectorEtiquetasResumen`).
+  - D-43.
+- Verificado:
+  - `db:test` 184/184 y `db:lint`; lint, typecheck, 212 pruebas (incluye las de la 10) y build.
+  - En el navegador contra el Supabase local como `admin@ls.test` (375 px): la tabla coincide con la cuenta a mano de las semillas (acero 61 unidades; aros 26, con 2 vendidas este mes y 3 en total).
+  - Elegir 5 etiquetas y guardar muestra el toast y deja solo esas; al recargar siguen.
+  - Vender el #0005 bajó collares 21 → 20 y pulseras 16 → 15, y subió su "Mes".
+  - Filas de 44 px, sin scroll horizontal; consola sin errores.
+  - Base local reseteada al terminar.
+- No verificado en el navegador (cubierto por pgTAP): unir o borrar una etiqueta seguida desde Ajustes. No hay captura porque el panel del navegador no dibujaba.
+- Pendiente:
+  - ~~PR contra `develop`~~ PR #20, mergeado con squash; `develop` en verde y la vista previa publicada con "Por etiqueta".
+  - ~~`db push` a `ls-dev`~~ hecho el 2026-10-19 antes del merge (pedido del usuario). Verificado: el dry-run dice que la base está al día, y anon recibe `permission denied` en `etiquetas_seguidas`, `resumen_etiquetas`, `guardar_etiquetas_seguidas` y `renombrar_etiqueta`; el catálogo sigue respondiendo (15 activos).
+  - En la próxima release, `db push --db-url` a `ls-prod` (D-41).
+
+### 2026-10-19 · Etapa 10 · `feature/10-scroll-catalogo`
+- Contexto: la release del MVP 1 ya está en `main` (PR #18). Con el uso real aparecieron tres pedidos: el scroll del catálogo se pierde al volver de un producto, agregar al carrito desde la grilla, y ver el stock por etiqueta. Se abrió el bloque **MVP 2** (etapas 10 y 11, D-42); lo de la grilla queda a decidir.
+- Hecho: causa reproducida contra `ls-dev` con 1,5 s de demora en la red (de 2161 px se volvía a 568 px: el catálogo se montaba con esqueletos y `ScrollRestoration` no tenía alto para restaurar). `listarCatalogo` guarda la última vidriera en memoria (`ultimaVidriera()`) y `CatalogoPage` la pinta mientras refresca; un error al refrescar no tapa los datos. 4 pruebas nuevas. Planes de las etapas 10 y 11 escritos.
+- Verificado: lint, typecheck, 202 pruebas y build. En el navegador contra `ls-dev` (375 px, misma demora): volver con "Volver" y con atrás deja la grilla en 2161 px, sin esqueletos, y se mantiene al llegar los datos nuevos; consola sin errores.
+- PR #19, mergeado con squash; `develop` en verde (`frontend`, `base-de-datos` y Cloudflare Pages).
 
 ### 2026-10-17 · Etapa 8 (puesta en marcha) · `fix/guia-produccion`
 - Hecho por el usuario: `ls-prod` creado, registro cortado, 5 migraciones aplicadas con `db push --db-url` (Session pooler), administradora con rol `admin`. Pages `ls-accesorios` conectado al repo, variables de Production (`ls-prod`) y Preview (`ls-dev`, sin `VITE_SITE_URL`), vista previa solo de `develop`. El primer deploy de `main` falló como se esperaba (`main` todavía no tiene la app).

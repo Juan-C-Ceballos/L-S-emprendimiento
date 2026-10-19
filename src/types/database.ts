@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "order_items": {
+            "etiquetas_seguidas": {
+                  Row: {
+                    "created_at": string,"tag_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"tag_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"tag_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "etiquetas_seguidas_tag_id_fkey"
+      columns: ["tag_id"]
+isOneToOne: true
+      referencedRelation: "tags"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"order_items": {
                   Row: {
                     "cantidad": number,"costo_unitario": number,"id": string,"order_id": string,"precio_unitario": number,"product_id": string
                   }
@@ -186,6 +206,9 @@ isOneToOne: false
 "es_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"guardar_etiquetas_seguidas":
+{ Args: { "p_ids": (string)[] }; Returns: undefined
+                           },
 "guardar_producto":
 { Args: { "p": Json }; Returns: Json
                            },
@@ -194,6 +217,11 @@ isOneToOne: false
                            },
 "renombrar_etiqueta":
 { Args: { "p_id": string,"p_nombre": string }; Returns: Json
+                           },
+"resumen_etiquetas":
+{ Args: { "p_ahora"?: string }; Returns: {
+              "id": string,"nombre": string,"piezas": number,"productos": number,"seguida": boolean,"unidades": number,"vendidas_mes": number,"vendidas_total": number
+            }[]
                            },
 "resumen_panel":
 { Args: { "p_ahora"?: string }; Returns: Json

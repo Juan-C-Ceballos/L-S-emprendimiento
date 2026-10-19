@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { claseLink } from '@/components/estilos'
 import { FilaPedido } from '@/components/panel/FilaPedido'
 import { FilaProducto } from '@/components/panel/FilaProducto'
+import { PorEtiqueta } from '@/components/panel/PorEtiqueta'
 import { Stat } from '@/components/panel/Stat'
 import { Button } from '@/components/ui/button'
 import { formatearFechaResumen, formatearPrecio, nombreMes } from '@/lib/formato'
@@ -28,6 +29,8 @@ function Encabezado({ titulo, to, texto }: { titulo: string; to: string; texto: 
 /** Inicio del panel (prototipo: `a.isHome`): lo que hay que atender hoy. */
 export function ResumenPage() {
   const datos = useAsync(obtenerDatosResumen)
+  // Al releer (después de elegir etiquetas) se sigue mostrando el resumen anterior.
+  const contenido = datos.estado === 'listo' ? datos.datos : datos.previos
 
   return (
     <div className="pb-6">
@@ -40,7 +43,7 @@ export function ResumenPage() {
         </p>
       </div>
 
-      {datos.estado === 'cargando' && (
+      {datos.estado === 'cargando' && contenido === undefined && (
         <p className="m-0 px-4 pt-4 text-[13px] text-texto-suave lg:px-8" aria-live="polite">
           Cargando el resumen…
         </p>
@@ -57,12 +60,12 @@ export function ResumenPage() {
         </div>
       )}
 
-      {datos.estado === 'listo' && <ContenidoResumen datos={datos.datos} />}
+      {contenido !== undefined && <ContenidoResumen datos={contenido} onRecargar={datos.recargar} />}
     </div>
   )
 }
 
-function ContenidoResumen({ datos }: { datos: DatosResumen }) {
+function ContenidoResumen({ datos, onRecargar }: { datos: DatosResumen; onRecargar: () => void }) {
   const textos = textosResumen(datos.resumen)
   return (
     <>
@@ -106,18 +109,20 @@ function ContenidoResumen({ datos }: { datos: DatosResumen }) {
 
       <Encabezado titulo="Para reponer" to="/admin/productos?filtro=stock-bajo" texto="Ver productos" />
       {datos.paraReponer.length > 0 ? (
-        <div className={`${claseLista} mb-6`}>
+        <div className={claseLista}>
           {datos.paraReponer.map((p) => (
             <FilaProducto key={p.id} producto={p} desde="resumen" variante="resumen" />
           ))}
         </div>
       ) : (
-        <div className={`${claseVacio} mb-6`}>
+        <div className={claseVacio}>
           <p className="m-0 max-w-[290px] text-sm text-texto-suave">
             Todos los productos activos tienen más de 3 unidades.
           </p>
         </div>
       )}
+
+      <PorEtiqueta etiquetas={datos.porEtiqueta} onGuardado={onRecargar} />
     </>
   )
 }

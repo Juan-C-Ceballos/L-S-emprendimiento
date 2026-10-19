@@ -259,6 +259,46 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Migraciones a producción**: manuales, en cada release, después del merge a `main`, con `npx supabase db push --db-url <cadena del Session pooler de ls-prod>` (primero con `--dry-run`). Se usa `--db-url` en vez de `supabase link` (lo que sugería el plan) para que la carpeta siga vinculada a `ls-dev` y un `db push` sin parámetros nunca toque producción. El *Session pooler* porque la conexión directa es solo IPv6. La cadena se carga en una variable de la terminal y no se guarda en ningún archivo. `db push` no corre `seed.sql`.
 - **Contraseña de la base de `ls-prod`**: solo letras y números (larga), para no tener que codificar caracteres especiales dentro de la cadena de conexión.
 
+### D-42 · MVP 2 y scroll del catálogo (etapa 10, 2026-10-19)
+- **MVP 2**: después de la primera release (PR #18) se abre un bloque nuevo de etapas en `PLAN.md` con lo que pidió el uso real: el scroll del catálogo (etapa 10) y el stock por etiqueta en el Resumen (etapa 11). "Agregar al carrito desde la grilla" (propuesta de diseño) queda **pendiente de decisión**: se vuelve a evaluar después de probar el arreglo del scroll, porque parte de su valor era no perder el lugar en la grilla. "Visto recientemente" se descartó: no arregla el scroll y, con piezas únicas, lo visto puede ya no estar.
+- **Causa del scroll perdido** (completa D-36): `ScrollRestoration` restauraba bien, pero `CatalogoPage` se montaba de nuevo y volvía a pedir la vidriera; mientras llegaba se veían 6 esqueletos y la página medía menos que la posición guardada, así que el navegador la recortaba. Medido contra `ls-dev` con 1,5 s de demora: de 2161 px se volvía a 568 px. Con 14 productos y respuesta rápida (etapa 4) no se notaba.
+- **Arreglo**: `listarCatalogo` guarda la última vidriera en una variable del módulo y `ultimaVidriera()` la devuelve. El catálogo la pinta en el primer render mientras el pedido nuevo corre por detrás y la reemplaza (stale-while-revalidate a mano). Si ese pedido falla, se siguen mostrando los datos en memoria en vez del error. Solo en memoria: recargar la página la vacía, y está bien (al recargar no hay scroll que recuperar). Sin librería de datos: es un solo caso. El stock que se ve puede tener unos segundos de atraso; `crear_pedido` sigue validando el stock real.
+- **Verificado**: con el arreglo, volver con "Volver" o con el botón atrás del navegador deja la página en 2161 px, sin esqueletos, y se mantiene cuando llegan los datos nuevos.
+
+### D-43 · Stock por etiqueta en el Resumen (etapa 11, 2026-10-19)
+- **Por qué**: casi todas las piezas son únicas (stock 1). El stock por producto le dice poco a la administradora, que piensa en "cuántos aros quedan" o "qué se vende más". Las etiquetas no tienen jerarquía y no se agrega una: ella elige qué etiquetas sigue.
+- **Un solo conjunto, elegido desde el Resumen y guardado en la base** (para verlo igual en el teléfono y en la compu). Sin ninguna elegida, se muestran todas. Decidido con el usuario.
+- **Tabla `etiquetas_seguidas` (solo admin) y no una columna de `settings`**: `settings` es de lectura pública porque el catálogo necesita el número de WhatsApp; una tabla aparte no toca ningún permiso existente. La clave foránea a `tags` con `on delete cascade` mantiene la integridad sola: borrar una etiqueta la saca de las seguidas, y renombrarla la deja seguida. Se descartó una fila única con JSON (la base no puede validar las referencias). Si algún día hacen falta varios conjuntos ("Tipos", "Materiales"), se agrega una tabla de grupos y una columna `grupo_id` en otra migración, sin perder lo elegido.
+- **`renombrar_etiqueta` se reemplaza** (`create or replace` en la migración nueva; la de la etapa 7 no se toca) para que, al **unir**, la etiqueta que queda herede "seguida" si se seguía la que desaparece.
+- **`resumen_etiquetas(p_ahora)`** devuelve **todas** las etiquetas con `seguida`, y la pantalla elige cuáles mostrar (`etiquetasAMostrar`). Así, una sola consulta sirve para la tabla y para el selector.
+  - `productos`: todos los que la usan, activos o no (para el selector).
+  - `piezas` y `unidades`: solo activos.
+  - `vendidas_mes` (mes de Buenos Aires, D-23) y `vendidas_total`: unidades de pedidos `vendido`, contadas con las etiquetas **actuales** del producto (un producto vendido y después reetiquetado cuenta en su etiqueta nueva; se acepta).
+- **`guardar_etiquetas_seguidas(p_ids)`** reemplaza el conjunto en una transacción e ignora los ids que ya no existen (por ejemplo, una etiqueta borrada mientras se elegía).
+- **Pantalla**:
+  - sección "Por etiqueta" debajo de "Para reponer", con las columnas Quedan, Mes y Total, ordenada de más a menos unidades;
+  - "Quedan" en rojo con 0 y en ámbar con `STOCK_BAJO` (3) o menos;
+  - cada fila lleva a Productos con `?q={etiqueta}` (la búsqueda ya incluye las etiquetas);
+  - una nota aclara que una pieza con varias etiquetas cuenta en cada una (las filas no suman el total).
+- **Selector**: checkboxes de 44 px, "Cancelar"/"Guardar" y un toast al guardar. Al guardar se relee el Resumen y, mientras tanto, se sigue mostrando el anterior (`previos` de `useAsync`). Primero fue en el lugar; después pasó a un modal (D-44).
+
+### D-44 · Selector de etiquetas del Resumen en un modal (2026-10-19)
+- **Pedido del usuario**: "Elegir etiquetas" abre un **modal** en vez de desplegarse en el lugar, y suma "Marcar todas" junto a "Desmarcar todas".
+- **Primer modal del proyecto**: hasta acá las confirmaciones iban en el lugar, como en el prototipo. Se usa el `Dialog` de shadcn (Radix, que ya venía en `radix-ui`), sin dependencias nuevas.
+  - `src/components/ui/dialog.tsx` quedó recortado a lo que se usa (`Dialog`, `DialogTrigger`, `DialogContent`, `DialogTitle`, `DialogDescription`).
+  - Usa los tokens de L&S: fondo blanco, `rounded-tarjeta`, overlay `tinta/40` y la cruz de 44 px con `claseBotonIcono` y `aria-label="Cerrar"`.
+  - El ícono es SVG en línea, como el resto del sitio, y no `lucide-react`.
+  - Radix se encarga del foco atrapado, Escape, el bloqueo del scroll de fondo y la devolución del foco al botón (por eso el botón es el `DialogTrigger` y vive dentro de `SelectorEtiquetasResumen`).
+- **Tamaño**: hasta 440 px de ancho y la altura de la pantalla menos 2 rem. La lista scrollea adentro y "Cancelar"/"Guardar" quedan siempre a la vista.
+- **"N de M marcadas"**, más "Marcar todas" (si falta alguna) y "Desmarcar todas" (si hay alguna).
+  - Ojo: **marcar todas no es lo mismo que no marcar ninguna**. Con todas marcadas, una etiqueta creada después no aparece hasta elegirla. Sin ninguna marcada, se ven todas, incluidas las nuevas. La descripción del modal dice lo segundo.
+- **Verificado** contra el Supabase local en 375 × 812 y 375 × 560: el modal abre, bloquea el scroll del fondo y "Marcar todas" deja 10 de 10. En la pantalla baja la lista scrollea y "Guardar" sigue visible. No se pudo ver terminar la animación de cierre de 100 ms porque el panel del navegador no dibujaba cuadros (reloj de animaciones en 0); el cierre y la vuelta del foco están cubiertos por `ResumenPage.test.tsx`.
+
+### D-45 · Sincronizar `develop` con `main` antes de cada release (2026-10-19)
+- **Problema**: cada release entra a `main` con un *merge commit* (como corresponde), pero ese commit queda solo en `main`. Como el ruleset exige *Require branches to be up to date* (`strict: true`), la PR de la release siguiente (`develop` → `main`) aparece desactualizada y GitHub no deja mergearla. Pasó por primera vez en la release del MVP 2: `develop` estaba 1 commit atrás de `main` (el merge del PR #18). El botón "Update branch" de la PR tampoco sirve: empujaría directo a `develop`, que exige PR.
+- **Solución**: antes de abrir la PR de release, si `git log origin/develop..origin/main` muestra algo, se abre una rama `chore/sync-main-en-develop` desde `develop`, se hace `git merge origin/main` (no cambia archivos, solo trae el commit) y se mergea a `develop` con **"Create a merge commit"**. **No con squash**: el squash descarta el commit de `main` y el problema sigue. Es la única excepción a "squash hacia `develop`".
+- Agregado a `docs/release-checklist.md` ("Antes de empezar") y a `docs/github-setup.md`.
+
 ## Pendientes de verificar (no bloquean)
 - **Producción**: que el cron diario alcance para que Supabase no pause `ls-prod` (ver D-41). Revisar después de la primera semana sin movimiento.
 - **GitHub**: la protección de ramas en repositorios **privados** requiere GitHub Pro/Team. Ver `docs/github-setup.md`.

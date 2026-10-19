@@ -106,11 +106,27 @@ function consultaCatalogo() {
     .order('id')
 }
 
+/** Última vidriera cargada; solo en memoria, se pierde al recargar la página (D-42). */
+let vidrieraEnMemoria: Vidriera | undefined
+
+/**
+ * La última vidriera que devolvió `listarCatalogo`, para pintar el catálogo al instante
+ * al volver de un producto: así `ScrollRestoration` encuentra la página con su alto real.
+ */
+export function ultimaVidriera(): Vidriera | undefined {
+  return vidrieraEnMemoria
+}
+
 /**
  * Productos activos con la miniatura de la portada y sus etiquetas, en una sola consulta (D-11).
  * Los más nuevos primero; el orden de los agotados lo decide `aplicarFiltros`.
  */
 export async function listarCatalogo(): Promise<Vidriera> {
+  vidrieraEnMemoria = await consultarVidriera()
+  return vidrieraEnMemoria
+}
+
+async function consultarVidriera(): Promise<Vidriera> {
   const { data, error } = await consultaCatalogo()
   if (error !== null) throw desdeErrorSupabase(error, 'No pudimos cargar la vidriera.')
 

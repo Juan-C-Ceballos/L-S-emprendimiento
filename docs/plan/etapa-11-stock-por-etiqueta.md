@@ -58,7 +58,7 @@ Si más adelante hacen falta varios conjuntos ("Tipos", "Materiales"), se agrega
    - error 42501 → `sin_acceso`.
 4. **Lógica pura** (`src/lib/resumen.ts`): `etiquetasAMostrar(lista)` devuelve las seguidas, o todas si no hay ninguna, ordenadas por unidades de mayor a menor (desempate por nombre).
 5. **Pantalla** (`ResumenPage`): sección "Por etiqueta" debajo de "Para reponer".
-   - Columnas Etiqueta / Quedan / Mes / Total; las que tienen 1 o 0 unidades van en rojo, como "Para reponer".
+   - Columnas Etiqueta / Quedan / Mes / Total; "Quedan" va en rojo con 0 y en ámbar con `STOCK_BAJO` o menos.
    - Cada etiqueta lleva a `/admin/productos?q={nombre}`.
    - Nota: "Una pieza con varias etiquetas cuenta en cada una."
    - Botón "Elegir etiquetas".

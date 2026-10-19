@@ -5,6 +5,7 @@ Correrlo **completo** sobre el deploy de vista previa de `develop` (que apunta a
 > Vista previa: `https://develop.ls-accesorios.pages.dev` (Supabase `ls-dev`). Producción: `https://ls-accesorios.pages.dev` (Supabase `ls-prod`, ref `tcpbmenfkakzlhyidxli`). Runbook en el README.
 
 ## Antes de empezar
+- [ ] `develop` contiene a `main`: `git fetch` y `git log --oneline origin/develop..origin/main` no muestra nada. Si muestra el merge de la release anterior, primero va una PR `chore/sync-main-en-develop` → `develop` con **"Create a merge commit"** (no squash), porque si no GitHub marca la PR de release como desactualizada (D-45).
 - [ ] `develop` tiene el CI en verde en el último commit.
 - [ ] Todas las migraciones nuevas desde la última release están en `supabase/migrations/` y pasaron `npm run db:test`.
 - [ ] `PLAN.md` refleja lo que entra en esta release.

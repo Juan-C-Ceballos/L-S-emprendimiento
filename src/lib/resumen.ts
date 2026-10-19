@@ -1,7 +1,7 @@
 import { formatearPrecio } from '@/lib/formato'
-import type { ResumenPanel } from '@/types/dominio'
+import type { ResumenPanel, StockEtiqueta } from '@/types/dominio'
 
-function plural(n: number, singular: string, varios: string): string {
+export function plural(n: number, singular: string, varios: string): string {
   return n === 1 ? `1 ${singular}` : `${n} ${varios}`
 }
 
@@ -18,3 +18,11 @@ export function textosResumen(r: ResumenPanel) {
   }
 }
 
+
+/** "Por etiqueta": las seguidas o, si no se eligió ninguna, todas; de más a menos unidades. */
+export function etiquetasAMostrar(lista: StockEtiqueta[]): StockEtiqueta[] {
+  const seguidas = lista.filter((e) => e.seguida)
+  return (seguidas.length > 0 ? seguidas : [...lista]).sort(
+    (a, b) => b.unidades - a.unidades || a.nombre.localeCompare(b.nombre, 'es'),
+  )
+}

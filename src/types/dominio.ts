@@ -252,3 +252,20 @@ export type ResumenPanel = {
   /** Mes calendario en hora de Buenos Aires; `mes` es `AAAA-MM`. */
   ventasMes: { mes: string; cantidad: number; total: number; ganancia: number }
 }
+
+/** Una fila de "Por etiqueta" en el Resumen (`resumen_etiquetas`, etapa 11). */
+export type StockEtiqueta = {
+  id: string
+  nombre: string
+  /** La administradora la eligió para el Resumen (`etiquetas_seguidas`). */
+  seguida: boolean
+  /** Productos que la usan, activos o no (para el selector). */
+  productos: number
+  /** Productos activos con stock. */
+  piezas: number
+  /** Suma del stock de los productos activos. */
+  unidades: number
+  /** Unidades vendidas en el mes calendario de Buenos Aires y desde siempre. */
+  vendidasMes: number
+  vendidasTotal: number
+}

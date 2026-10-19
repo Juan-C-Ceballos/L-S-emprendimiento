@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 10 · Scroll del catálogo (MVP 2), en `feature/10-scroll-catalogo`. Después sigue la 11 (stock por etiqueta).
+- **Etapa en curso:** MVP 2. La 10 (scroll del catálogo) está lista en `feature/10-scroll-catalogo` y la 11 (stock por etiqueta) en `feature/11-stock-por-etiqueta`, que sale de la 10. Faltan los PR: primero el de la 10, después el de la 11, y al mergear la 11 el `db push` de la migración `stock_por_etiqueta` a `ls-dev`. A `ls-prod` se aplica en la próxima release.
 - **Etapa 8:** la primera release ya está en `main` (PR #18, merge commit de `develop`; verificado con git el 2026-10-19: `main` y `develop` tienen el mismo contenido). **A confirmar con el usuario** qué quedó hecho de la guía `docs/produccion-paso-a-paso.md`: paso 4 (URL de Auth), checklist de release (5), Worker anti-pausa (7) y abrir la tienda (8). Cuando esté confirmado, verificar producción contra `ls-prod`, completar `<proyecto>` en el README y el checklist, y tildar la etapa 8.
 - **Producción:** Supabase `ls-prod` (ref `tcpbmenfkakzlhyidxli`, URL `https://tcpbmenfkakzlhyidxli.supabase.co`, São Paulo, organización `L&S-Emprendimiento`). Cloudflare Pages `ls-accesorios`: producción `https://ls-accesorios.pages.dev` (rama `main`), vista previa `https://develop.ls-accesorios.pages.dev` (rama `develop`).
 - **Cómo probar:** el catálogo, contra `ls-dev` con el servidor `dev-local` de `.claude/launch.json` (puerto 5175, usa `.env.local`). El panel, contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
@@ -70,6 +70,26 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-19 · Etapa 11 · `feature/11-stock-por-etiqueta`
+- Hecho:
+  - Migración `stock_por_etiqueta`: tabla `etiquetas_seguidas` (solo admin, RLS en la misma migración), `resumen_etiquetas(p_ahora)`, `guardar_etiquetas_seguidas(p_ids)` y `renombrar_etiqueta` reemplazada (al unir, hereda "seguida").
+  - `10_stock_por_etiqueta.test.sql` (22 pruebas) y `00_estructura` al día; tipos regenerados.
+  - Servicios `obtenerStockPorEtiqueta` y `guardarEtiquetasSeguidas`; `etiquetasAMostrar` en `src/lib/resumen.ts`.
+  - Sección "Por etiqueta" del Resumen (`PorEtiqueta`) con el selector en el lugar (`SelectorEtiquetasResumen`).
+  - D-43.
+- Verificado:
+  - `db:test` 184/184 y `db:lint`; lint, typecheck, 212 pruebas (incluye las de la 10) y build.
+  - En el navegador contra el Supabase local como `admin@ls.test` (375 px): la tabla coincide con la cuenta a mano de las semillas (acero 61 unidades; aros 26, con 2 vendidas este mes y 3 en total).
+  - Elegir 5 etiquetas y guardar muestra el toast y deja solo esas; al recargar siguen.
+  - Vender el #0005 bajó collares 21 → 20 y pulseras 16 → 15, y subió su "Mes".
+  - Filas de 44 px, sin scroll horizontal; consola sin errores.
+  - Base local reseteada al terminar.
+- No verificado en el navegador (cubierto por pgTAP): unir o borrar una etiqueta seguida desde Ajustes. No hay captura porque el panel del navegador no dibujaba.
+- Pendiente:
+  - PR contra `develop` después del de la 10 y squash con CI en verde.
+  - Después del merge, `npx supabase db push --dry-run` y `npx supabase db push` a `ls-dev` (lo corre el usuario).
+  - En la próxima release, `db push --db-url` a `ls-prod` (D-41).
 
 ### 2026-10-19 · Etapa 10 · `feature/10-scroll-catalogo`
 - Contexto: la release del MVP 1 ya está en `main` (PR #18). Con el uso real aparecieron tres pedidos: el scroll del catálogo se pierde al volver de un producto, agregar al carrito desde la grilla, y ver el stock por etiqueta. Se abrió el bloque **MVP 2** (etapas 10 y 11, D-42); lo de la grilla queda a decidir.

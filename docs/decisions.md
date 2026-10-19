@@ -265,6 +265,23 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Arreglo**: `listarCatalogo` guarda la última vidriera en una variable del módulo y `ultimaVidriera()` la devuelve. El catálogo la pinta en el primer render mientras el pedido nuevo corre por detrás y la reemplaza (stale-while-revalidate a mano). Si ese pedido falla, se siguen mostrando los datos en memoria en vez del error. Solo en memoria: recargar la página la vacía, y está bien (al recargar no hay scroll que recuperar). Sin librería de datos: es un solo caso. El stock que se ve puede tener unos segundos de atraso; `crear_pedido` sigue validando el stock real.
 - **Verificado**: con el arreglo, volver con "Volver" o con el botón atrás del navegador deja la página en 2161 px, sin esqueletos, y se mantiene cuando llegan los datos nuevos.
 
+### D-43 · Stock por etiqueta en el Resumen (etapa 11, 2026-10-19)
+- **Por qué**: casi todas las piezas son únicas (stock 1). El stock por producto le dice poco a la administradora, que piensa en "cuántos aros quedan" o "qué se vende más". Las etiquetas no tienen jerarquía y no se agrega una: ella elige qué etiquetas sigue.
+- **Un solo conjunto, elegido desde el Resumen y guardado en la base** (para verlo igual en el teléfono y en la compu). Sin ninguna elegida, se muestran todas. Decidido con el usuario.
+- **Tabla `etiquetas_seguidas` (solo admin) y no una columna de `settings`**: `settings` es de lectura pública porque el catálogo necesita el número de WhatsApp; una tabla aparte no toca ningún permiso existente. La clave foránea a `tags` con `on delete cascade` mantiene la integridad sola: borrar una etiqueta la saca de las seguidas, y renombrarla la deja seguida. Se descartó una fila única con JSON (la base no puede validar las referencias). Si algún día hacen falta varios conjuntos ("Tipos", "Materiales"), se agrega una tabla de grupos y una columna `grupo_id` en otra migración, sin perder lo elegido.
+- **`renombrar_etiqueta` se reemplaza** (`create or replace` en la migración nueva; la de la etapa 7 no se toca) para que, al **unir**, la etiqueta que queda herede "seguida" si se seguía la que desaparece.
+- **`resumen_etiquetas(p_ahora)`** devuelve **todas** las etiquetas con `seguida`, y la pantalla elige cuáles mostrar (`etiquetasAMostrar`). Así, una sola consulta sirve para la tabla y para el selector.
+  - `productos`: todos los que la usan, activos o no (para el selector).
+  - `piezas` y `unidades`: solo activos.
+  - `vendidas_mes` (mes de Buenos Aires, D-23) y `vendidas_total`: unidades de pedidos `vendido`, contadas con las etiquetas **actuales** del producto (un producto vendido y después reetiquetado cuenta en su etiqueta nueva; se acepta).
+- **`guardar_etiquetas_seguidas(p_ids)`** reemplaza el conjunto en una transacción e ignora los ids que ya no existen (por ejemplo, una etiqueta borrada mientras se elegía).
+- **Pantalla**:
+  - sección "Por etiqueta" debajo de "Para reponer", con las columnas Quedan, Mes y Total, ordenada de más a menos unidades;
+  - "Quedan" en rojo con 0 y en ámbar con `STOCK_BAJO` (3) o menos;
+  - cada fila lleva a Productos con `?q={etiqueta}` (la búsqueda ya incluye las etiquetas);
+  - una nota aclara que una pieza con varias etiquetas cuenta en cada una (las filas no suman el total).
+- **El selector va en el lugar, sin modal**: checkboxes de 44 px, "Desmarcar todas", "Cancelar"/"Guardar" y un toast al guardar. Al guardar se relee el Resumen y, mientras tanto, se sigue mostrando el anterior (`previos` de `useAsync`).
+
 ## Pendientes de verificar (no bloquean)
 - **Producción**: que el cron diario alcance para que Supabase no pause `ls-prod` (ver D-41). Revisar después de la primera semana sin movimiento.
 - **GitHub**: la protección de ramas en repositorios **privados** requiere GitHub Pro/Team. Ver `docs/github-setup.md`.

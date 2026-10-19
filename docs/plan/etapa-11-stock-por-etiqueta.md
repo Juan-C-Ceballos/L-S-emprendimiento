@@ -63,7 +63,7 @@ Si más adelante hacen falta varios conjuntos ("Tipos", "Materiales"), se agrega
    - Nota: "Una pieza con varias etiquetas cuenta en cada una."
    - Botón "Elegir etiquetas".
 6. **Componente `SelectorEtiquetasResumen`** (`src/components/panel/`):
-   - en el lugar, sin modal;
+   - en el lugar, sin modal (después pasó a un modal con "Marcar todas", D-44);
    - lista con checkbox, nombre y cantidad de productos, más "Cancelar" y "Guardar";
    - objetivos de 44 px y `aria-live` para "Guardado";
    - al guardar, relee el Resumen.

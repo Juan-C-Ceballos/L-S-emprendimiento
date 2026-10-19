@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Etapa en curso:** MVP 2 · 11 (stock por etiqueta), lista en `feature/11-stock-por-etiqueta` con `develop` al día. La 10 ya entró (PR #19). Falta el PR de la 11. La migración `stock_por_etiqueta` ya está aplicada en `ls-dev` (2026-10-19, antes del merge, para que la vista previa no falle). A `ls-prod` se aplica en la próxima release con `db push --db-url`: hasta entonces, el Resumen de producción da error si se publica el frontend sin la migración.
+- **Etapa en curso:** MVP 2. Las etapas 10 (PR #19) y 11 (PR #20) están en `develop` y en la vista previa. Ajuste pedido después: el selector de etiquetas del Resumen pasa a un modal con "Marcar todas" (`feature/selector-etiquetas-modal`, D-44). La migración `stock_por_etiqueta` está en `ls-dev`; a `ls-prod` va en la próxima release con `db push --db-url`, **apenas Cloudflare publique `main`** (sin ella, el Resumen de producción da error). Pendiente de decisión: agregar al carrito desde la grilla.
 - **Etapa 8:** la primera release ya está en `main` (PR #18, merge commit de `develop`; verificado con git el 2026-10-19: `main` y `develop` tienen el mismo contenido). **A confirmar con el usuario** qué quedó hecho de la guía `docs/produccion-paso-a-paso.md`: paso 4 (URL de Auth), checklist de release (5), Worker anti-pausa (7) y abrir la tienda (8). Cuando esté confirmado, verificar producción contra `ls-prod`, completar `<proyecto>` en el README y el checklist, y tildar la etapa 8.
 - **Producción:** Supabase `ls-prod` (ref `tcpbmenfkakzlhyidxli`, URL `https://tcpbmenfkakzlhyidxli.supabase.co`, São Paulo, organización `L&S-Emprendimiento`). Cloudflare Pages `ls-accesorios`: producción `https://ls-accesorios.pages.dev` (rama `main`), vista previa `https://develop.ls-accesorios.pages.dev` (rama `develop`).
 - **Cómo probar:** el catálogo, contra `ls-dev` con el servidor `dev-local` de `.claude/launch.json` (puerto 5175, usa `.env.local`). El panel, contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
@@ -40,7 +40,7 @@
 
 - [x] **10 · Scroll del catálogo** — [`etapa-10-scroll-catalogo.md`](docs/plan/etapa-10-scroll-catalogo.md) · `feature/10-scroll-catalogo`
   Al volver de un producto, la grilla queda donde estaba (vidriera en memoria, D-42).
-- [ ] **11 · Stock por etiqueta** — [`etapa-11-stock-por-etiqueta.md`](docs/plan/etapa-11-stock-por-etiqueta.md) · `feature/11-stock-por-etiqueta`
+- [x] **11 · Stock por etiqueta** — [`etapa-11-stock-por-etiqueta.md`](docs/plan/etapa-11-stock-por-etiqueta.md) · `feature/11-stock-por-etiqueta`
   Sección "Por etiqueta" en el Resumen: unidades que quedan y vendidas (mes y total), con las etiquetas que elige la administradora.
 - **A decidir:** agregar al carrito desde la grilla (propuesta de diseño). Se vuelve a evaluar después de probar la etapa 10 (D-42).
 
@@ -71,6 +71,11 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 
 - PR: …
 -->
 
+### 2026-10-19 · Ajuste de la etapa 11 · `feature/selector-etiquetas-modal`
+- Hecho: "Elegir etiquetas" abre un modal (`Dialog` de shadcn sobre Radix, recortado y con los tokens de L&S) con "N de M marcadas", "Marcar todas" y "Desmarcar todas". El botón es el disparador del modal, así que el foco vuelve a él al cerrar. D-44.
+- Verificado: lint, typecheck, 213 pruebas y build. En el navegador contra el Supabase local (375 × 812 y 375 × 560): abre, bloquea el scroll del fondo, "Marcar todas" deja 10 de 10, y en la pantalla baja la lista scrollea con "Guardar" visible. El cierre no se vio terminar porque el panel no dibujaba cuadros; lo cubren las pruebas.
+- Pendiente: PR contra `develop` y squash con CI en verde.
+
 ### 2026-10-19 · Etapa 11 · `feature/11-stock-por-etiqueta`
 - Hecho:
   - Migración `stock_por_etiqueta`: tabla `etiquetas_seguidas` (solo admin, RLS en la misma migración), `resumen_etiquetas(p_ahora)`, `guardar_etiquetas_seguidas(p_ids)` y `renombrar_etiqueta` reemplazada (al unir, hereda "seguida").
@@ -87,7 +92,7 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 
   - Base local reseteada al terminar.
 - No verificado en el navegador (cubierto por pgTAP): unir o borrar una etiqueta seguida desde Ajustes. No hay captura porque el panel del navegador no dibujaba.
 - Pendiente:
-  - PR contra `develop` después del de la 10 y squash con CI en verde.
+  - ~~PR contra `develop`~~ PR #20, mergeado con squash; `develop` en verde y la vista previa publicada con "Por etiqueta".
   - ~~`db push` a `ls-dev`~~ hecho el 2026-10-19 antes del merge (pedido del usuario). Verificado: el dry-run dice que la base está al día, y anon recibe `permission denied` en `etiquetas_seguidas`, `resumen_etiquetas`, `guardar_etiquetas_seguidas` y `renombrar_etiqueta`; el catálogo sigue respondiendo (15 activos).
   - En la próxima release, `db push --db-url` a `ls-prod` (D-41).
 

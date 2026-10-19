@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { claseLink } from '@/components/estilos'
 import { useToast } from '@/components/useToast'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { plural } from '@/lib/resumen'
 import { ErrorServicio, MENSAJE_GENERICO } from '@/services/errores'
 import { guardarEtiquetasSeguidas } from '@/services/resumen'
@@ -9,12 +10,35 @@ import type { StockEtiqueta } from '@/types/dominio'
 
 type Props = {
   etiquetas: StockEtiqueta[]
-  onCancelar: () => void
+  /** Después de guardar, relee el Resumen. */
   onGuardado: () => void
 }
 
-/** Elegir qué etiquetas se siguen en "Por etiqueta", en el lugar y sin modal (D-43). */
-export function SelectorEtiquetasResumen({ etiquetas, onCancelar, onGuardado }: Props) {
+/** "Elegir etiquetas" y su modal, para elegir qué etiquetas se siguen en "Por etiqueta" (D-43, D-44). */
+export function SelectorEtiquetasResumen({ etiquetas, onGuardado }: Props) {
+  const [abierto, setAbierto] = useState(false)
+  return (
+    <Dialog open={abierto} onOpenChange={setAbierto}>
+      {/* Con el disparador, Radix devuelve el foco al botón al cerrar. */}
+      <DialogTrigger className={`${claseLink} flex items-center`}>Elegir etiquetas</DialogTrigger>
+      {/* El contenido se monta al abrir, así cada vez arranca con las seguidas guardadas. */}
+      <DialogContent>
+        <Contenido
+          etiquetas={etiquetas}
+          onCerrar={() => {
+            setAbierto(false)
+          }}
+          onGuardado={() => {
+            setAbierto(false)
+            onGuardado()
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function Contenido({ etiquetas, onCerrar, onGuardado }: Props & { onCerrar: () => void }) {
   const { mostrarToast } = useToast()
   const [marcadas, setMarcadas] = useState(() => new Set(etiquetas.filter((e) => e.seguida).map((e) => e.id)))
   const [guardando, setGuardando] = useState(false)
@@ -45,28 +69,46 @@ export function SelectorEtiquetasResumen({ etiquetas, onCancelar, onGuardado }: 
   }
 
   return (
-    <fieldset className="m-0 mx-4 mb-2 min-w-0 rounded-tarjeta border border-borde bg-white p-0 lg:mx-8">
-      <legend className="sr-only">Etiquetas del resumen</legend>
-      <div className="flex items-center justify-between gap-3 border-b border-divisor px-3.5 py-2.5">
-        <p className="m-0 text-[13px] leading-[1.45] text-texto-suave">
-          Marcá las que querés seguir. Si no marcás ninguna, se muestran todas.
-        </p>
-        {marcadas.size > 0 && (
-          <button
-            type="button"
-            className={`${claseLink} flex-none`}
-            onClick={() => {
-              setMarcadas(new Set())
-            }}
-          >
-            Desmarcar todas
-          </button>
-        )}
+    <>
+      <div className="flex flex-col gap-1 px-5 pt-5 pr-14 pb-3">
+        <DialogTitle>Etiquetas del resumen</DialogTitle>
+        <DialogDescription>Marcá las que querés seguir. Si no marcás ninguna, se muestran todas.</DialogDescription>
       </div>
-      <ul className="m-0 list-none p-0">
+
+      <div className="flex items-center justify-between gap-3 border-y border-divisor px-5 py-1">
+        <span className="text-[12.5px] text-texto-suave tabular-nums">
+          {marcadas.size} de {etiquetas.length} marcadas
+        </span>
+        <span className="flex gap-2">
+          {marcadas.size < etiquetas.length && (
+            <button
+              type="button"
+              className={claseLink}
+              onClick={() => {
+                setMarcadas(new Set(etiquetas.map((e) => e.id)))
+              }}
+            >
+              Marcar todas
+            </button>
+          )}
+          {marcadas.size > 0 && (
+            <button
+              type="button"
+              className={claseLink}
+              onClick={() => {
+                setMarcadas(new Set())
+              }}
+            >
+              Desmarcar todas
+            </button>
+          )}
+        </span>
+      </div>
+
+      <ul className="m-0 min-h-0 flex-1 list-none overflow-y-auto p-0">
         {ordenadas.map((e) => (
           <li key={e.id} className="border-b border-divisor last:border-b-0">
-            <label className="flex min-h-11 cursor-pointer items-center gap-3 px-3.5 py-2 hover:bg-fila-hover">
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 px-5 py-2 hover:bg-fila-hover">
               <input
                 type="checkbox"
                 className="size-5 flex-none accent-tinta"
@@ -83,19 +125,20 @@ export function SelectorEtiquetasResumen({ etiquetas, onCancelar, onGuardado }: 
           </li>
         ))}
       </ul>
+
       {error !== undefined && (
-        <p role="alert" className="m-0 border-t border-divisor px-3.5 pt-2.5 text-sm text-peligro">
+        <p role="alert" className="m-0 border-t border-divisor px-5 pt-2.5 text-sm text-peligro">
           {error}
         </p>
       )}
-      <div className="flex justify-end gap-2 border-t border-divisor px-3.5 py-2.5">
-        <Button variant="ghost" size="sm" disabled={guardando} onClick={onCancelar}>
+      <div className="flex justify-end gap-2 border-t border-divisor px-5 py-3">
+        <Button variant="ghost" size="sm" disabled={guardando} onClick={onCerrar}>
           Cancelar
         </Button>
         <Button size="sm" disabled={guardando} onClick={() => void guardar()}>
           {guardando ? 'Guardando…' : 'Guardar'}
         </Button>
       </div>
-    </fieldset>
+    </>
   )
 }

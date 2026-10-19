@@ -280,7 +280,19 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
   - "Quedan" en rojo con 0 y en ámbar con `STOCK_BAJO` (3) o menos;
   - cada fila lleva a Productos con `?q={etiqueta}` (la búsqueda ya incluye las etiquetas);
   - una nota aclara que una pieza con varias etiquetas cuenta en cada una (las filas no suman el total).
-- **El selector va en el lugar, sin modal**: checkboxes de 44 px, "Desmarcar todas", "Cancelar"/"Guardar" y un toast al guardar. Al guardar se relee el Resumen y, mientras tanto, se sigue mostrando el anterior (`previos` de `useAsync`).
+- **Selector**: checkboxes de 44 px, "Cancelar"/"Guardar" y un toast al guardar. Al guardar se relee el Resumen y, mientras tanto, se sigue mostrando el anterior (`previos` de `useAsync`). Primero fue en el lugar; después pasó a un modal (D-44).
+
+### D-44 · Selector de etiquetas del Resumen en un modal (2026-10-19)
+- **Pedido del usuario**: "Elegir etiquetas" abre un **modal** en vez de desplegarse en el lugar, y suma "Marcar todas" junto a "Desmarcar todas".
+- **Primer modal del proyecto**: hasta acá las confirmaciones iban en el lugar, como en el prototipo. Se usa el `Dialog` de shadcn (Radix, que ya venía en `radix-ui`), sin dependencias nuevas.
+  - `src/components/ui/dialog.tsx` quedó recortado a lo que se usa (`Dialog`, `DialogTrigger`, `DialogContent`, `DialogTitle`, `DialogDescription`).
+  - Usa los tokens de L&S: fondo blanco, `rounded-tarjeta`, overlay `tinta/40` y la cruz de 44 px con `claseBotonIcono` y `aria-label="Cerrar"`.
+  - El ícono es SVG en línea, como el resto del sitio, y no `lucide-react`.
+  - Radix se encarga del foco atrapado, Escape, el bloqueo del scroll de fondo y la devolución del foco al botón (por eso el botón es el `DialogTrigger` y vive dentro de `SelectorEtiquetasResumen`).
+- **Tamaño**: hasta 440 px de ancho y la altura de la pantalla menos 2 rem. La lista scrollea adentro y "Cancelar"/"Guardar" quedan siempre a la vista.
+- **"N de M marcadas"**, más "Marcar todas" (si falta alguna) y "Desmarcar todas" (si hay alguna).
+  - Ojo: **marcar todas no es lo mismo que no marcar ninguna**. Con todas marcadas, una etiqueta creada después no aparece hasta elegirla. Sin ninguna marcada, se ven todas, incluidas las nuevas. La descripción del modal dice lo segundo.
+- **Verificado** contra el Supabase local en 375 × 812 y 375 × 560: el modal abre, bloquea el scroll del fondo y "Marcar todas" deja 10 de 10. En la pantalla baja la lista scrollea y "Guardar" sigue visible. No se pudo ver terminar la animación de cierre de 100 ms porque el panel del navegador no dibujaba cuadros (reloj de animaciones en 0); el cierre y la vuelta del foco están cubiertos por `ResumenPage.test.tsx`.
 
 ## Pendientes de verificar (no bloquean)
 - **Producción**: que el cron diario alcance para que Supabase no pause `ls-prod` (ver D-41). Revisar después de la primera semana sin movimiento.

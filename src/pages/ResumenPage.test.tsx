@@ -178,6 +178,8 @@ describe('ResumenPage · Por etiqueta', () => {
     renderizar({ ...sinPendientes, porEtiqueta: [etiqueta('anillos', 1, true), etiqueta('aros', 26)] })
     await usuario.click(await screen.findByRole('button', { name: 'Elegir etiquetas' }))
 
+    const modal = screen.getByRole('dialog', { name: 'Etiquetas del resumen' })
+    expect(within(modal).getByText('1 de 2 marcadas')).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: /anillos/ })).toBeChecked()
     await usuario.click(screen.getByRole('checkbox', { name: /aros/ }))
     await usuario.click(screen.getByRole('button', { name: 'Guardar' }))
@@ -187,7 +189,30 @@ describe('ResumenPage · Por etiqueta', () => {
       expect(obtenerDatosResumen).toHaveBeenCalledTimes(2)
     })
     expect(await screen.findByText('Guardamos las etiquetas del resumen.')).toBeInTheDocument()
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('«Marcar todas» y «Desmarcar todas» cambian todas las casillas', async () => {
+    const usuario = userEvent.setup()
+    vi.mocked(guardarEtiquetasSeguidas).mockResolvedValue()
+    renderizar({
+      ...sinPendientes,
+      porEtiqueta: [etiqueta('anillos', 1), etiqueta('aros', 26), etiqueta('pulseras', 2)],
+    })
+    await usuario.click(await screen.findByRole('button', { name: 'Elegir etiquetas' }))
+    expect(screen.queryByRole('button', { name: 'Desmarcar todas' })).not.toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('button', { name: 'Marcar todas' }))
+    expect(screen.getAllByRole('checkbox').every((c) => (c as HTMLInputElement).checked)).toBe(true)
+    expect(screen.getByText('3 de 3 marcadas')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Marcar todas' })).not.toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('button', { name: 'Desmarcar todas' }))
+    expect(screen.getAllByRole('checkbox').some((c) => (c as HTMLInputElement).checked)).toBe(false)
+
+    await usuario.click(screen.getByRole('button', { name: 'Marcar todas' }))
+    await usuario.click(screen.getByRole('button', { name: 'Guardar' }))
+    expect(guardarEtiquetasSeguidas).toHaveBeenCalledWith(['t-anillos', 't-aros', 't-pulseras'])
   })
 
   it('cancelar no guarda y un error se muestra sin cerrar el selector', async () => {
@@ -195,7 +220,16 @@ describe('ResumenPage · Por etiqueta', () => {
     renderizar({ ...sinPendientes, porEtiqueta: [etiqueta('aros', 26)] })
     await usuario.click(await screen.findByRole('button', { name: 'Elegir etiquetas' }))
     await usuario.click(screen.getByRole('button', { name: 'Cancelar' }))
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    // Escape y la cruz también cierran sin guardar.
+    await usuario.click(screen.getByRole('button', { name: 'Elegir etiquetas' }))
+    await usuario.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Elegir etiquetas' })).toHaveFocus()
+    await usuario.click(screen.getByRole('button', { name: 'Elegir etiquetas' }))
+    await usuario.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(guardarEtiquetasSeguidas).not.toHaveBeenCalled()
 
     vi.mocked(guardarEtiquetasSeguidas).mockRejectedValue(

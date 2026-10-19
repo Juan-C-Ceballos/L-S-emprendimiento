@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { guardarProducto, listarCatalogo, obtenerProductoPublico } from './productos'
+import { guardarProducto, listarCatalogo, obtenerProductoPublico, ultimaVidriera } from './productos'
 import { borrarArchivos } from './imagenes'
 import type { DatosProducto } from '@/types/dominio'
 
@@ -98,6 +98,18 @@ const tag = (id: string, nombre: string, creada = '2026-10-15T00:00:00Z') => ({
 })
 
 describe('listarCatalogo', () => {
+  // Va primero: la memoria es del módulo y las pruebas siguientes la llenan.
+  it('guarda la última vidriera en memoria y un error no la borra', async () => {
+    expect(ultimaVidriera()).toBeUndefined()
+    consulta.respuesta = { data: [], error: null }
+    const vidriera = await listarCatalogo()
+    expect(ultimaVidriera()).toBe(vidriera)
+
+    consulta.respuesta = { data: null, error: { code: '500', message: 'x' } }
+    await expect(listarCatalogo()).rejects.toThrow()
+    expect(ultimaVidriera()).toBe(vidriera)
+  })
+
   it('portada = menor orden, etiquetas planas en orden de creación y agotado', async () => {
     consulta.respuesta = {
       data: [

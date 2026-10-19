@@ -4,10 +4,10 @@
 
 ## Estado actual
 
-- **Etapa en curso:** 8 · Puesta en producción. Código y documentación en `develop` (PR #16). El usuario sigue `docs/produccion-paso-a-paso.md`: hechos los pasos 1 a 3 (`ls-prod` con migraciones y administradora; Pages `ls-accesorios` con variables por entorno y vista previa solo de `develop`). Faltan: vista previa de `develop` publicada y verificada (sale con el próximo merge a `develop`), paso 4 (URL de Auth), checklist de release (5), release `develop` → `main` (6), Worker anti-pausa (7) y abrir la tienda (8).
-- **Rama:** `develop` (la etapa 8 ya entró con el PR #16; los ajustes de la guía van en `fix/guia-produccion`).
+- **Etapa en curso:** 10 · Scroll del catálogo (MVP 2), en `feature/10-scroll-catalogo`. Después sigue la 11 (stock por etiqueta).
+- **Etapa 8:** la primera release ya está en `main` (PR #18, merge commit de `develop`; verificado con git el 2026-10-19: `main` y `develop` tienen el mismo contenido). **A confirmar con el usuario** qué quedó hecho de la guía `docs/produccion-paso-a-paso.md`: paso 4 (URL de Auth), checklist de release (5), Worker anti-pausa (7) y abrir la tienda (8). Cuando esté confirmado, verificar producción contra `ls-prod`, completar `<proyecto>` en el README y el checklist, y tildar la etapa 8.
 - **Producción:** Supabase `ls-prod` (ref `tcpbmenfkakzlhyidxli`, URL `https://tcpbmenfkakzlhyidxli.supabase.co`, São Paulo, organización `L&S-Emprendimiento`). Cloudflare Pages `ls-accesorios`: producción `https://ls-accesorios.pages.dev` (rama `main`), vista previa `https://develop.ls-accesorios.pages.dev` (rama `develop`).
-- **Próximo paso (sesión de Claude):** cuando se publique la vista previa de `develop`, verificar que apunte a `ls-dev`, los headers y que recargar en rutas internas no dé 404; después de la release, lo mismo en producción contra `ls-prod`; completar `<proyecto>` en el README y el checklist, tildar la etapa 8. El panel se prueba contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` de `.claude/launch.json` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
+- **Cómo probar:** el catálogo, contra `ls-dev` con el servidor `dev-local` de `.claude/launch.json` (puerto 5175, usa `.env.local`). El panel, contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
 - **Supabase en la nube:** proyecto de **desarrollo** `ls-dev` creado (ref `nhsjichuumyflklqkhxw`, URL `https://nhsjichuumyflklqkhxw.supabase.co`, São Paulo, Postgres 17, organización `L&S-Emprendimiento`, plan gratuito). Las 5 migraciones aplicadas con `supabase db push` (verificado el 2026-10-16 por la API: `guardar_producto`, `marcar_vendido`, `renombrar_etiqueta` y `resumen_panel` existen y anon recibe `permission denied`); registro público desactivado; semillas de productos y pedidos cargadas por el usuario. Administradora creada: `1accesorioslis@gmail.com` con rol `admin` (verificado 2026-10-15: es la única cuenta de `auth.users`). **No** correr ahí el bloque final de `supabase/seed.sql` (usuarios de prueba con contraseñas en el repo público). La carpeta local quedó vinculada a ese proyecto (`supabase/.temp/`, ignorado). Producción se crea en la etapa 8 en la misma organización.
 - **Al mergear cada etapa con migraciones nuevas:** `npx supabase db push --dry-run` y después `npx supabase db push` contra dev (lo corre el usuario; pide la contraseña de la base).
 - **Ojo en Windows:** la carpeta del proyecto no puede tener `&` en la ruta (rompe `npx` y los scripts de npm). Ya se renombró a `L-S` y los scripts volvieron a la forma estándar (D-29).
@@ -36,7 +36,15 @@
 - [ ] **9 · Posterior al MVP** (solo documentación) — [`etapa-09-post-mvp.md`](docs/plan/etapa-09-post-mvp.md)
   Topes, captcha, límite por IP, vistas previas por producto, reportes, PWA.
 
-Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo necesita la 1 (puede adelantarse a la 2 y la 3 si hiciera falta), y la 6 y la 7 solo necesitan la 2. Se recomienda el orden numérico.
+### MVP 2 (pedidos del uso real, desde 2026-10-19)
+
+- [ ] **10 · Scroll del catálogo** — [`etapa-10-scroll-catalogo.md`](docs/plan/etapa-10-scroll-catalogo.md) · `feature/10-scroll-catalogo`
+  Al volver de un producto, la grilla queda donde estaba (vidriera en memoria, D-42).
+- [ ] **11 · Stock por etiqueta** — [`etapa-11-stock-por-etiqueta.md`](docs/plan/etapa-11-stock-por-etiqueta.md) · `feature/11-stock-por-etiqueta`
+  Sección "Por etiqueta" en el Resumen: unidades que quedan y vendidas (mes y total), con las etiquetas que elige la administradora.
+- **A decidir:** agregar al carrito desde la grilla (propuesta de diseño). Se vuelve a evaluar después de probar la etapa 10 (D-42).
+
+Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 son independientes entre sí. La 4 solo necesita la 1 (puede adelantarse a la 2 y la 3 si hiciera falta), y la 6 y la 7 solo necesitan la 2. Se recomienda el orden numérico.
 
 ## Qué necesito del usuario (y cuándo)
 
@@ -62,6 +70,12 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 4 solo neces
 - Pendiente: …
 - PR: …
 -->
+
+### 2026-10-19 · Etapa 10 · `feature/10-scroll-catalogo`
+- Contexto: la release del MVP 1 ya está en `main` (PR #18). Con el uso real aparecieron tres pedidos: el scroll del catálogo se pierde al volver de un producto, agregar al carrito desde la grilla, y ver el stock por etiqueta. Se abrió el bloque **MVP 2** (etapas 10 y 11, D-42); lo de la grilla queda a decidir.
+- Hecho: causa reproducida contra `ls-dev` con 1,5 s de demora en la red (de 2161 px se volvía a 568 px: el catálogo se montaba con esqueletos y `ScrollRestoration` no tenía alto para restaurar). `listarCatalogo` guarda la última vidriera en memoria (`ultimaVidriera()`) y `CatalogoPage` la pinta mientras refresca; un error al refrescar no tapa los datos. 4 pruebas nuevas. Planes de las etapas 10 y 11 escritos.
+- Verificado: lint, typecheck, 202 pruebas y build. En el navegador contra `ls-dev` (375 px, misma demora): volver con "Volver" y con atrás deja la grilla en 2161 px, sin esqueletos, y se mantiene al llegar los datos nuevos; consola sin errores.
+- Pendiente: PR contra `develop` y squash con CI en verde.
 
 ### 2026-10-17 · Etapa 8 (puesta en marcha) · `fix/guia-produccion`
 - Hecho por el usuario: `ls-prod` creado, registro cortado, 5 migraciones aplicadas con `db push --db-url` (Session pooler), administradora con rol `admin`. Pages `ls-accesorios` conectado al repo, variables de Production (`ls-prod`) y Preview (`ls-dev`, sin `VITE_SITE_URL`), vista previa solo de `develop`. El primer deploy de `main` falló como se esperaba (`main` todavía no tiene la app).

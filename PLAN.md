@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Etapa en curso:** MVP 2 · 11 (stock por etiqueta), lista en `feature/11-stock-por-etiqueta` con `develop` al día. La 10 ya entró (PR #19). Falta el PR de la 11 y, **apenas se mergee**, el `db push` de la migración `stock_por_etiqueta` a `ls-dev`: sin ella, el Resumen de la vista previa da error. A `ls-prod` se aplica en la próxima release.
+- **Etapa en curso:** MVP 2 · 11 (stock por etiqueta), lista en `feature/11-stock-por-etiqueta` con `develop` al día. La 10 ya entró (PR #19). Falta el PR de la 11. La migración `stock_por_etiqueta` ya está aplicada en `ls-dev` (2026-10-19, antes del merge, para que la vista previa no falle). A `ls-prod` se aplica en la próxima release con `db push --db-url`: hasta entonces, el Resumen de producción da error si se publica el frontend sin la migración.
 - **Etapa 8:** la primera release ya está en `main` (PR #18, merge commit de `develop`; verificado con git el 2026-10-19: `main` y `develop` tienen el mismo contenido). **A confirmar con el usuario** qué quedó hecho de la guía `docs/produccion-paso-a-paso.md`: paso 4 (URL de Auth), checklist de release (5), Worker anti-pausa (7) y abrir la tienda (8). Cuando esté confirmado, verificar producción contra `ls-prod`, completar `<proyecto>` en el README y el checklist, y tildar la etapa 8.
 - **Producción:** Supabase `ls-prod` (ref `tcpbmenfkakzlhyidxli`, URL `https://tcpbmenfkakzlhyidxli.supabase.co`, São Paulo, organización `L&S-Emprendimiento`). Cloudflare Pages `ls-accesorios`: producción `https://ls-accesorios.pages.dev` (rama `main`), vista previa `https://develop.ls-accesorios.pages.dev` (rama `develop`).
 - **Cómo probar:** el catálogo, contra `ls-dev` con el servidor `dev-local` de `.claude/launch.json` (puerto 5175, usa `.env.local`). El panel, contra el Supabase local: Docker, `npm run db:start`, `npm run db:reset` (pgTAP necesita las semillas intactas) y el servidor `dev-supabase-local` (puerto 5176, usuario `admin@ls.test` de `supabase/seed.sql`). El build de producción se sirve con `preview-dist` (puerto 4173).
@@ -88,7 +88,7 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 
 - No verificado en el navegador (cubierto por pgTAP): unir o borrar una etiqueta seguida desde Ajustes. No hay captura porque el panel del navegador no dibujaba.
 - Pendiente:
   - PR contra `develop` después del de la 10 y squash con CI en verde.
-  - Después del merge, `npx supabase db push --dry-run` y `npx supabase db push` a `ls-dev` (lo corre el usuario).
+  - ~~`db push` a `ls-dev`~~ hecho el 2026-10-19 antes del merge (pedido del usuario). Verificado: el dry-run dice que la base está al día, y anon recibe `permission denied` en `etiquetas_seguidas`, `resumen_etiquetas`, `guardar_etiquetas_seguidas` y `renombrar_etiqueta`; el catálogo sigue respondiendo (15 activos).
   - En la próxima release, `db push --db-url` a `ls-prod` (D-41).
 
 ### 2026-10-19 · Etapa 10 · `feature/10-scroll-catalogo`

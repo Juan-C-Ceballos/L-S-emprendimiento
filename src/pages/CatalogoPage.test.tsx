@@ -2,11 +2,11 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CatalogoPage } from './CatalogoPage'
-import { listarCatalogo } from '@/services/productos'
+import { listarCatalogo, ultimaVidriera } from '@/services/productos'
 import { renderizarRutas } from '@/test/renderizar'
 import type { ProductoVidriera } from '@/types/dominio'
 
-vi.mock('@/services/productos', () => ({ listarCatalogo: vi.fn() }))
+vi.mock('@/services/productos', () => ({ listarCatalogo: vi.fn(), ultimaVidriera: vi.fn() }))
 
 function producto(nombre: string, etiquetas: string[], stock = 5, precio = 10000): ProductoVidriera {
   return { id: nombre, nombre, precio, stock, agotado: stock <= 0, portadaUrl: null, etiquetas }
@@ -27,6 +27,7 @@ function tarjetas(): string[] {
 
 beforeEach(() => {
   localStorage.clear()
+  vi.mocked(ultimaVidriera).mockReturnValue(undefined)
   vi.mocked(listarCatalogo).mockResolvedValue({
     productos: [
       producto('Aros gota martillada', ['aros', 'dorado'], 0, 16800),
@@ -205,5 +206,25 @@ describe('CatalogoPage', () => {
     expect(await screen.findByText('No pudimos cargar la vidriera.')).toBeInTheDocument()
     await usuario.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(await screen.findByText('4 piezas en la vidriera')).toBeInTheDocument()
+  })
+
+  it('con la vidriera en memoria pinta las tarjetas en el primer render, sin esqueletos', () => {
+    vi.mocked(ultimaVidriera).mockReturnValue({ productos: [producto('Aros perla mini', ['aros'])], etiquetas: ['aros'] })
+    vi.mocked(listarCatalogo).mockReturnValue(new Promise(() => undefined))
+    renderizar()
+    expect(tarjetas()).toEqual(['Aros perla mini'])
+    expect(screen.getByText('1 pieza en la vidriera')).toBeInTheDocument()
+    expect(screen.queryByText('Cargando la vidriera…')).not.toBeInTheDocument()
+  })
+
+  it('con la vidriera en memoria, un error al refrescar no la tapa', async () => {
+    vi.mocked(ultimaVidriera).mockReturnValue({ productos: [producto('Aros perla mini', ['aros'])], etiquetas: ['aros'] })
+    vi.mocked(listarCatalogo).mockRejectedValueOnce(new Error('red'))
+    renderizar()
+    await waitFor(() => {
+      expect(listarCatalogo).toHaveBeenCalled()
+    })
+    expect(screen.queryByText('No pudimos cargar la vidriera.')).not.toBeInTheDocument()
+    expect(tarjetas()).toEqual(['Aros perla mini'])
   })
 })

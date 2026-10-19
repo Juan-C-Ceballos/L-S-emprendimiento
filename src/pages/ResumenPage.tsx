@@ -1,7 +1,6 @@
 import { Link } from 'react-router'
 import { claseLink } from '@/components/estilos'
 import { FilaPedido } from '@/components/panel/FilaPedido'
-import { FilaProducto } from '@/components/panel/FilaProducto'
 import { PorEtiqueta } from '@/components/panel/PorEtiqueta'
 import { Stat } from '@/components/panel/Stat'
 import { Button } from '@/components/ui/button'
@@ -69,18 +68,12 @@ function ContenidoResumen({ datos, onRecargar }: { datos: DatosResumen; onRecarg
   const textos = textosResumen(datos.resumen)
   return (
     <>
-      <div className="grid grid-cols-2 gap-2.5 p-4 lg:grid-cols-3 lg:px-8 lg:py-5">
+      <div className="grid grid-cols-2 gap-2.5 p-4 lg:px-8 lg:py-5">
         <Stat
           to="/admin/pedidos?estado=pendiente"
           etiqueta="Pedidos pendientes"
           valor={String(datos.resumen.pendientes.cantidad)}
           detalle={textos.pendientes}
-        />
-        <Stat
-          to="/admin/productos?filtro=stock-bajo"
-          etiqueta="Stock bajo"
-          valor={String(datos.resumen.stockBajo.cantidad)}
-          detalle={textos.stockBajo}
         />
         <Stat
           to="/admin/pedidos?estado=vendido"
@@ -103,21 +96,6 @@ function ContenidoResumen({ datos, onRecargar }: { datos: DatosResumen; onRecarg
           <p className="m-0 font-display text-[19px] font-semibold tracking-[-0.01em]">Todo al día</p>
           <p className="m-0 max-w-[290px] text-sm text-texto-suave">
             No hay pedidos pendientes. Cuando un cliente confirme uno, aparece acá.
-          </p>
-        </div>
-      )}
-
-      <Encabezado titulo="Para reponer" to="/admin/productos?filtro=stock-bajo" texto="Ver productos" />
-      {datos.paraReponer.length > 0 ? (
-        <div className={claseLista}>
-          {datos.paraReponer.map((p) => (
-            <FilaProducto key={p.id} producto={p} desde="resumen" variante="resumen" />
-          ))}
-        </div>
-      ) : (
-        <div className={claseVacio}>
-          <p className="m-0 max-w-[290px] text-sm text-texto-suave">
-            Todos los productos activos tienen más de 3 unidades.
           </p>
         </div>
       )}

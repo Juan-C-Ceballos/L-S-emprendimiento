@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type SubmitEvent } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { EditorEtiquetas } from '@/components/panel/EditorEtiquetas'
 import { EditorImagenes, type ImagenFormulario } from '@/components/panel/EditorImagenes'
 import { InterruptorActivo } from '@/components/panel/InterruptorActivo'
@@ -90,9 +90,8 @@ function FormularioProducto({
   etiquetas: EtiquetaConUso[]
 }) {
   const navigate = useNavigate()
-  const [params] = useSearchParams()
   const { mostrarToast } = useToast()
-  const volverA = params.get('desde') === 'resumen' ? '/admin' : '/admin/productos'
+  const volverA = '/admin/productos'
 
   // Al crear, el id se genera acá para poder subir las fotos antes de guardar (D-16).
   const [productoId] = useState(() => inicial?.id ?? crypto.randomUUID())

@@ -71,6 +71,11 @@ Dependencias: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8; MVP 2: 10 y 11 
 - PR: …
 -->
 
+### 2026-10-19 · Resumen sin stock bajo · `feature/resumen-sin-stock-bajo`
+- Hecho: se sacan del Resumen la tarjeta "Stock bajo" y la sección "Para reponer" (D-46); quedan Pedidos pendientes, Ventas del mes, "Para atender" y "Por etiqueta". Se borra el código que solo usaban ellas.
+- Verificado: lint, typecheck, 213 pruebas y build. Sin PR todavía.
+- Pendiente: PR contra `develop`. Idea sin hacer: "Más vendidos" del mes en lugar del bloque quitado.
+
 ### 2026-10-19 · Release del MVP 2 · `chore/sync-main-en-develop`
 - Hecho: `develop` estaba 1 commit atrás de `main` (el merge de la release #18) y el ruleset `strict` bloquearía la PR de release. Esta rama trae ese commit sin cambiar archivos; se mergea con merge commit (D-45, sumado al checklist de release y a `docs/github-setup.md`).
 - Checklist de release corrido sobre `develop` en `c546824`:

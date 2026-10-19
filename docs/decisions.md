@@ -299,6 +299,14 @@ Formato: `D-NN`. No se reutilizan números. Para revertir una decisión, agregá
 - **Solución**: antes de abrir la PR de release, si `git log origin/develop..origin/main` muestra algo, se abre una rama `chore/sync-main-en-develop` desde `develop`, se hace `git merge origin/main` (no cambia archivos, solo trae el commit) y se mergea a `develop` con **"Create a merge commit"**. **No con squash**: el squash descarta el commit de `main` y el problema sigue. Es la única excepción a "squash hacia `develop`".
 - Agregado a `docs/release-checklist.md` ("Antes de empezar") y a `docs/github-setup.md`.
 
+### D-46 · El Resumen deja de mostrar "Stock bajo" y "Para reponer" (2026-10-19)
+- **Pedido del usuario**: con "Por etiqueta" (D-43), lo que importa es cuánto queda por etiqueta; el stock bajo por producto ya no aporta. Se sacan la tarjeta "Stock bajo" y la sección "Para reponer".
+- **Resumen**: quedan dos tarjetas (Pedidos pendientes y Ventas del mes, en 2 columnas), "Para atender" y "Por etiqueta". `obtenerDatosResumen` ya no lee la lista de productos.
+- **Código que quedó sin uso y se sacó**: `FilaProducto` sin `variante="resumen"` ni `desde`; `?desde=resumen` en `ProductoFormPage`; `stockBajo` en `ResumenPanel` y en `textosResumen`.
+- **Se conserva**: el filtro "Stock bajo" de `/admin/productos` y `STOCK_BAJO` (lo usan ese filtro, `PorEtiqueta` y la nota del catálogo).
+- **Base de datos**: `resumen_panel` sigue devolviendo `stock_bajo`. La migración es inmutable y el frontend lo ignora; si estorba, se saca con una migración nueva.
+- Esto reemplaza lo dicho sobre "Para reponer" y la tarjeta "Stock bajo" en D-22 y en la etapa 7.
+
 ## Pendientes de verificar (no bloquean)
 - **Producción**: que el cron diario alcance para que Supabase no pause `ls-prod` (ver D-41). Revisar después de la primera semana sin movimiento.
 - **GitHub**: la protección de ramas en repositorios **privados** requiere GitHub Pro/Team. Ver `docs/github-setup.md`.
